@@ -97,27 +97,18 @@ An **All-in-one** Robot Manipulation Learning Suite for Polcy Models Training an
 
 
 ## 📋 Table of Contents
-- [InternManip](#internmanip)
-  - [🏠 Highlights](#-highlights)
-    - [What can you do with InternManip?](#what-can-you-do-with-internmanip)
-    - [What's included?](#whats-included)
-    - [Why InternManip?](#why-internmanip)
-  - [🔥 News](#-news)
-  - [📋 Table of Contents](#-table-of-contents)
-  - [🚀 Getting Started](#-getting-started)
-    - [Prerequisites](#prerequisites)
-    - [Installation](#installation)
-  - [📚 Documentation \& Tutorial (WIP)](#-documentation--tutorial-wip)
-  - [📦 Benchmarks \& Baselines](#-benchmarks--baselines)
-    - [CALVIN (ABC-D) Benchmark](#calvin-abc-d-benchmark)
-    - [Simpler-Env Benchmark](#simpler-env-benchmark)
-    - [Genmanip Benchmark](#genmanip-benchmark)
-  - [🔧 Support](#-support)
-  - [👥 Contribute](#-contribute)
-  - [🔗 Citation](#-citation)
-  - [📝 TODO List](#-todo-list)
-  - [📄 License](#-license)
-  - [👏 Acknowledgements](#-acknowledgements)
+- [🏠 Highlights](#-highlights)
+- [🔥 News](#-news)
+- [📋 Table of Contents](#-table-of-contents)
+- [🚀 Getting Started](#-getting-started)
+- [📚 Documentation \& Tutorial (WIP)](#-documentation--tutorial-wip)
+- [📦 Benchmarks \& Baselines](#-benchmarks--baselines)
+- [🔧 Support](#-support)
+- [👥 Contribute](#-contribute)
+- [🔗 Citation](#-citation)
+- [📝 TODO List](#-todo-list)
+- [📄 License](#-license)
+- [👏 Acknowledgements](#-acknowledgements)
 
 
 
@@ -234,10 +225,7 @@ We provide detailed [docs](https://internmanip.github.io) for the basic usage of
 Welcome to try and post your suggestions!
 
 
-## 📦 Benchmarks & Baselines
-<!-- <p align="center">
-  <img src="docs/en/_static/image/benchmark.png" align="center" width="100%">
-</p> -->
+## 📦 Benchmarks & Baselines (WIP)
 
 
 InternManip offers implementations of multiple manipulation policy models—**GR00T-N1**, **GR00T-N1.5**, **Pi-0**, **DP-CLIP**, and **ACT-CLIP**—as well as curated datasets including **GenManip**, **Simpler-Env**, and **CALVIN**, all organized in the standardized **LeRobot** format.
