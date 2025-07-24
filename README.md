@@ -191,23 +191,6 @@ The GPU requirements for model running and simulation are different, as shown in
 > [!NOTE]
 > We provide a flexible installation tool for users who want to use InternManip for different purposes. Users can choose to install the training and inference environment, and the individual simulation environment independently.
 
-<!-- **Basic**
-- Ubuntu 20.04, 22.04
-- CUDA 12.4 
-- GPU:
-  - NVIDIA RTX 2070, RTX A6000, A100, H100, or higher
-      > [!WARNING] 
-      > Hardware must support CUDA 12.4.
-      > The evaluation on `genmanip` benchmark requires an NVIDIA RTX series GPU to run the simulation.
-
-**Recommended** 
-- Ubuntu 20.04, 22.04
-- CUDA 12.4
-- GPU:
-   > [!NOTE]
-   > We recommend using different GPUs for model and simulation respectively
-  - For simulation: NVIDIA GPU Series (RTX 4090 or higher)
-  - For model training and inference: NVIDIA A100, H100, or higher -->
 
 ### Installation
 
@@ -233,36 +216,36 @@ InternManip offers implementations of multiple manipulation policy models—**GR
 The available `${MODEL}`, `${DATASET}`, `${BENCHMARK}` and their results are summarized in the following tables:
 
 ### CALVIN (ABC-D) Benchmark
-| Model  | Dataset/Benchmark | Score | Model Weights |
+| Model  | Dataset/Benchmark | Score (Main Metric) | Model Weights |
 | ------------ | ---- | ------------- | ------- | 
-| `gr00t-n1` | `calvin-abcd` |  | [`calvin-abcd/gr00t-n1`](#) |
-| `gr00t-n1.5` | `calvin-abcd` |  | [`calvin-abcd/gr00t-n1.5`](#) |
-| `pi-0` | `calvin-abcd` |  | [`calvin-abcd/pi-0`](#)|
-| `dp-clip` | `calvin-abcd` |  | [`calvin-abcd/dp-clip`](#)|
-| `act-clip` | `calvin-abcd` |  | [`calvin-abcd/act-clip`](#)|
+| `gr00t_n1` | `calvin_abcd` | | |
+| `gr00t_n1_5` | `calvin_abcd` | | |
+| `pi0` | `calvin_abcd` | | |
+| `dp_clip` | `calvin_abcd` | | |
+| `act_clip` | `calvin_abcd` | | |
 
 ### Simpler-Env Benchmark
 | Model  | Dataset/Benchmark | Success Rate | Model Weights |
 | ------------ | ------------- | ------------- | ------- |
-| `gr00t-n1` | `google-robot` |  | [`google-robot/gr00t-n1`](https://huggingface.co/lerobot/gr00t-n1) |
-| `gr00t-n1.5` | `google-robot` |  | [`google-robot/gr00t-n1.5`](https://huggingface.co/lerobot/gr00t-n1.5) |
-| `pi-0` | `google-robot` |  | [`google-robot/pi-0`](https://huggingface.co/lerobot/pi0) |
-| `dp-clip` | `google-robot` |  | [`google-robot/dp-clip`](https://huggingface.co/lerobot/dp-clip) |
-| `act-clip` | `google-robot` |  | [`google-robot/act-clip`](https://huggingface.co/lerobot/act-clip) |
-| `gr00t-n1` | `bridgedata-v2` |  | [`bridgedata-v2/gr00t-n1`](https://huggingface.co/lerobot/gr00t-n1) |
-| `gr00t-n1.5` | `bridgedata-v2` |  | [`bridgedata-v2/gr00t-n1.5`](https://huggingface.co/lerobot/gr00t-n1.5) |
-| `pi-0` | `bridgedata-v2` |  | [`bridgedata-v2/pi-0`](https://huggingface.co/lerobot/pi0) |
-| `dp-clip` | `bridgedata-v2` |  | [`bridgedata-v2/dp-clip`](https://huggingface.co/lerobot/dp-clip) |
-| `act-clip` | `bridgedata-v2` |  | [`bridgedata-v2/act-clip`](https://huggingface.co/lerobot/act-clip) |
+| `gr00t_n1` | `google_robot` | | |
+| `gr00t_n1_5` | `google_robot` | | |
+| `pi0` | `google_robot` | | |
+| `dp_clip` | `google_robot` | | |
+| `act_clip` | `google_robot` | | |
+| `gr00t_n1` | `bridgedata_v2` | | |
+| `gr00t_n1_5` | `bridgedata_v2` | | |
+| `pi0` | `bridgedata_v2` | | |
+| `dp_clip` | `bridgedata_v2` | | |
+| `act_clip` | `bridgedata_v2` | | |
 
 ### Genmanip Benchmark
 | Model  | Dataset/Benchmark | Success Rate | Model Weights |
 | ------------ | ------------- | ------------- | ------- |
-| `gr00t-n1` | `genmanip-v1` |  | [`genmanip-v1/gr00t-n1`](#) |
-| `gr00t-n1.5` | `genmanip-v1` |  | [`genmanip-v1/gr00t-n1.5`](#) |
-| `pi-0` | `genmanip-v1` |  | [`genmanip-v1/pi-0`](#) |
-| `dp-clip` | `genmanip-v1` |  | [`genmanip-v1/dp-clip`](#) |
-| `act-clip` | `genmanip-v1` |  | [`genmanip-v1/act-clip`](#) |
+| `gr00t_n1` | `genmanip_v1` | | |
+| `gr00t_n1_5` | `genmanip_v1` | | |
+| `pi0` | `genmanip_v1` | | |
+| `dp_clip` | `genmanip_v1` | | |
+| `act_clip` | `genmanip_v1` | | |
 
 Please refer to the [benchmark documentation](https://internmanip.github.io/usage/get_started/run-benchmark-baseline.html) for more details on how to run the benchmarks and reproduce the results.
 
