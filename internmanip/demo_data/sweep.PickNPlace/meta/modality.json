@@ -1,0 +1,50 @@
+{
+    "state": {
+        "ee_pos": {
+            "start": 0,
+            "end": 3
+        },
+        "ee_rot": {
+            "start": 0,
+            "end": 3
+        },
+        "joints": {
+            "start": 0,
+            "end": 7
+        },
+        "gripper": {
+            "start": 0,
+            "end": 1
+        }
+    },
+    "action": {
+        "delta_ee_pos": {
+            "start": 0,
+            "end": 3
+        },
+        "delta_ee_rot": {
+            "start": 0,
+            "end": 3
+        },
+        "joints": {
+            "start": 0,
+            "end": 7
+        },
+        "gripper": {
+            "start": 0,
+            "end": 1
+        }
+    },
+    "video": {
+        "ego_view": {
+            "original_key": "video.ego_view"
+        },
+        "base_view": {
+            "original_key": "video.base_view"
+        }
+    },
+    "annotation": {
+        "human.action.task_description": {},
+        "human.validity": {}
+    }
+}

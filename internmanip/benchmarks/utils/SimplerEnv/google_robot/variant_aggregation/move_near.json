@@ -1,0 +1,450 @@
+{
+    "google_robot_move_near": [
+        {
+            "policy_setup": "google_robot",
+            "task_name": "google_robot_move_near",
+            "env_name": "MoveNearGoogleInScene-v0",
+            "scene_name": "google_pick_coke_can_1_v4",
+            "robot": "google_robot_static",
+            "control_freq": 3,
+            "sim_freq": 513,
+            "max_episode_steps": 80,
+            "robot_init_x_range": [
+                0.35,
+                0.35,
+                1.0
+            ],
+            "robot_init_y_range": [
+                0.21,
+                0.21,
+                1.0
+            ],
+            "robot_init_rot_quat_center": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "robot_init_rot_rpy_range": [
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                -0.09,
+                -0.09,
+                1.0
+            ],
+            "obj_variation_mode": "episode",
+            "obj_episode_range": [
+                0,
+                60
+            ],
+            "additional_env_build_kwargs": {},
+            "eval_setup": "variant_aggregation"
+        },
+        {
+            "policy_setup": "google_robot",
+            "task_name": "google_robot_move_near",
+            "env_name": "MoveNearGoogleInScene-v0",
+            "scene_name": "google_pick_coke_can_1_v4",
+            "robot": "google_robot_static",
+            "control_freq": 3,
+            "sim_freq": 513,
+            "max_episode_steps": 80,
+            "robot_init_x_range": [
+                0.35,
+                0.35,
+                1.0
+            ],
+            "robot_init_y_range": [
+                0.21,
+                0.21,
+                1.0
+            ],
+            "robot_init_rot_quat_center": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "robot_init_rot_rpy_range": [
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                -0.09,
+                -0.09,
+                1.0
+            ],
+            "obj_variation_mode": "episode",
+            "obj_episode_range": [
+                0,
+                60
+            ],
+            "additional_env_build_kwargs": {
+                "no_distractor": true
+            },
+            "eval_setup": "variant_aggregation"
+        },
+        {
+            "policy_setup": "google_robot",
+            "task_name": "google_robot_move_near",
+            "env_name": "MoveNearGoogleInScene-v0",
+            "scene_name": "google_pick_coke_can_1_v4_alt_background",
+            "robot": "google_robot_static",
+            "control_freq": 3,
+            "sim_freq": 513,
+            "max_episode_steps": 80,
+            "robot_init_x_range": [
+                0.35,
+                0.35,
+                1.0
+            ],
+            "robot_init_y_range": [
+                0.21,
+                0.21,
+                1.0
+            ],
+            "robot_init_rot_quat_center": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "robot_init_rot_rpy_range": [
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                -0.09,
+                -0.09,
+                1.0
+            ],
+            "obj_variation_mode": "episode",
+            "obj_episode_range": [
+                0,
+                60
+            ],
+            "additional_env_build_kwargs": {},
+            "eval_setup": "variant_aggregation"
+        },
+        {
+            "policy_setup": "google_robot",
+            "task_name": "google_robot_move_near",
+            "env_name": "MoveNearGoogleInScene-v0",
+            "scene_name": "google_pick_coke_can_1_v4_alt_background_2",
+            "robot": "google_robot_static",
+            "control_freq": 3,
+            "sim_freq": 513,
+            "max_episode_steps": 80,
+            "robot_init_x_range": [
+                0.35,
+                0.35,
+                1.0
+            ],
+            "robot_init_y_range": [
+                0.21,
+                0.21,
+                1.0
+            ],
+            "robot_init_rot_quat_center": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "robot_init_rot_rpy_range": [
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                -0.09,
+                -0.09,
+                1.0
+            ],
+            "obj_variation_mode": "episode",
+            "obj_episode_range": [
+                0,
+                60
+            ],
+            "additional_env_build_kwargs": {},
+            "eval_setup": "variant_aggregation"
+        },
+        {
+            "policy_setup": "google_robot",
+            "task_name": "google_robot_move_near",
+            "env_name": "MoveNearGoogleInScene-v0",
+            "scene_name": "google_pick_coke_can_1_v4",
+            "robot": "google_robot_static",
+            "control_freq": 3,
+            "sim_freq": 513,
+            "max_episode_steps": 80,
+            "robot_init_x_range": [
+                0.35,
+                0.35,
+                1.0
+            ],
+            "robot_init_y_range": [
+                0.21,
+                0.21,
+                1.0
+            ],
+            "robot_init_rot_quat_center": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "robot_init_rot_rpy_range": [
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                -0.09,
+                -0.09,
+                1.0
+            ],
+            "obj_variation_mode": "episode",
+            "obj_episode_range": [
+                0,
+                60
+            ],
+            "additional_env_build_kwargs": {
+                "slightly_darker_lighting": true
+            },
+            "eval_setup": "variant_aggregation"
+        },
+        {
+            "policy_setup": "google_robot",
+            "task_name": "google_robot_move_near",
+            "env_name": "MoveNearGoogleInScene-v0",
+            "scene_name": "google_pick_coke_can_1_v4",
+            "robot": "google_robot_static",
+            "control_freq": 3,
+            "sim_freq": 513,
+            "max_episode_steps": 80,
+            "robot_init_x_range": [
+                0.35,
+                0.35,
+                1.0
+            ],
+            "robot_init_y_range": [
+                0.21,
+                0.21,
+                1.0
+            ],
+            "robot_init_rot_quat_center": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "robot_init_rot_rpy_range": [
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                -0.09,
+                -0.09,
+                1.0
+            ],
+            "obj_variation_mode": "episode",
+            "obj_episode_range": [
+                0,
+                60
+            ],
+            "additional_env_build_kwargs": {
+                "slightly_brighter_lighting": true
+            },
+            "eval_setup": "variant_aggregation"
+        },
+        {
+            "policy_setup": "google_robot",
+            "task_name": "google_robot_move_near",
+            "env_name": "MoveNearGoogleInScene-v0",
+            "scene_name": "Baked_sc1_staging_objaverse_cabinet1_h870",
+            "robot": "google_robot_static",
+            "control_freq": 3,
+            "sim_freq": 513,
+            "max_episode_steps": 80,
+            "robot_init_x_range": [
+                0.35,
+                0.35,
+                1.0
+            ],
+            "robot_init_y_range": [
+                0.21,
+                0.21,
+                1.0
+            ],
+            "robot_init_rot_quat_center": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "robot_init_rot_rpy_range": [
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                -0.09,
+                -0.09,
+                1.0
+            ],
+            "obj_variation_mode": "episode",
+            "obj_episode_range": [
+                0,
+                60
+            ],
+            "additional_env_build_kwargs": {},
+            "eval_setup": "variant_aggregation"
+        },
+        {
+            "policy_setup": "google_robot",
+            "task_name": "google_robot_move_near",
+            "env_name": "MoveNearGoogleInScene-v0",
+            "scene_name": "Baked_sc1_staging_objaverse_cabinet2_h870",
+            "robot": "google_robot_static",
+            "control_freq": 3,
+            "sim_freq": 513,
+            "max_episode_steps": 80,
+            "robot_init_x_range": [
+                0.35,
+                0.35,
+                1.0
+            ],
+            "robot_init_y_range": [
+                0.21,
+                0.21,
+                1.0
+            ],
+            "robot_init_rot_quat_center": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "robot_init_rot_rpy_range": [
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                -0.09,
+                -0.09,
+                1.0
+            ],
+            "obj_variation_mode": "episode",
+            "obj_episode_range": [
+                0,
+                60
+            ],
+            "additional_env_build_kwargs": {},
+            "eval_setup": "variant_aggregation"
+        },
+        {
+            "policy_setup": "google_robot",
+            "task_name": "google_robot_move_near",
+            "env_name": "MoveNearAltGoogleCameraInScene-v0",
+            "scene_name": "google_pick_coke_can_1_v4",
+            "robot": "google_robot_static",
+            "control_freq": 3,
+            "sim_freq": 513,
+            "max_episode_steps": 80,
+            "robot_init_x_range": [
+                0.35,
+                0.35,
+                1.0
+            ],
+            "robot_init_y_range": [
+                0.21,
+                0.21,
+                1.0
+            ],
+            "robot_init_rot_quat_center": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "robot_init_rot_rpy_range": [
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                -0.09,
+                -0.09,
+                1.0
+            ],
+            "obj_variation_mode": "episode",
+            "obj_episode_range": [
+                0,
+                60
+            ],
+            "additional_env_build_kwargs": {},
+            "eval_setup": "variant_aggregation"
+        },
+        {
+            "policy_setup": "google_robot",
+            "task_name": "google_robot_move_near",
+            "env_name": "MoveNearAltGoogleCamera2InScene-v0",
+            "scene_name": "google_pick_coke_can_1_v4",
+            "robot": "google_robot_static",
+            "control_freq": 3,
+            "sim_freq": 513,
+            "max_episode_steps": 80,
+            "robot_init_x_range": [
+                0.35,
+                0.35,
+                1.0
+            ],
+            "robot_init_y_range": [
+                0.21,
+                0.21,
+                1.0
+            ],
+            "robot_init_rot_quat_center": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "robot_init_rot_rpy_range": [
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                -0.09,
+                -0.09,
+                1.0
+            ],
+            "obj_variation_mode": "episode",
+            "obj_episode_range": [
+                0,
+                60
+            ],
+            "additional_env_build_kwargs": {},
+            "eval_setup": "variant_aggregation"
+        }
+    ]
+}

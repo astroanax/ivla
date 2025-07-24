@@ -1,0 +1,14 @@
+model_type: dp_clip
+dataset_path: /mnt/petrelfs/share_data/zhouyunsong/Sweep/
+num_gpus: 1
+batch_size: 16
+output_dir: Checkpoints/runs/debug-pi0
+max_steps: 10000
+tune_visual: True
+tune_llm: True
+save_steps: 10000
+data_config: sweep
+video_backend: decord
+report_to: wandb
+gradient_accumulation_steps: 8
+# base_model_path: lerobot/pi0

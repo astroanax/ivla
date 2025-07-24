@@ -1,0 +1,700 @@
+{
+    "google_robot_place_in_closed_top_drawer": [
+        {
+            "policy_setup": "google_robot",
+            "task_name": "google_robot_place_in_closed_top_drawer",
+            "env_name": "PlaceIntoClosedTopDrawerCustomInScene-v0",
+            "scene_name": "dummy_drawer",
+            "robot": "google_robot_static",
+            "control_freq": 3,
+            "sim_freq": 513,
+            "max_episode_steps": 200,
+            "robot_init_x_range": [
+                0.644,
+                0.644,
+                1.0
+            ],
+            "robot_init_y_range": [
+                -0.179,
+                -0.179,
+                1.0
+            ],
+            "robot_init_rot_quat_center": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "robot_init_rot_rpy_range": [
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                -0.03,
+                -0.03,
+                1.0
+            ],
+            "obj_variation_mode": "xy",
+            "obj_init_x_range": [
+                -0.08,
+                -0.02,
+                3
+            ],
+            "obj_init_y_range": [
+                -0.02,
+                0.08,
+                3
+            ],
+            "rgb_overlay_path": "${INTERNMANIP_ROOT_DIR}/internmanip/benchmarks/SimplerEnv/ManiSkill2_real2sim/data/real_inpainting/open_drawer_a0.png",
+            "enable_raytracing": true,
+            "additional_env_build_kwargs": {
+                "model_ids": "baked_apple_v2",
+                "station_name": "mk_station_recolor",
+                "light_mode": "simple",
+                "disable_bad_material": true,
+                "urdf_version": "recolor_cabinet_visual_matching_1"
+            },
+            "eval_setup": "visual_matching"
+        },
+        {
+            "policy_setup": "google_robot",
+            "task_name": "google_robot_place_in_closed_top_drawer",
+            "env_name": "PlaceIntoClosedTopDrawerCustomInScene-v0",
+            "scene_name": "dummy_drawer",
+            "robot": "google_robot_static",
+            "control_freq": 3,
+            "sim_freq": 513,
+            "max_episode_steps": 200,
+            "robot_init_x_range": [
+                0.652,
+                0.652,
+                1.0
+            ],
+            "robot_init_y_range": [
+                0.009,
+                0.009,
+                1.0
+            ],
+            "robot_init_rot_quat_center": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "robot_init_rot_rpy_range": [
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "obj_variation_mode": "xy",
+            "obj_init_x_range": [
+                -0.08,
+                -0.02,
+                3
+            ],
+            "obj_init_y_range": [
+                -0.02,
+                0.08,
+                3
+            ],
+            "rgb_overlay_path": "${INTERNMANIP_ROOT_DIR}/internmanip/benchmarks/SimplerEnv/ManiSkill2_real2sim/data/real_inpainting/open_drawer_b0.png",
+            "enable_raytracing": true,
+            "additional_env_build_kwargs": {
+                "model_ids": "baked_apple_v2",
+                "station_name": "mk_station_recolor",
+                "light_mode": "simple",
+                "disable_bad_material": true,
+                "urdf_version": "recolor_cabinet_visual_matching_1"
+            },
+            "eval_setup": "visual_matching"
+        },
+        {
+            "policy_setup": "google_robot",
+            "task_name": "google_robot_place_in_closed_top_drawer",
+            "env_name": "PlaceIntoClosedTopDrawerCustomInScene-v0",
+            "scene_name": "dummy_drawer",
+            "robot": "google_robot_static",
+            "control_freq": 3,
+            "sim_freq": 513,
+            "max_episode_steps": 200,
+            "robot_init_x_range": [
+                0.665,
+                0.665,
+                1.0
+            ],
+            "robot_init_y_range": [
+                0.224,
+                0.224,
+                1.0
+            ],
+            "robot_init_rot_quat_center": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "robot_init_rot_rpy_range": [
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "obj_variation_mode": "xy",
+            "obj_init_x_range": [
+                -0.08,
+                -0.02,
+                3
+            ],
+            "obj_init_y_range": [
+                -0.02,
+                0.08,
+                3
+            ],
+            "rgb_overlay_path": "${INTERNMANIP_ROOT_DIR}/internmanip/benchmarks/SimplerEnv/ManiSkill2_real2sim/data/real_inpainting/open_drawer_c0.png",
+            "enable_raytracing": true,
+            "additional_env_build_kwargs": {
+                "model_ids": "baked_apple_v2",
+                "station_name": "mk_station_recolor",
+                "light_mode": "simple",
+                "disable_bad_material": true,
+                "urdf_version": "recolor_cabinet_visual_matching_1"
+            },
+            "eval_setup": "visual_matching"
+        },
+        {
+            "policy_setup": "google_robot",
+            "task_name": "google_robot_place_in_closed_top_drawer",
+            "env_name": "PlaceIntoClosedTopDrawerCustomInScene-v0",
+            "scene_name": "dummy_drawer",
+            "robot": "google_robot_static",
+            "control_freq": 3,
+            "sim_freq": 513,
+            "max_episode_steps": 200,
+            "robot_init_x_range": [
+                0.644,
+                0.644,
+                1.0
+            ],
+            "robot_init_y_range": [
+                -0.179,
+                -0.179,
+                1.0
+            ],
+            "robot_init_rot_quat_center": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "robot_init_rot_rpy_range": [
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                -0.03,
+                -0.03,
+                1.0
+            ],
+            "obj_variation_mode": "xy",
+            "obj_init_x_range": [
+                -0.08,
+                -0.02,
+                3
+            ],
+            "obj_init_y_range": [
+                -0.02,
+                0.08,
+                3
+            ],
+            "rgb_overlay_path": "${INTERNMANIP_ROOT_DIR}/internmanip/benchmarks/SimplerEnv/ManiSkill2_real2sim/data/real_inpainting/open_drawer_a0.png",
+            "enable_raytracing": true,
+            "additional_env_build_kwargs": {
+                "model_ids": "baked_apple_v2",
+                "station_name": "mk_station_recolor",
+                "light_mode": "simple",
+                "disable_bad_material": true,
+                "urdf_version": "recolor_tabletop_visual_matching_1"
+            },
+            "eval_setup": "visual_matching"
+        },
+        {
+            "policy_setup": "google_robot",
+            "task_name": "google_robot_place_in_closed_top_drawer",
+            "env_name": "PlaceIntoClosedTopDrawerCustomInScene-v0",
+            "scene_name": "dummy_drawer",
+            "robot": "google_robot_static",
+            "control_freq": 3,
+            "sim_freq": 513,
+            "max_episode_steps": 200,
+            "robot_init_x_range": [
+                0.652,
+                0.652,
+                1.0
+            ],
+            "robot_init_y_range": [
+                0.009,
+                0.009,
+                1.0
+            ],
+            "robot_init_rot_quat_center": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "robot_init_rot_rpy_range": [
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "obj_variation_mode": "xy",
+            "obj_init_x_range": [
+                -0.08,
+                -0.02,
+                3
+            ],
+            "obj_init_y_range": [
+                -0.02,
+                0.08,
+                3
+            ],
+            "rgb_overlay_path": "${INTERNMANIP_ROOT_DIR}/internmanip/benchmarks/SimplerEnv/ManiSkill2_real2sim/data/real_inpainting/open_drawer_b0.png",
+            "enable_raytracing": true,
+            "additional_env_build_kwargs": {
+                "model_ids": "baked_apple_v2",
+                "station_name": "mk_station_recolor",
+                "light_mode": "simple",
+                "disable_bad_material": true,
+                "urdf_version": "recolor_tabletop_visual_matching_1"
+            },
+            "eval_setup": "visual_matching"
+        },
+        {
+            "policy_setup": "google_robot",
+            "task_name": "google_robot_place_in_closed_top_drawer",
+            "env_name": "PlaceIntoClosedTopDrawerCustomInScene-v0",
+            "scene_name": "dummy_drawer",
+            "robot": "google_robot_static",
+            "control_freq": 3,
+            "sim_freq": 513,
+            "max_episode_steps": 200,
+            "robot_init_x_range": [
+                0.665,
+                0.665,
+                1.0
+            ],
+            "robot_init_y_range": [
+                0.224,
+                0.224,
+                1.0
+            ],
+            "robot_init_rot_quat_center": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "robot_init_rot_rpy_range": [
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "obj_variation_mode": "xy",
+            "obj_init_x_range": [
+                -0.08,
+                -0.02,
+                3
+            ],
+            "obj_init_y_range": [
+                -0.02,
+                0.08,
+                3
+            ],
+            "rgb_overlay_path": "${INTERNMANIP_ROOT_DIR}/internmanip/benchmarks/SimplerEnv/ManiSkill2_real2sim/data/real_inpainting/open_drawer_c0.png",
+            "enable_raytracing": true,
+            "additional_env_build_kwargs": {
+                "model_ids": "baked_apple_v2",
+                "station_name": "mk_station_recolor",
+                "light_mode": "simple",
+                "disable_bad_material": true,
+                "urdf_version": "recolor_tabletop_visual_matching_1"
+            },
+            "eval_setup": "visual_matching"
+        },
+        {
+            "policy_setup": "google_robot",
+            "task_name": "google_robot_place_in_closed_top_drawer",
+            "env_name": "PlaceIntoClosedTopDrawerCustomInScene-v0",
+            "scene_name": "dummy_drawer",
+            "robot": "google_robot_static",
+            "control_freq": 3,
+            "sim_freq": 513,
+            "max_episode_steps": 200,
+            "robot_init_x_range": [
+                0.644,
+                0.644,
+                1.0
+            ],
+            "robot_init_y_range": [
+                -0.179,
+                -0.179,
+                1.0
+            ],
+            "robot_init_rot_quat_center": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "robot_init_rot_rpy_range": [
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                -0.03,
+                -0.03,
+                1.0
+            ],
+            "obj_variation_mode": "xy",
+            "obj_init_x_range": [
+                -0.08,
+                -0.02,
+                3
+            ],
+            "obj_init_y_range": [
+                -0.02,
+                0.08,
+                3
+            ],
+            "rgb_overlay_path": "${INTERNMANIP_ROOT_DIR}/internmanip/benchmarks/SimplerEnv/ManiSkill2_real2sim/data/real_inpainting/open_drawer_a0.png",
+            "enable_raytracing": true,
+            "additional_env_build_kwargs": {
+                "model_ids": "baked_apple_v2",
+                "station_name": "mk_station_recolor",
+                "light_mode": "simple",
+                "disable_bad_material": true,
+                "urdf_version": "recolor_tabletop_visual_matching_2"
+            },
+            "eval_setup": "visual_matching"
+        },
+        {
+            "policy_setup": "google_robot",
+            "task_name": "google_robot_place_in_closed_top_drawer",
+            "env_name": "PlaceIntoClosedTopDrawerCustomInScene-v0",
+            "scene_name": "dummy_drawer",
+            "robot": "google_robot_static",
+            "control_freq": 3,
+            "sim_freq": 513,
+            "max_episode_steps": 200,
+            "robot_init_x_range": [
+                0.652,
+                0.652,
+                1.0
+            ],
+            "robot_init_y_range": [
+                0.009,
+                0.009,
+                1.0
+            ],
+            "robot_init_rot_quat_center": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "robot_init_rot_rpy_range": [
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "obj_variation_mode": "xy",
+            "obj_init_x_range": [
+                -0.08,
+                -0.02,
+                3
+            ],
+            "obj_init_y_range": [
+                -0.02,
+                0.08,
+                3
+            ],
+            "rgb_overlay_path": "${INTERNMANIP_ROOT_DIR}/internmanip/benchmarks/SimplerEnv/ManiSkill2_real2sim/data/real_inpainting/open_drawer_b0.png",
+            "enable_raytracing": true,
+            "additional_env_build_kwargs": {
+                "model_ids": "baked_apple_v2",
+                "station_name": "mk_station_recolor",
+                "light_mode": "simple",
+                "disable_bad_material": true,
+                "urdf_version": "recolor_tabletop_visual_matching_2"
+            },
+            "eval_setup": "visual_matching"
+        },
+        {
+            "policy_setup": "google_robot",
+            "task_name": "google_robot_place_in_closed_top_drawer",
+            "env_name": "PlaceIntoClosedTopDrawerCustomInScene-v0",
+            "scene_name": "dummy_drawer",
+            "robot": "google_robot_static",
+            "control_freq": 3,
+            "sim_freq": 513,
+            "max_episode_steps": 200,
+            "robot_init_x_range": [
+                0.665,
+                0.665,
+                1.0
+            ],
+            "robot_init_y_range": [
+                0.224,
+                0.224,
+                1.0
+            ],
+            "robot_init_rot_quat_center": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "robot_init_rot_rpy_range": [
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "obj_variation_mode": "xy",
+            "obj_init_x_range": [
+                -0.08,
+                -0.02,
+                3
+            ],
+            "obj_init_y_range": [
+                -0.02,
+                0.08,
+                3
+            ],
+            "rgb_overlay_path": "${INTERNMANIP_ROOT_DIR}/internmanip/benchmarks/SimplerEnv/ManiSkill2_real2sim/data/real_inpainting/open_drawer_c0.png",
+            "enable_raytracing": true,
+            "additional_env_build_kwargs": {
+                "model_ids": "baked_apple_v2",
+                "station_name": "mk_station_recolor",
+                "light_mode": "simple",
+                "disable_bad_material": true,
+                "urdf_version": "recolor_tabletop_visual_matching_2"
+            },
+            "eval_setup": "visual_matching"
+        },
+        {
+            "policy_setup": "google_robot",
+            "task_name": "google_robot_place_in_closed_top_drawer",
+            "env_name": "PlaceIntoClosedTopDrawerCustomInScene-v0",
+            "scene_name": "dummy_drawer",
+            "robot": "google_robot_static",
+            "control_freq": 3,
+            "sim_freq": 513,
+            "max_episode_steps": 200,
+            "robot_init_x_range": [
+                0.644,
+                0.644,
+                1.0
+            ],
+            "robot_init_y_range": [
+                -0.179,
+                -0.179,
+                1.0
+            ],
+            "robot_init_rot_quat_center": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "robot_init_rot_rpy_range": [
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                -0.03,
+                -0.03,
+                1.0
+            ],
+            "obj_variation_mode": "xy",
+            "obj_init_x_range": [
+                -0.08,
+                -0.02,
+                3
+            ],
+            "obj_init_y_range": [
+                -0.02,
+                0.08,
+                3
+            ],
+            "rgb_overlay_path": "${INTERNMANIP_ROOT_DIR}/internmanip/benchmarks/SimplerEnv/ManiSkill2_real2sim/data/real_inpainting/open_drawer_a0.png",
+            "enable_raytracing": true,
+            "additional_env_build_kwargs": {
+                "model_ids": "baked_apple_v2",
+                "station_name": "mk_station_recolor",
+                "light_mode": "simple",
+                "disable_bad_material": true,
+                "urdf_version": null
+            },
+            "eval_setup": "visual_matching"
+        },
+        {
+            "policy_setup": "google_robot",
+            "task_name": "google_robot_place_in_closed_top_drawer",
+            "env_name": "PlaceIntoClosedTopDrawerCustomInScene-v0",
+            "scene_name": "dummy_drawer",
+            "robot": "google_robot_static",
+            "control_freq": 3,
+            "sim_freq": 513,
+            "max_episode_steps": 200,
+            "robot_init_x_range": [
+                0.652,
+                0.652,
+                1.0
+            ],
+            "robot_init_y_range": [
+                0.009,
+                0.009,
+                1.0
+            ],
+            "robot_init_rot_quat_center": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "robot_init_rot_rpy_range": [
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "obj_variation_mode": "xy",
+            "obj_init_x_range": [
+                -0.08,
+                -0.02,
+                3
+            ],
+            "obj_init_y_range": [
+                -0.02,
+                0.08,
+                3
+            ],
+            "rgb_overlay_path": "${INTERNMANIP_ROOT_DIR}/internmanip/benchmarks/SimplerEnv/ManiSkill2_real2sim/data/real_inpainting/open_drawer_b0.png",
+            "enable_raytracing": true,
+            "additional_env_build_kwargs": {
+                "model_ids": "baked_apple_v2",
+                "station_name": "mk_station_recolor",
+                "light_mode": "simple",
+                "disable_bad_material": true,
+                "urdf_version": null
+            },
+            "eval_setup": "visual_matching"
+        },
+        {
+            "policy_setup": "google_robot",
+            "task_name": "google_robot_place_in_closed_top_drawer",
+            "env_name": "PlaceIntoClosedTopDrawerCustomInScene-v0",
+            "scene_name": "dummy_drawer",
+            "robot": "google_robot_static",
+            "control_freq": 3,
+            "sim_freq": 513,
+            "max_episode_steps": 200,
+            "robot_init_x_range": [
+                0.665,
+                0.665,
+                1.0
+            ],
+            "robot_init_y_range": [
+                0.224,
+                0.224,
+                1.0
+            ],
+            "robot_init_rot_quat_center": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "robot_init_rot_rpy_range": [
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "obj_variation_mode": "xy",
+            "obj_init_x_range": [
+                -0.08,
+                -0.02,
+                3
+            ],
+            "obj_init_y_range": [
+                -0.02,
+                0.08,
+                3
+            ],
+            "rgb_overlay_path": "${INTERNMANIP_ROOT_DIR}/internmanip/benchmarks/SimplerEnv/ManiSkill2_real2sim/data/real_inpainting/open_drawer_c0.png",
+            "enable_raytracing": true,
+            "additional_env_build_kwargs": {
+                "model_ids": "baked_apple_v2",
+                "station_name": "mk_station_recolor",
+                "light_mode": "simple",
+                "disable_bad_material": true,
+                "urdf_version": null
+            },
+            "eval_setup": "visual_matching"
+        }
+    ]
+}

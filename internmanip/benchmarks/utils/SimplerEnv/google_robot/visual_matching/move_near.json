@@ -1,0 +1,196 @@
+{
+    "google_robot_move_near": [
+        {
+            "policy_setup": "google_robot",
+            "task_name": "google_robot_move_near",
+            "env_name": "MoveNearGoogleBakedTexInScene-v0",
+            "scene_name": "google_pick_coke_can_1_v4",
+            "robot": "google_robot_static",
+            "rgb_overlay_path": "${INTERNMANIP_ROOT_DIR}/internmanip/benchmarks/SimplerEnv/ManiSkill2_real2sim/data/real_inpainting/google_move_near_real_eval_1.png",
+            "control_freq": 3,
+            "sim_freq": 513,
+            "max_episode_steps": 80,
+            "robot_init_x_range": [
+                0.35,
+                0.35,
+                1.0
+            ],
+            "robot_init_y_range": [
+                0.21,
+                0.21,
+                1.0
+            ],
+            "robot_init_rot_quat_center": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "robot_init_rot_rpy_range": [
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                -0.09,
+                -0.09,
+                1.0
+            ],
+            "obj_variation_mode": "episode",
+            "obj_episode_range": [
+                0,
+                60
+            ],
+            "additional-env-save-tags": "baked_except_bpb_orange",
+            "additional_env_build_kwargs": {
+                "urdf_version": null
+            },
+            "eval_setup": "visual_matching"
+        },
+        {
+            "policy_setup": "google_robot",
+            "task_name": "google_robot_move_near",
+            "env_name": "MoveNearGoogleBakedTexInScene-v0",
+            "scene_name": "google_pick_coke_can_1_v4",
+            "robot": "google_robot_static",
+            "rgb_overlay_path": "${INTERNMANIP_ROOT_DIR}/internmanip/benchmarks/SimplerEnv/ManiSkill2_real2sim/data/real_inpainting/google_move_near_real_eval_1.png",
+            "control_freq": 3,
+            "sim_freq": 513,
+            "max_episode_steps": 80,
+            "robot_init_x_range": [
+                0.35,
+                0.35,
+                1.0
+            ],
+            "robot_init_y_range": [
+                0.21,
+                0.21,
+                1.0
+            ],
+            "robot_init_rot_quat_center": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "robot_init_rot_rpy_range": [
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                -0.09,
+                -0.09,
+                1.0
+            ],
+            "obj_variation_mode": "episode",
+            "obj_episode_range": [
+                0,
+                60
+            ],
+            "additional-env-save-tags": "baked_except_bpb_orange",
+            "additional_env_build_kwargs": {
+                "urdf_version": "recolor_tabletop_visual_matching_1"
+            },
+            "eval_setup": "visual_matching"
+        },
+        {
+            "policy_setup": "google_robot",
+            "task_name": "google_robot_move_near",
+            "env_name": "MoveNearGoogleBakedTexInScene-v0",
+            "scene_name": "google_pick_coke_can_1_v4",
+            "robot": "google_robot_static",
+            "rgb_overlay_path": "${INTERNMANIP_ROOT_DIR}/internmanip/benchmarks/SimplerEnv/ManiSkill2_real2sim/data/real_inpainting/google_move_near_real_eval_1.png",
+            "control_freq": 3,
+            "sim_freq": 513,
+            "max_episode_steps": 80,
+            "robot_init_x_range": [
+                0.35,
+                0.35,
+                1.0
+            ],
+            "robot_init_y_range": [
+                0.21,
+                0.21,
+                1.0
+            ],
+            "robot_init_rot_quat_center": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "robot_init_rot_rpy_range": [
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                -0.09,
+                -0.09,
+                1.0
+            ],
+            "obj_variation_mode": "episode",
+            "obj_episode_range": [
+                0,
+                60
+            ],
+            "additional-env-save-tags": "baked_except_bpb_orange",
+            "additional_env_build_kwargs": {
+                "urdf_version": "recolor_tabletop_visual_matching_2"
+            },
+            "eval_setup": "visual_matching"
+        },
+        {
+            "policy_setup": "google_robot",
+            "task_name": "google_robot_move_near",
+            "env_name": "MoveNearGoogleBakedTexInScene-v0",
+            "scene_name": "google_pick_coke_can_1_v4",
+            "robot": "google_robot_static",
+            "rgb_overlay_path": "${INTERNMANIP_ROOT_DIR}/internmanip/benchmarks/SimplerEnv/ManiSkill2_real2sim/data/real_inpainting/google_move_near_real_eval_1.png",
+            "control_freq": 3,
+            "sim_freq": 513,
+            "max_episode_steps": 80,
+            "robot_init_x_range": [
+                0.35,
+                0.35,
+                1.0
+            ],
+            "robot_init_y_range": [
+                0.21,
+                0.21,
+                1.0
+            ],
+            "robot_init_rot_quat_center": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "robot_init_rot_rpy_range": [
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                -0.09,
+                -0.09,
+                1.0
+            ],
+            "obj_variation_mode": "episode",
+            "obj_episode_range": [
+                0,
+                60
+            ],
+            "additional-env-save-tags": "baked_except_bpb_orange",
+            "additional_env_build_kwargs": {
+                "urdf_version": "recolor_cabinet_visual_matching_1"
+            },
+            "eval_setup": "visual_matching"
+        }
+    ]
+}

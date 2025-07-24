@@ -1,0 +1,48 @@
+{
+    "widowx_spoon_on_towel": [
+        {
+            "policy_setup": "widowx_bridge",
+            "task_name": "widowx_spoon_on_towel",
+            "env_name": "PutSpoonOnTableClothInScene-v0",
+            "scene_name": "bridge_table_1_v1",
+            "robot": "widowx",
+            "control_freq": 5,
+            "sim_freq": 500,
+            "max_episode_steps": 60,
+            "robot_init_x_range": [
+                0.147,
+                0.147,
+                1.0
+            ],
+            "robot_init_y_range": [
+                0.028,
+                0.028,
+                1.0
+            ],
+            "robot_init_rot_quat_center": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "robot_init_rot_rpy_range": [
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "obj_variation_mode": "episode",
+            "obj_episode_range": [
+                0,
+                24
+            ],
+            "rgb_overlay_path": "${INTERNMANIP_ROOT_DIR}/internmanip/benchmarks/SimplerEnv/ManiSkill2_real2sim/data/real_inpainting/bridge_real_eval_1.png",
+            "eval_setup": "visual_matching"
+        }
+    ]
+}

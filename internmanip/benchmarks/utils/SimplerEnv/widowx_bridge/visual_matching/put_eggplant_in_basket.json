@@ -1,0 +1,48 @@
+{
+    "widowx_put_eggplant_in_basket": [
+        {
+            "policy_setup": "widowx_bridge",
+            "task_name": "widowx_put_eggplant_in_basket",
+            "env_name": "PutEggplantInBasketScene-v0",
+            "scene_name": "bridge_table_1_v2",
+            "robot": "widowx_sink_camera_setup",
+            "control_freq": 5,
+            "sim_freq": 500,
+            "max_episode_steps": 120,
+            "robot_init_x_range": [
+                0.127,
+                0.127,
+                1.0
+            ],
+            "robot_init_y_range": [
+                0.06,
+                0.06,
+                1.0
+            ],
+            "robot_init_rot_quat_center": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "robot_init_rot_rpy_range": [
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "obj_variation_mode": "episode",
+            "obj_episode_range": [
+                0,
+                24
+            ],
+            "rgb_overlay_path": "${INTERNMANIP_ROOT_DIR}/internmanip/benchmarks/SimplerEnv/ManiSkill2_real2sim/data/real_inpainting/bridge_sink.png",
+            "eval_setup": "visual_matching"
+        }
+    ]
+}

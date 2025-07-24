@@ -1,0 +1,48 @@
+{
+    // _description: "The state of the robot, default original key is observation.state"
+    "state": {
+        "left_arm": {
+            "original_key": "observation.state.left_arm"
+        },
+        "left_hand": {
+            "original_key": "observation.state.left_hand"
+        },
+        "left_leg": {
+            "original_key": "observation.state.left_leg"
+        },
+        "neck": {
+            "original_key": "observation.state.neck"
+        },
+        "right_arm": {
+            "original_key": "observation.state.right_arm"
+        },
+        "right_hand": {
+            "original_key": "observation.state.right_hand"
+        },
+        "right_leg": {
+            "original_key": "observation.state.right_leg"
+        },
+        "waist": {
+            "original_key": "observation.state.waist"
+        }
+    },
+    "action": {
+        "left_arm": {},
+        "left_hand": {},
+        "left_leg": {},
+        "neck": {},
+        "right_arm": {},
+        "right_hand": {},
+        "right_leg": {},
+        "waist": {}
+    },
+    "video": {
+        "ego_view": {
+            "original_key": "observation.images.ego_view"
+        }
+    },
+    "annotation": {
+        "human.action.task_description": {},
+        "human.validity": {}
+    }
+}

@@ -1,0 +1,652 @@
+{
+    "google_robot_pick_coke_can": [
+        {
+            "policy_setup": "google_robot",
+            "task_name": "google_robot_pick_coke_can",
+            "env_name": "GraspSingleOpenedCokeCanInScene-v0",
+            "scene_name": "google_pick_coke_can_1_v4",
+            "robot": "google_robot_static",
+            "control_freq": 3,
+            "sim_freq": 513,
+            "max_episode_steps": 80,
+            "rgb_overlay_path": "${INTERNMANIP_ROOT_DIR}/internmanip/benchmarks/SimplerEnv/ManiSkill2_real2sim/data/real_inpainting/google_coke_can_real_eval_1.png",
+            "robot_init_x_range": [
+                0.35,
+                0.35,
+                1.0
+            ],
+            "robot_init_y_range": [
+                0.2,
+                0.2,
+                1.0
+            ],
+            "robot_init_rot_quat_center": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "robot_init_rot_rpy_range": [
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "obj_variation_mode": "xy",
+            "obj_init_x_range": [
+                -0.35,
+                -0.12,
+                5
+            ],
+            "obj_init_y_range": [
+                -0.02,
+                0.42,
+                5
+            ],
+            "additional_env_build_kwargs": {
+                "lr_switch": true,
+                "urdf_version": null
+            },
+            "eval_setup": "visual_matching"
+        },
+        {
+            "policy_setup": "google_robot",
+            "task_name": "google_robot_pick_coke_can",
+            "env_name": "GraspSingleOpenedCokeCanInScene-v0",
+            "scene_name": "google_pick_coke_can_1_v4",
+            "robot": "google_robot_static",
+            "control_freq": 3,
+            "sim_freq": 513,
+            "max_episode_steps": 80,
+            "rgb_overlay_path": "${INTERNMANIP_ROOT_DIR}/internmanip/benchmarks/SimplerEnv/ManiSkill2_real2sim/data/real_inpainting/google_coke_can_real_eval_1.png",
+            "robot_init_x_range": [
+                0.35,
+                0.35,
+                1.0
+            ],
+            "robot_init_y_range": [
+                0.2,
+                0.2,
+                1.0
+            ],
+            "robot_init_rot_quat_center": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "robot_init_rot_rpy_range": [
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "obj_variation_mode": "xy",
+            "obj_init_x_range": [
+                -0.35,
+                -0.12,
+                5
+            ],
+            "obj_init_y_range": [
+                -0.02,
+                0.42,
+                5
+            ],
+            "additional_env_build_kwargs": {
+                "upright": true,
+                "urdf_version": null
+            },
+            "eval_setup": "visual_matching"
+        },
+        {
+            "policy_setup": "google_robot",
+            "task_name": "google_robot_pick_coke_can",
+            "env_name": "GraspSingleOpenedCokeCanInScene-v0",
+            "scene_name": "google_pick_coke_can_1_v4",
+            "robot": "google_robot_static",
+            "control_freq": 3,
+            "sim_freq": 513,
+            "max_episode_steps": 80,
+            "rgb_overlay_path": "${INTERNMANIP_ROOT_DIR}/internmanip/benchmarks/SimplerEnv/ManiSkill2_real2sim/data/real_inpainting/google_coke_can_real_eval_1.png",
+            "robot_init_x_range": [
+                0.35,
+                0.35,
+                1.0
+            ],
+            "robot_init_y_range": [
+                0.2,
+                0.2,
+                1.0
+            ],
+            "robot_init_rot_quat_center": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "robot_init_rot_rpy_range": [
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "obj_variation_mode": "xy",
+            "obj_init_x_range": [
+                -0.35,
+                -0.12,
+                5
+            ],
+            "obj_init_y_range": [
+                -0.02,
+                0.42,
+                5
+            ],
+            "additional_env_build_kwargs": {
+                "laid_vertically": true,
+                "urdf_version": null
+            },
+            "eval_setup": "visual_matching"
+        },
+        {
+            "policy_setup": "google_robot",
+            "task_name": "google_robot_pick_coke_can",
+            "env_name": "GraspSingleOpenedCokeCanInScene-v0",
+            "scene_name": "google_pick_coke_can_1_v4",
+            "robot": "google_robot_static",
+            "control_freq": 3,
+            "sim_freq": 513,
+            "max_episode_steps": 80,
+            "rgb_overlay_path": "${INTERNMANIP_ROOT_DIR}/internmanip/benchmarks/SimplerEnv/ManiSkill2_real2sim/data/real_inpainting/google_coke_can_real_eval_1.png",
+            "robot_init_x_range": [
+                0.35,
+                0.35,
+                1.0
+            ],
+            "robot_init_y_range": [
+                0.2,
+                0.2,
+                1.0
+            ],
+            "robot_init_rot_quat_center": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "robot_init_rot_rpy_range": [
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "obj_variation_mode": "xy",
+            "obj_init_x_range": [
+                -0.35,
+                -0.12,
+                5
+            ],
+            "obj_init_y_range": [
+                -0.02,
+                0.42,
+                5
+            ],
+            "additional_env_build_kwargs": {
+                "lr_switch": true,
+                "urdf_version": "recolor_tabletop_visual_matching_1"
+            },
+            "eval_setup": "visual_matching"
+        },
+        {
+            "policy_setup": "google_robot",
+            "task_name": "google_robot_pick_coke_can",
+            "env_name": "GraspSingleOpenedCokeCanInScene-v0",
+            "scene_name": "google_pick_coke_can_1_v4",
+            "robot": "google_robot_static",
+            "control_freq": 3,
+            "sim_freq": 513,
+            "max_episode_steps": 80,
+            "rgb_overlay_path": "${INTERNMANIP_ROOT_DIR}/internmanip/benchmarks/SimplerEnv/ManiSkill2_real2sim/data/real_inpainting/google_coke_can_real_eval_1.png",
+            "robot_init_x_range": [
+                0.35,
+                0.35,
+                1.0
+            ],
+            "robot_init_y_range": [
+                0.2,
+                0.2,
+                1.0
+            ],
+            "robot_init_rot_quat_center": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "robot_init_rot_rpy_range": [
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "obj_variation_mode": "xy",
+            "obj_init_x_range": [
+                -0.35,
+                -0.12,
+                5
+            ],
+            "obj_init_y_range": [
+                -0.02,
+                0.42,
+                5
+            ],
+            "additional_env_build_kwargs": {
+                "upright": true,
+                "urdf_version": "recolor_tabletop_visual_matching_1"
+            },
+            "eval_setup": "visual_matching"
+        },
+        {
+            "policy_setup": "google_robot",
+            "task_name": "google_robot_pick_coke_can",
+            "env_name": "GraspSingleOpenedCokeCanInScene-v0",
+            "scene_name": "google_pick_coke_can_1_v4",
+            "robot": "google_robot_static",
+            "control_freq": 3,
+            "sim_freq": 513,
+            "max_episode_steps": 80,
+            "rgb_overlay_path": "${INTERNMANIP_ROOT_DIR}/internmanip/benchmarks/SimplerEnv/ManiSkill2_real2sim/data/real_inpainting/google_coke_can_real_eval_1.png",
+            "robot_init_x_range": [
+                0.35,
+                0.35,
+                1.0
+            ],
+            "robot_init_y_range": [
+                0.2,
+                0.2,
+                1.0
+            ],
+            "robot_init_rot_quat_center": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "robot_init_rot_rpy_range": [
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "obj_variation_mode": "xy",
+            "obj_init_x_range": [
+                -0.35,
+                -0.12,
+                5
+            ],
+            "obj_init_y_range": [
+                -0.02,
+                0.42,
+                5
+            ],
+            "additional_env_build_kwargs": {
+                "laid_vertically": true,
+                "urdf_version": "recolor_tabletop_visual_matching_1"
+            },
+            "eval_setup": "visual_matching"
+        },
+        {
+            "policy_setup": "google_robot",
+            "task_name": "google_robot_pick_coke_can",
+            "env_name": "GraspSingleOpenedCokeCanInScene-v0",
+            "scene_name": "google_pick_coke_can_1_v4",
+            "robot": "google_robot_static",
+            "control_freq": 3,
+            "sim_freq": 513,
+            "max_episode_steps": 80,
+            "rgb_overlay_path": "${INTERNMANIP_ROOT_DIR}/internmanip/benchmarks/SimplerEnv/ManiSkill2_real2sim/data/real_inpainting/google_coke_can_real_eval_1.png",
+            "robot_init_x_range": [
+                0.35,
+                0.35,
+                1.0
+            ],
+            "robot_init_y_range": [
+                0.2,
+                0.2,
+                1.0
+            ],
+            "robot_init_rot_quat_center": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "robot_init_rot_rpy_range": [
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "obj_variation_mode": "xy",
+            "obj_init_x_range": [
+                -0.35,
+                -0.12,
+                5
+            ],
+            "obj_init_y_range": [
+                -0.02,
+                0.42,
+                5
+            ],
+            "additional_env_build_kwargs": {
+                "lr_switch": true,
+                "urdf_version": "recolor_tabletop_visual_matching_2"
+            },
+            "eval_setup": "visual_matching"
+        },
+        {
+            "policy_setup": "google_robot",
+            "task_name": "google_robot_pick_coke_can",
+            "env_name": "GraspSingleOpenedCokeCanInScene-v0",
+            "scene_name": "google_pick_coke_can_1_v4",
+            "robot": "google_robot_static",
+            "control_freq": 3,
+            "sim_freq": 513,
+            "max_episode_steps": 80,
+            "rgb_overlay_path": "${INTERNMANIP_ROOT_DIR}/internmanip/benchmarks/SimplerEnv/ManiSkill2_real2sim/data/real_inpainting/google_coke_can_real_eval_1.png",
+            "robot_init_x_range": [
+                0.35,
+                0.35,
+                1.0
+            ],
+            "robot_init_y_range": [
+                0.2,
+                0.2,
+                1.0
+            ],
+            "robot_init_rot_quat_center": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "robot_init_rot_rpy_range": [
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "obj_variation_mode": "xy",
+            "obj_init_x_range": [
+                -0.35,
+                -0.12,
+                5
+            ],
+            "obj_init_y_range": [
+                -0.02,
+                0.42,
+                5
+            ],
+            "additional_env_build_kwargs": {
+                "upright": true,
+                "urdf_version": "recolor_tabletop_visual_matching_2"
+            },
+            "eval_setup": "visual_matching"
+        },
+        {
+            "policy_setup": "google_robot",
+            "task_name": "google_robot_pick_coke_can",
+            "env_name": "GraspSingleOpenedCokeCanInScene-v0",
+            "scene_name": "google_pick_coke_can_1_v4",
+            "robot": "google_robot_static",
+            "control_freq": 3,
+            "sim_freq": 513,
+            "max_episode_steps": 80,
+            "rgb_overlay_path": "${INTERNMANIP_ROOT_DIR}/internmanip/benchmarks/SimplerEnv/ManiSkill2_real2sim/data/real_inpainting/google_coke_can_real_eval_1.png",
+            "robot_init_x_range": [
+                0.35,
+                0.35,
+                1.0
+            ],
+            "robot_init_y_range": [
+                0.2,
+                0.2,
+                1.0
+            ],
+            "robot_init_rot_quat_center": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "robot_init_rot_rpy_range": [
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "obj_variation_mode": "xy",
+            "obj_init_x_range": [
+                -0.35,
+                -0.12,
+                5
+            ],
+            "obj_init_y_range": [
+                -0.02,
+                0.42,
+                5
+            ],
+            "additional_env_build_kwargs": {
+                "laid_vertically": true,
+                "urdf_version": "recolor_tabletop_visual_matching_2"
+            },
+            "eval_setup": "visual_matching"
+        },
+        {
+            "policy_setup": "google_robot",
+            "task_name": "google_robot_pick_coke_can",
+            "env_name": "GraspSingleOpenedCokeCanInScene-v0",
+            "scene_name": "google_pick_coke_can_1_v4",
+            "robot": "google_robot_static",
+            "control_freq": 3,
+            "sim_freq": 513,
+            "max_episode_steps": 80,
+            "rgb_overlay_path": "${INTERNMANIP_ROOT_DIR}/internmanip/benchmarks/SimplerEnv/ManiSkill2_real2sim/data/real_inpainting/google_coke_can_real_eval_1.png",
+            "robot_init_x_range": [
+                0.35,
+                0.35,
+                1.0
+            ],
+            "robot_init_y_range": [
+                0.2,
+                0.2,
+                1.0
+            ],
+            "robot_init_rot_quat_center": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "robot_init_rot_rpy_range": [
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "obj_variation_mode": "xy",
+            "obj_init_x_range": [
+                -0.35,
+                -0.12,
+                5
+            ],
+            "obj_init_y_range": [
+                -0.02,
+                0.42,
+                5
+            ],
+            "additional_env_build_kwargs": {
+                "lr_switch": true,
+                "urdf_version": "recolor_cabinet_visual_matching_1"
+            },
+            "eval_setup": "visual_matching"
+        },
+        {
+            "policy_setup": "google_robot",
+            "task_name": "google_robot_pick_coke_can",
+            "env_name": "GraspSingleOpenedCokeCanInScene-v0",
+            "scene_name": "google_pick_coke_can_1_v4",
+            "robot": "google_robot_static",
+            "control_freq": 3,
+            "sim_freq": 513,
+            "max_episode_steps": 80,
+            "rgb_overlay_path": "${INTERNMANIP_ROOT_DIR}/internmanip/benchmarks/SimplerEnv/ManiSkill2_real2sim/data/real_inpainting/google_coke_can_real_eval_1.png",
+            "robot_init_x_range": [
+                0.35,
+                0.35,
+                1.0
+            ],
+            "robot_init_y_range": [
+                0.2,
+                0.2,
+                1.0
+            ],
+            "robot_init_rot_quat_center": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "robot_init_rot_rpy_range": [
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "obj_variation_mode": "xy",
+            "obj_init_x_range": [
+                -0.35,
+                -0.12,
+                5
+            ],
+            "obj_init_y_range": [
+                -0.02,
+                0.42,
+                5
+            ],
+            "additional_env_build_kwargs": {
+                "upright": true,
+                "urdf_version": "recolor_cabinet_visual_matching_1"
+            },
+            "eval_setup": "visual_matching"
+        },
+        {
+            "policy_setup": "google_robot",
+            "task_name": "google_robot_pick_coke_can",
+            "env_name": "GraspSingleOpenedCokeCanInScene-v0",
+            "scene_name": "google_pick_coke_can_1_v4",
+            "robot": "google_robot_static",
+            "control_freq": 3,
+            "sim_freq": 513,
+            "max_episode_steps": 80,
+            "rgb_overlay_path": "${INTERNMANIP_ROOT_DIR}/internmanip/benchmarks/SimplerEnv/ManiSkill2_real2sim/data/real_inpainting/google_coke_can_real_eval_1.png",
+            "robot_init_x_range": [
+                0.35,
+                0.35,
+                1.0
+            ],
+            "robot_init_y_range": [
+                0.2,
+                0.2,
+                1.0
+            ],
+            "robot_init_rot_quat_center": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "robot_init_rot_rpy_range": [
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "obj_variation_mode": "xy",
+            "obj_init_x_range": [
+                -0.35,
+                -0.12,
+                5
+            ],
+            "obj_init_y_range": [
+                -0.02,
+                0.42,
+                5
+            ],
+            "additional_env_build_kwargs": {
+                "laid_vertically": true,
+                "urdf_version": "recolor_cabinet_visual_matching_1"
+            },
+            "eval_setup": "visual_matching"
+        }
+    ]
+}
