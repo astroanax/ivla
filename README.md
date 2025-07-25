@@ -4,8 +4,8 @@
 ![demo](assets/_static/video/internmanip_10fps.gif "demo")
 <div id="top" align="left">
 
-[![Gradio Demo](https://img.shields.io/badge/Gradio-Demo-orange?style=flat&logo=gradio)](#)
-[![doc](https://img.shields.io/badge/Document-FFA500?logo=readthedocs&logoColor=white)](https://internrobotics.github.io/user_guide/internmanip/)
+[![Gradio Demo](https://img.shields.io/badge/Gradio-Demo-orange?style=flat&logo=gradio)](https://huggingface.co/spaces/InternRobotics/InternManip-eval-demo)
+[![doc](https://img.shields.io/badge/Document-FFA500?logo=readthedocs&logoColor=white)](https://internrobotics.github.io/user_guide/internmanip/index.html)
 [![GitHub star chart](https://img.shields.io/github/stars/InternRobotics/InternManip?style=square)](#)
 [![GitHub Issues](https://img.shields.io/github/issues/InternRobotics/InternManip)](#)
 <a href="https://cdn.vansin.top/taoyuan.jpg"><img src="https://img.shields.io/badge/WeChat-07C160?logo=wechat&logoColor=white" height="20" style="display:inline"></a>
@@ -18,8 +18,6 @@
 
 An **All-in-one** Robot Manipulation Learning Suite for Polcy Models Training and Evaluation on Various Datasets and Benchmarks.
 
-## Description:
-NVIDIA Isaac GR00T N1 is the world’s first open foundation model for generalized humanoid robot reasoning and skills. This cross-embodiment model takes multimodal input, including language and images, to perform manipulation tasks in diverse environments. Developers and researchers can post-train GR00T N1 with real or synthetic data for their specific humanoid robot or task.
 
 
 ## 🏠 Highlights
@@ -94,7 +92,7 @@ NVIDIA Isaac GR00T N1 is the world’s first open foundation model for generaliz
 
 ## 🔥 News
 - **\[2025/07\]** We are hosting 🏆IROS 2025 Grand Challenge, stay tuned at [official website](https://internrobotics.shlab.org.cn/challenge/2025/).
-- **\[2025/07\]** Try the SOTA models on GenManip at [Gradio Demo](#).
+- **\[2025/07\]** Try the SOTA models on GenManip at [Gradio Demo](https://huggingface.co/spaces/InternRobotics/InternManip-eval-demo).
 - **\[2025/07\]** InternManip `v0.1.0` released, [change log](#).
 
 
@@ -299,8 +297,6 @@ If you find our work helpful, please cite:
 - \[ \] Release the technical report.
 - \[ \] Support online interactive training.
 
-## Model Version(s):
-This is the initial version of the model, version 1.0.
 
 ## 📄 License
 

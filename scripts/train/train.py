@@ -56,12 +56,6 @@ POLICY_NAME_TO_ID = {
 def main(config: TrainCfg):
     """Main training function."""
     # ------------ load model ------------
-    # model_cls,data_collator, model_id = get_policy_class(config.model_type)
-    # if config.base_model_path == '':
-    #     config.base_model_path = model_id
-    
-    # print(f"Try to load {model_cls}")
-    # model = None
 
     cache_dir = config.cache_dir
     
