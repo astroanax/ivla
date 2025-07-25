@@ -18,6 +18,8 @@
 
 An **All-in-one** Robot Manipulation Learning Suite for Polcy Models Training and Evaluation on Various Datasets and Benchmarks.
 
+## Description:
+NVIDIA Isaac GR00T N1 is the world’s first open foundation model for generalized humanoid robot reasoning and skills. This cross-embodiment model takes multimodal input, including language and images, to perform manipulation tasks in diverse environments. Developers and researchers can post-train GR00T N1 with real or synthetic data for their specific humanoid robot or task.
 
 
 ## 🏠 Highlights
@@ -297,6 +299,8 @@ If you find our work helpful, please cite:
 - \[ \] Release the technical report.
 - \[ \] Support online interactive training.
 
+## Model Version(s):
+This is the initial version of the model, version 1.0.
 
 ## 📄 License
 

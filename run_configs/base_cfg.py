@@ -8,6 +8,9 @@ class TrainCfg(BaseModel):
     dataset_path: str = './internmanip/demo_data/robot_sim_converted.PickNPlace/'
     """Path to the dataset directory."""
 
+    cache_dir: str = None
+    """Path to user-defined HF cache"""
+
     output_dir: str = ""
     """Directory to save model checkpoints."""
 

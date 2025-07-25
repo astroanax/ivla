@@ -56,6 +56,14 @@ POLICY_NAME_TO_ID = {
 def main(config: TrainCfg):
     """Main training function."""
     # ------------ load model ------------
+    # model_cls,data_collator, model_id = get_policy_class(config.model_type)
+    # if config.base_model_path == '':
+    #     config.base_model_path = model_id
+    
+    # print(f"Try to load {model_cls}")
+    # model = None
+
+    cache_dir = config.cache_dir
     
     kwargs = config.model_dump()
     kwargs.pop("model_type")
@@ -66,7 +74,7 @@ def main(config: TrainCfg):
         model = AutoModel.from_config(model_cfg, **kwargs)
     else:
         # must ensure that if the path is a huggingface model, it should be a repo that has only one model weight
-        model = AutoModel.from_pretrained(config.base_model_path)
+        model = AutoModel.from_pretrained(config.base_model_path, dir=cache_dir)
 
     model.compute_dtype = config.compute_dtype
     model.config.compute_dtype = config.compute_dtype
@@ -95,6 +103,7 @@ def main(config: TrainCfg):
         transforms=transforms,
         embodiment_tag=embodiment_tag,  # This will override the dataset's embodiment tag to "new_embodiment"
         video_backend=config.video_backend,
+        cache_dir=cache_dir,
     )
 
     if config.lora_rank > 0:

@@ -179,6 +179,7 @@ class LeRobotSingleDataset(Dataset):
         video_backend_kwargs: dict | None = None,
         transforms: ComposedModalityTransform | None = None,
         augsteps: int = 10,
+        cache_dir: str | None = None,
     ):
         """
         Initialize the dataset.
@@ -200,7 +201,11 @@ class LeRobotSingleDataset(Dataset):
         # if not Path(dataset_path).exists():
         #     raise FileNotFoundError(f"Dataset path {dataset_path} does not exist")
 
-        hf_cache_dir = Path(os.getenv("HF_DATASETS_CACHE", Path.home() / ".cache" / "huggingface" / "datasets"))
+        # hf_cache_dir = Path(os.getenv("HF_DATASETS_CACHE", Path.home() / ".cache" / "huggingface" / "datasets"))
+        if cache_dir is None:
+            hf_cache_dir = Path.home() / ".cache" / "huggingface" / "datasets"
+        else:
+            hf_cache_dir = Path(os.path.join(cache_dir, "HF_datasets"))
         if Path(dataset_path).exists():
             pass 
         else:

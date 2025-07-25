@@ -7,7 +7,7 @@ echo $NODE_RANK
 
 
 master_addr=$(scontrol show hostname ${node_list} | head -n1)
-# SH-IDC1-10-140-0-184  --master_addr=10.140.0.184 
+
 echo $master_addr
 
 #bash kill.sh

@@ -16,4 +16,4 @@ MASTER_PORT=12111 PYTHONPATH=./ torchrun \
    --nnodes=$SLURM_NNODES \
    --nproc_per_node=1 --master_port=12322 \
    --node_rank=$SLURM_PROCID --master_addr=$master_addr \
-   scripts/train/train.py --config run_configs/train/gr00t_n1_sweep.yaml
+   scripts/train/train.py --config run_configs/train/gr00t_n1_genmanip.yaml
