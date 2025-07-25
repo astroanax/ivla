@@ -9,7 +9,7 @@ from internmanip.configs import AgentCfg
 from internmanip.configs.dataset.data_config import DATA_CONFIG_MAP
 # from internmanip.benchmarks.SimplerEnv.simpler_env.utils.action.action_ensemble import ActionEnsembler
 from internmanip.agent.utils.geometry import euler2mat, quat2mat, mat2euler
-from internmanip.agent.gr00t.Gr00tPolicy import Gr00tPolicy, unsqueeze_dict_values, squeeze_dict_values
+from internmanip.agent.gr00t.Gr00tPolicy import unsqueeze_dict_values, squeeze_dict_values
 from internmanip.dataset.embodiment_tags import EmbodimentTag
 from internmanip.dataset.transform.base import ComposedModalityTransform
 from internmanip.dataset.schema import DatasetMetadata
@@ -27,21 +27,24 @@ import matplotlib.pyplot as plt
 from transforms3d.euler import euler2axangle
 
 
-class Gr00t_N1_Agent(BaseAgent):
+class SimplerAgent(BaseAgent):
+    """
+    include google robot and widowx
+    """
     def __init__(self, config: AgentCfg):
         os.environ["TOKENIZERS_PARALLELISM"] = "false"
         agent_settings = config.agent_settings
         self.policy_setup = agent_settings.get("policy_setup", None)
 
-        if self.policy_setup == "widowx_bridge":
+        if self.policy_setup == "bridgedata_v2":
             self.action_ensemble = False
-            self.data_config = DATA_CONFIG_MAP["widowx"]
+            self.data_config = DATA_CONFIG_MAP["bridgedata_v2"]
             self.image_size = [256, 256]
             self.sticky_gripper_num_repeat = 1
             # EE pose in Bridge data was relative to a top-down pose, instead of robot base
             self.default_rot = np.array([[0, 0, 1.0], [0, 1.0, 0], [-1.0, 0, 0]])  # https://github.com/rail-berkeley/bridge_data_robot/blob/b841131ecd512bafb303075bd8f8b677e0bf9f1f/widowx_envs/widowx_controller/src/widowx_controller/widowx_controller.py#L203
         elif self.policy_setup == "google_robot":
-            self.data_config = DATA_CONFIG_MAP["google"]
+            self.data_config = DATA_CONFIG_MAP["google_robot"]
             self.action_ensemble = False
             self.image_size = [320, 256]
             self.sticky_gripper_num_repeat = 10

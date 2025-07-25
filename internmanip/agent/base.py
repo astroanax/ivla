@@ -17,11 +17,11 @@ class AgentRegistry(Enum):
     @property
     def value(self):
         if self.name == "GR00T_N1":
-            from internmanip.agent.gr00t.gr00t_agent import Gr00t_N1_Agent
-            return Gr00t_N1_Agent
+            from internmanip.agent.simpler_agent import SimplerAgent
+            return SimplerAgent
         elif self.name == "GR00T_N15":
-            from internmanip.agent.gr00t.gr00t_agent import Gr00t_N1_Agent
-            return Gr00t_N1_Agent
+            from internmanip.agent.simpler_agent import SimplerAgent
+            return SimplerAgent
         elif self.name == "GR00T_N15_GENMANIP":
             from internmanip.agent.gr00t.gr00t_agent_genmanip import Gr00tAgent_Genmanip
             return Gr00tAgent_Genmanip
@@ -29,10 +29,8 @@ class AgentRegistry(Enum):
             from internmanip.agent.dp_agent_genmanip import DPAgent
             return DPAgent
         elif self.name == "PI0":
-            # from internmanip.agent.pi0_agent import Pi0Agent
-            # return Pi0Agent
-            from internmanip.agent.gr00t.gr00t_agent import Gr00t_N1_Agent
-            return Gr00t_N1_Agent
+            from internmanip.agent.simpler_agent import SimplerAgent
+            return SimplerAgent
         else:
             raise ValueError(f"Invalid agent type: {self.name}. Only {[agent_type.name for agent_type in AgentRegistry]} are registered.")
 
