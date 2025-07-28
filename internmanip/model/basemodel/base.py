@@ -79,7 +79,7 @@ class BasePolicyModel(PreTrainedModel):
         try:
             # NOTE(YL) This downloads the model to the local cache and returns the local path to the model
             # download the model, saved in ~/.cache/huggingface/hub/, return the path of folder
-            cache_dir = kwargs.pop('dir')
+            cache_dir = kwargs.pop('HF_cache_dir')
             local_model_path = snapshot_download(pretrained_model_name_or_path, repo_type="model", cache_dir=cache_dir)
             print(
                 f"Model found in the huggingface hub. Loading from path: {pretrained_model_name_or_path}"

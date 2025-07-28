@@ -57,7 +57,6 @@ def main(config: TrainCfg):
     """Main training function."""
     # ------------ load model ------------
 
-    cache_dir = config.cache_dir
     
     kwargs = config.model_dump()
     kwargs.pop("model_type")
@@ -68,7 +67,7 @@ def main(config: TrainCfg):
         model = AutoModel.from_config(model_cfg, **kwargs)
     else:
         # must ensure that if the path is a huggingface model, it should be a repo that has only one model weight
-        model = AutoModel.from_pretrained(config.base_model_path, dir=cache_dir)
+        model = AutoModel.from_pretrained(config.base_model_path, **kwargs)
 
     model.compute_dtype = config.compute_dtype
     model.config.compute_dtype = config.compute_dtype
@@ -97,7 +96,7 @@ def main(config: TrainCfg):
         transforms=transforms,
         embodiment_tag=embodiment_tag,  # This will override the dataset's embodiment tag to "new_embodiment"
         video_backend=config.video_backend,
-        cache_dir=cache_dir,
+        cache_dir=config.HF_cache_dir,
     )
 
     if config.lora_rank > 0:
