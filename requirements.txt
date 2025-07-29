@@ -3,5 +3,5 @@ requests
 uvicorn
 fastapi
 ray[default]
-transformers
+transformers==4.51.3
 pillow
