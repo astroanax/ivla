@@ -97,6 +97,7 @@ def main(config: TrainCfg):
         embodiment_tag=embodiment_tag,  # This will override the dataset's embodiment tag to "new_embodiment"
         video_backend=config.video_backend,
         cache_dir=config.HF_cache_dir,
+        skip_unlabeled=config.skip_unlabeled
     )
 
     if config.lora_rank > 0:

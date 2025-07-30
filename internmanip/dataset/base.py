@@ -180,6 +180,7 @@ class LeRobotSingleDataset(Dataset):
         transforms: ComposedModalityTransform | None = None,
         augsteps: int = 10,
         cache_dir: str | None = None,
+        skip_unlabeled: bool = False,
     ):
         """
         Initialize the dataset.
@@ -233,6 +234,7 @@ class LeRobotSingleDataset(Dataset):
         self.video_backend_kwargs = video_backend_kwargs if video_backend_kwargs is not None else {}
         self.augstep_ = augsteps>0
         self.augsteps = augsteps
+        self.skip_unlabeled = skip_unlabeled
         if transforms is None:
             self.transforms = ComposedModalityTransform(transforms=[])
         elif isinstance(transforms, list):
@@ -487,10 +489,16 @@ class LeRobotSingleDataset(Dataset):
         trajectory_ids = []
         trajectory_lengths = []
         for episode in episode_metadata:
-            trajectory_ids.append(episode["episode_index"])
-            trajectory_lengths.append(episode["length"])
-            if "tasks" in episode.keys():
-                self.language_data[episode["episode_index"]] = episode["tasks"]
+            if self.skip_unlabeled:
+                if "tasks" in episode.keys() and len(episode["tasks"][0]) > 1:
+                    trajectory_ids.append(episode["episode_index"])    
+                    trajectory_lengths.append(episode["length"])
+                    self.language_data[episode["episode_index"]] = episode["tasks"]
+            else:
+                trajectory_ids.append(episode["episode_index"])
+                trajectory_lengths.append(episode["length"])
+                if "tasks" in episode.keys():
+                    self.language_data[episode["episode_index"]] = episode["tasks"]                
         return np.array(trajectory_ids), np.array(trajectory_lengths)
 
     def _get_all_steps(self) -> list[tuple[int, int]]:

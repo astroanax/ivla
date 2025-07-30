@@ -94,4 +94,5 @@ class TrainCfg(BaseModel):
     use_pretrained_model: bool = False
     """Whether to use a pretrained model."""
 
+    skip_unlabeled: bool = False
 
