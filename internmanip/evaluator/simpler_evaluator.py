@@ -241,7 +241,7 @@ class SimplerEvaluator(Evaluator):
             env_save_name = env_save_name + f"_{k}_{v}"
         if episode_kwargs["additional_env_save_tags"] is not None:
             env_save_name = env_save_name + f"_{episode_kwargs['additional_env_save_tags']}"
-        ckpt_path_basename = self.config.agent.model_name_or_path if self.config.agent.model_name_or_path[-1] != "/" else self.config.agent.model_name_or_path[:-1]
+        ckpt_path_basename = self.config.agent.base_model_path if self.config.agent.base_model_path[-1] != "/" else self.config.agent.base_model_path[:-1]
         ckpt_path_basename = ckpt_path_basename.split("/")[-1]
         if self.env.env_settings.obj_variation_mode == "xy":
             video_name = f"{success}_obj_{episode_kwargs['obj_init_x']}_{episode_kwargs['obj_init_y']}"

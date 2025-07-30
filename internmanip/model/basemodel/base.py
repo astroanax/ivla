@@ -10,38 +10,6 @@ import safetensors
 from safetensors.torch import load_model as load_model_as_safetensor
 
 
-class PolicyModelRegistry(Enum):
-    """
-    Registry of policy model subclasses.
-    The key is the policy model type.
-    The value is the policy model subclass.
-    """
-    GR00T_N1 = "GR00T_N1"
-    GR00T_N15 = "GR00T_N1_5"
-    GR00T_N15_GENMANIP = "GR00T_N1_5"
-    PI0 = "PI0Policy"
-    DP = "DPPolicy"
-
-    @property
-    def value(self):
-        if self.name == "GR00T_N1":
-            from internmanip.model.basemodel.gr00t_n1 import GR00T_N1
-            return GR00T_N1
-        elif self.name == "GR00T_N15":
-            from internmanip.model.basemodel.gr00t_n1 import GR00T_N1_5
-            return GR00T_N1_5
-        elif self.name == "GR00T_N15_GENMANIP":
-            from internmanip.model.basemodel.gr00t_n1 import GR00T_N1_5
-            return GR00T_N1_5
-        elif self.name == "PI0":
-            from internmanip.model.basemodel.pi0.modeling_pi0 import PI0Policy
-            return PI0Policy
-        elif self.name == "DP":
-            from internmanip.model.basemodel.diffusion_LMguided.modeling_diffusion import DiffusionModel
-            return DiffusionModel
-        else:
-            raise ValueError(f"Invalid policy model type: {self.name}. Only {[model_type.name for model_type in PolicyModelRegistry]} are registered.")
-
 
 class BasePolicyModel(PreTrainedModel):
 
@@ -58,21 +26,6 @@ class BasePolicyModel(PreTrainedModel):
     def forward(self, *args, **kwargs):
         raise NotImplementedError("Not implemented in base policy model class")
 
-    @classmethod
-    def init(
-        cls, 
-        model_type: str, 
-        model_name_or_path: Optional[str] = None, 
-        **kwargs
-    ):
-        """
-        Init a model instance from a config.
-        """
-        print("Initializing policy model:\n"
-                f"\tmodel_type: {model_type}\n"
-                f"\tmodel_name_or_path: {model_name_or_path}\n"
-                f"\tkwargs: {kwargs}")
-        return PolicyModelRegistry[model_type].value.from_pretrained(model_name_or_path, **kwargs)
 
     @classmethod
     def from_pretrained(cls, pretrained_model_name_or_path: str, **kwargs):

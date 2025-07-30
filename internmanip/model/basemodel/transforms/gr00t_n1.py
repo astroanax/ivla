@@ -381,7 +381,7 @@ class GR00TTransform(InvertibleModalityTransform):
 
         # Process each element.
         data_split_processed = [self.apply_single(elem) for elem in data_split]
-        return collate_gr00t_n1(data_split_processed, self.vlm_processor)
+        return collate_gr00t_n1(data_split_processed)
 
     def apply(self, data: dict) -> dict:
         is_batched, batch_size = self.check_keys_and_batch_size(data)
@@ -665,7 +665,7 @@ class GR00TTransform_15(InvertibleModalityTransform):
         #     data_split.append(single_data)        
         # Process each element.
         data_split_processed = [self.apply_single(elem) for elem in data_split]
-        return collate_gr00t_n15(data_split_processed, self.eagle_processor)
+        return collate_gr00t_n15(data_split_processed)
 
     def apply(self, data: dict) -> dict:
         is_batched, batch_size = self.check_keys_and_batch_size(data)

@@ -60,10 +60,11 @@ def main(config: TrainCfg):
     
     kwargs = config.model_dump()
     kwargs.pop("model_type")
-    model_cfg = AutoConfig.for_model(config.model_type, **kwargs)
+    
     if config.base_model_path == '':
         config.base_model_path = POLICY_NAME_TO_ID[config.model_type]
     if config.base_model_path is None:
+        model_cfg = AutoConfig.for_model(config.model_type, **kwargs)
         model = AutoModel.from_config(model_cfg, **kwargs)
     else:
         # must ensure that if the path is a huggingface model, it should be a repo that has only one model weight

@@ -6,8 +6,10 @@ from internmanip.configs.agent.server_cfg import ServerCfg
 
 class AgentCfg(BaseModel):
     agent_type: str
-    model_name_or_path: Optional[str] = None
+    # Deprecated
+    # model_name_or_path: Optional[str] = None
     model_cfg: Optional[PretrainedConfig] = None
+    base_model_path: Optional[str] = None # weights of the model
     model_kwargs: Optional[Dict[str, Any]] = {}
     server_cfg: Optional[ServerCfg] = None
     agent_settings: Optional[Dict[str, Any]] = {}
@@ -21,7 +23,7 @@ class AgentCfg(BaseModel):
     
     @field_validator("model_cfg", mode="before")
     def validate_model_cfg(cls, v):
-        """处理model_cfg字段的反序列化，利用transformers的AutoConfig机制"""
+        """Deserializing the `model_cfg` field using the `AutoConfig` mechanism from the Transformers library."""
         if v is None:
             return None
         
@@ -30,8 +32,11 @@ class AgentCfg(BaseModel):
         
         if isinstance(v, dict):
             model_type = v.get('model_type', '')
+
+            # TODO: Need to refactor to use AutoConfig.for_model()
             
-            # 尝试使用 transformers 的 CONFIG_MAPPING
+            # Attempting to use `CONFIG_MAPPING` from the Transformers library.
+
             try:
                 from transformers.models.auto.configuration_auto import CONFIG_MAPPING
                 if model_type in CONFIG_MAPPING:
@@ -40,7 +45,8 @@ class AgentCfg(BaseModel):
             except Exception:
                 pass
             
-            # 回退到手动处理已知的配置类型
+            # Reverting to manually handling known configuration types.
+
             if model_type == 'DP':
                 from internmanip.configs.model.dp_cfg import DiffusionConfig
                 return DiffusionConfig(**v)

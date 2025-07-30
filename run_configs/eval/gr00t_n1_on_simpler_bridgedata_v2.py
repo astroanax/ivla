@@ -5,18 +5,18 @@ from pathlib import Path
 eval_cfg = EvalCfg(
     eval_type="simpler",
     agent=AgentCfg(
-        agent_type="gr00t_n1_5",
-        model_name_or_path="/PATH/TO/YOUR/GR00T_N15_FINETUNED_CHECKPOINT",
+        agent_type="gr00t_n1",
+        base_model_path="/PATH/TO/YOUR/FINETUNED_CHECKPOINT",
         agent_settings={
             "policy_setup": "bridgedata_v2",
             "action_scale": 1.0,
             "exec_horizon": 1,
             "action_ensemble_temp": -0.8,
-            "embodiment_tag": "gr1",
+            "embodiment_tag": "new_embodiment",
             "denoising_steps": 16,
         },
         model_kwargs={
-            "HF_cache_dir": "/PATH/TO/YOUR/HUGGINGFACE/CACHE",
+            "HF_cache_dir": None,
         },        
         server_cfg=ServerCfg(
             server_host="localhost",
@@ -34,7 +34,7 @@ eval_cfg = EvalCfg(
 
             ]
     ),
-    logging_dir=f"{Path(__file__).absolute().parents[2]}/logs/eval/simpler",
+    logging_dir=f"{Path(__file__).absolute().parents[2]}/logs/eval/gr00t_n1_on_simpler",
     distributed_cfg=DistributedCfg(
         num_workers=4,
         ray_head_ip="10.150.91.18", # or "auto"

@@ -44,12 +44,15 @@ class BaseAgent:
             from internmanip.agent.utils import PolicyClient
             self.policy_model = PolicyClient(self.config)
         else:
-            from internmanip.model.basemodel.base import BasePolicyModel
-            self.policy_model = BasePolicyModel.init(
-                model_type=self.config.agent_type,
-                model_name_or_path=self.config.model_name_or_path, 
-                **self.config.model_kwargs
-            )
+            # TODO: should change the kwargs
+            from internmanip import model
+            from transformers import AutoModel
+            if config.base_model_path is None:
+                model = AutoModel.from_config(config.model_cfg, **config.model_kwargs)
+            else:
+                # must ensure that if the path is a huggingface model, it should be a repo that has only one model weight
+                model = AutoModel.from_pretrained(config.base_model_path, **config.model_kwargs)
+            self.policy_model = model
 
     def step(self):
         raise NotImplementedError("Not implemented in base agent class")

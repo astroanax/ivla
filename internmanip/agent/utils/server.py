@@ -1,3 +1,4 @@
+from transformers import AutoModel
 from internmanip.configs import ServerCfg, AgentCfg
 from internmanip.model.basemodel.base import BasePolicyModel
 from internmanip.agent.utils.io_utils import deserialize_data, serialize_data
@@ -60,13 +61,14 @@ class PolicyServer:
 
     async def init_policy(self, request: Dict[str, Any]):
         policy_config = AgentCfg(**request)
-        policy = BasePolicyModel.init(
-            model_type=policy_config.agent_type,
-            model_name_or_path=policy_config.model_name_or_path, 
-            **policy_config.model_kwargs
-        )
+        if policy_config.base_model_path is None:
+            model = AutoModel.from_config(policy_config.model_cfg, **policy_config.model_kwargs)
+        else:
+            # must ensure that if the path is a huggingface model, it should be a repo that has only one model weight
+            model = AutoModel.from_pretrained(policy_config.base_model_path, **policy_config.model_kwargs)
+        policy_model = model
         policy_name = policy_config.agent_type
-        self.policy_instances[policy_name] = policy
+        self.policy_instances[policy_name] = policy_model
         return {"status": "success", "policy_name": policy_name}
 
     def _validate_policy_exists(self, policy_name: str):

@@ -89,7 +89,17 @@ class SimplerAgent(BaseAgent):
         self.policy_model.to(device=self.device)  # type: ignore
 
         # Load metadata for normalization stats
-        metadata_path = Path(config.model_name_or_path) / "experiment_cfg" / "metadata.json"
+        # metadata_path = Path(config.base_model_path) / "experiment_cfg" / "metadata.json"
+        if Path(config.base_model_path).exists():
+            metadata_path = Path(config.base_model_path) / "experiment_cfg" / "metadata.json"
+        else:
+            snapshot_path = snapshot_download(
+                repo_id=config.base_model_path,
+                cache_dir=config.model_kwargs['HF_cache_dir'],
+                local_files_only=True,
+                allow_patterns="experiment_cfg/metadata.json"
+            )
+            metadata_path = Path(snapshot_path) / "experiment_cfg" / "metadata.json"
         with open(metadata_path, "r") as f:
             metadatas = json.load(f)
 
@@ -307,7 +317,7 @@ class SimplerAgent(BaseAgent):
         images: List[Image.Image] = self._obtain_image_history()
 
         eef_pos = kwargs.get("eef_pos", None)
-        if self.policy_setup == "widowx_bridge":
+        if self.policy_setup == "bridgedata_v2":
             state = self.preprocess_widowx_proprio(eef_pos)
             batch = {
                 "video.image_0": np.array(images[0][None]), # numpy (b h w c)
@@ -398,7 +408,7 @@ class SimplerAgent(BaseAgent):
 
             action["gripper"] = relative_gripper_action
 
-        elif self.policy_setup == "widowx_bridge":
+        elif self.policy_setup == "bridgedata_v2":
             action["gripper"] = 2.0 * (raw_action["open_gripper"] > 0.5) - 1.0
         
         action["terminate_episode"] = np.array([0.0])
