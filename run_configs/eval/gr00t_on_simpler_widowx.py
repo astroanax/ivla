@@ -7,15 +7,18 @@ eval_cfg = EvalCfg(
     eval_type="simpler",
     agent=AgentCfg(
         agent_type="gr00t_n1",
-        model_name_or_path="/PATH/TO/YOUR/GR00T_FINETUNED_CHECKPOINT",
+        model_name_or_path="/PATH/TO/YOUR/GR00T_N15_FINETUNED_CHECKPOINT",
         agent_settings={
-            "policy_setup": "widowx_bridge",
+            "policy_setup": "bridgedata_v2",
             "action_scale": 1.0,
             "exec_horizon": 1,
             "action_ensemble_temp": -0.8,
-            "embodiment_tag": "gr1",
+            "embodiment_tag": "new_embodiment",
             "denoising_steps": 16,
         },
+        model_kwargs={
+            "HF_cache_dir": "/PATH/TO/YOUR/HUGGINGFACE/CACHE",
+        },        
         server_cfg=ServerCfg(
             server_host="localhost",
             server_port=5000,

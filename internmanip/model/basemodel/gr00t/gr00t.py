@@ -160,7 +160,7 @@ class GR00T_N1_5(BasePolicyModel):
         self.validate_data(action_head_outputs, backbone_outputs, is_training=True)
         return action_head_outputs
 
-    def get_action(
+    def inference(
         self,
         inputs: dict,
     ) -> BatchFeature:
