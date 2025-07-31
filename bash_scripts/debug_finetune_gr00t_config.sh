@@ -7,7 +7,7 @@ echo $NODE_RANK
 
 
 master_addr=$(scontrol show hostname ${node_list} | head -n1)
-# 
+
 echo $master_addr
 
 #bash kill.sh

@@ -23,8 +23,8 @@ class AgentRegistry(Enum):
             from internmanip.agent.simpler_agent import SimplerAgent
             return SimplerAgent
         elif self.name == "GR00T_N15_GENMANIP":
-            from internmanip.agent.gr00t.gr00t_agent_genmanip import Gr00tAgent_Genmanip
-            return Gr00tAgent_Genmanip
+            from internmanip.agent.genmanip_agent import GenmanipAgent
+            return GenmanipAgent
         elif self.name == "DP":
             from internmanip.agent.dp_agent_genmanip import DPAgent
             return DPAgent
