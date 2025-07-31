@@ -1,22 +1,23 @@
 from internmanip.configs import *
-# from internmanip.configs.model.pi0_cfg import PI0Config
 from pathlib import Path
 
 
 eval_cfg = EvalCfg(
     eval_type="simpler",
     agent=AgentCfg(
-        agent_type="pi0",
-        model_name_or_path="lerobot/pi0",
-        # model_cfg=PI0Config(),
+        agent_type="gr00t_n1",
+        base_model_path="InternRobotics/Gr00t-n1_BridgeDataV2",
         agent_settings={
             "policy_setup": "bridgedata_v2",
             "action_scale": 1.0,
             "exec_horizon": 1,
             "action_ensemble_temp": -0.8,
-            "embodiment_tag": "widowx",
+            "embodiment_tag": "new_embodiment",
             "denoising_steps": 16,
         },
+        model_kwargs={
+            "HF_cache_dir": None,
+        },        
         server_cfg=ServerCfg(
             server_host="localhost",
             server_port=5000,
@@ -33,7 +34,7 @@ eval_cfg = EvalCfg(
 
             ]
     ),
-    logging_dir=f"{Path(__file__).absolute().parents[2]}/eval_results/bridgedata_v2/pi0/",
+    logging_dir=f"{Path(__file__).absolute().parents[2]}/logs/demo/gr00t_n1_on_simpler",
     distributed_cfg=DistributedCfg(
         num_workers=4,
         ray_head_ip="10.150.91.18", # or "auto"
