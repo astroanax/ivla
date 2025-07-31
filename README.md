@@ -84,8 +84,8 @@ An **All-in-one** Robot Manipulation Learning Suite for Polcy Models Training an
 - ✅ Standard training workflow and server-client evaluation engine.
 
 ### Why InternManip?
-- 🙅🏻‍♂️ Stop re-implementing baselines. 
-- 🙅🏻 Stop struggling with dataset formats. 
+- 🙅🏻‍♂️ Stop re-implementing baselines.
+- 🙅🏻 Stop struggling with dataset formats.
 - 💡 Focus on *policy innovation*, not infrastructure.
 
 
@@ -121,7 +121,7 @@ An **All-in-one** Robot Manipulation Learning Suite for Polcy Models Training an
 ### Prerequisites
 
 - Ubuntu 20.04, 22.04
-- CUDA 12.4 
+- CUDA 12.4
 - GPU:
 The GPU requirements for model running and simulation are different, as shown in the table below:
 
@@ -149,7 +149,7 @@ The GPU requirements for model running and simulation are different, as shown in
        <td>
          Genmanip
       </td>
- 
+
    </tr>
    <tr align="center" valign="middle">
       <td>
@@ -170,7 +170,7 @@ The GPU requirements for model running and simulation are different, as shown in
    </tr>
    <tr align="center" valign="middle">
       <td>
-         NVIDIA V/A/H100 
+         NVIDIA V/A/H100
       </td>
       <td>
          ✅
@@ -217,7 +217,7 @@ The available `${MODEL}`, `${DATASET}`, `${BENCHMARK}` and their results are sum
 
 ### CALVIN (ABC-D) Benchmark
 | Model  | Dataset/Benchmark | Score (Main Metric) | Model Weights |
-| ------------ | ---- | ------------- | ------- | 
+| ------------ | ---- | ------------- | ------- |
 | `gr00t_n1` | `calvin_abcd` | | |
 | `gr00t_n1_5` | `calvin_abcd` | | |
 | `pi0` | `calvin_abcd` | | |
@@ -300,7 +300,7 @@ If you find our work helpful, please cite:
 
 ## 📄 License
 
-InternManip's assets and codes are [MIT licensed](LICENSE). 
+InternManip's assets and codes are [MIT licensed](LICENSE).
 The open-sourced data are under the <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/">Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License </a><a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-sa/4.0/80x15.png" /></a>.
 Other datasets (including Calvin and Simpler) inherit their own distribution licenses.
 

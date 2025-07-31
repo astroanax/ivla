@@ -27,11 +27,11 @@ from internmanip.model.backbone.eagle2_hg_model.inference_eagle_repo import resh
 from .eagle2_hg_model.inference_eagle_repo import EagleProcessor, ModelSpecificValues
 
 DEFAULT_EAGLE_MODEL_NAME = os.path.join(
-    os.path.dirname(internmanip.__file__), "model", "backbone", "eagle2_hg_model"
+    os.path.dirname(internmanip.__file__), 'model', 'backbone', 'eagle2_hg_model'
 )
 
 DEFAULT_EAGLE_PATH = os.path.join(
-    os.path.dirname(internmanip.__file__), "model", "backbone", "eagle2_hg_model_15"
+    os.path.dirname(internmanip.__file__), 'model', 'backbone', 'eagle2_hg_model_15'
 )
 
 
@@ -110,8 +110,8 @@ class EagleBackbone(nn.Module):
         self.model = AutoModel.from_config(config, trust_remote_code=True)
         self.model.neftune_alpha = None
 
-        if hasattr(self.model.vision_model, "vision_model") and hasattr(
-            self.model.vision_model.vision_model, "head"
+        if hasattr(self.model.vision_model, 'vision_model') and hasattr(
+            self.model.vision_model.vision_model, 'head'
         ):
             self.model.vision_model.vision_model.head = torch.nn.Identity()
 
@@ -122,9 +122,9 @@ class EagleBackbone(nn.Module):
 
         # initialize processor
         processor = EagleProcessor(
-            model_path=processor_cfg["model_path"],
-            max_input_tiles=processor_cfg["max_input_tiles"],
-            model_spec=ModelSpecificValues(**processor_cfg["model_spec"]),
+            model_path=processor_cfg['model_path'],
+            max_input_tiles=processor_cfg['max_input_tiles'],
+            model_spec=ModelSpecificValues(**processor_cfg['model_spec']),
         )
         self.model.img_context_token_id = processor.get_img_context_token()
         assert self.model.template == processor.model_spec.template
@@ -139,28 +139,28 @@ class EagleBackbone(nn.Module):
             reshape_model_embeddings(self.model, scale_image_resolution)
 
         if load_pretrained_det_eagle_path is not None:
-            print("loading eagle model weight from: {}".format(load_pretrained_det_eagle_path))
+            print('loading eagle model weight from: {}'.format(load_pretrained_det_eagle_path))
             self.model.load_state_dict(torch.load(load_pretrained_det_eagle_path))
 
         self.set_trainable_parameters(tune_llm, tune_visual)
 
         if (
-            hasattr(self.model, "vision_model")
-            and hasattr(self.model.vision_model, "vision_model")
-            and hasattr(self.model.vision_model.vision_model, "vision_towers")
+            hasattr(self.model, 'vision_model')
+            and hasattr(self.model.vision_model, 'vision_model')
+            and hasattr(self.model.vision_model.vision_model, 'vision_towers')
             and len(self.model.vision_model.vision_model.vision_towers) > 1
         ):
             vision_towers = self.model.vision_model.vision_model.vision_towers
 
             if (
-                hasattr(vision_towers[0], "vision_tower")
-                and hasattr(vision_towers[0].vision_tower, "vision_model")
-                and hasattr(vision_towers[0].vision_tower.vision_model, "encoder")
+                hasattr(vision_towers[0], 'vision_tower')
+                and hasattr(vision_towers[0].vision_tower, 'vision_model')
+                and hasattr(vision_towers[0].vision_tower.vision_model, 'encoder')
             ):
                 vision_towers[0].vision_tower.vision_model.encoder.gradient_checkpointing = False
                 vision_towers[0].vision_tower.vision_model.head = torch.nn.Identity()
 
-            if hasattr(vision_towers[1], "vision_tower"):
+            if hasattr(vision_towers[1], 'vision_tower'):
                 vision_towers[1].vision_tower.head = torch.nn.Identity()
 
     def set_trainable_parameters(self, tune_llm: bool, tune_visual: bool):
@@ -196,18 +196,18 @@ class EagleBackbone(nn.Module):
         embeddings = get_embeddings(
             self.model,
             self.reproject_vision,
-            pixel_values=vl_input["pixel_values"],
-            input_ids=vl_input["input_ids"],
-            attention_mask=vl_input["attention_mask"],
+            pixel_values=vl_input['pixel_values'],
+            input_ids=vl_input['input_ids'],
+            attention_mask=vl_input['attention_mask'],
         )
 
         embeddings = self.linear(embeddings)
 
-        attention_mask = vl_input["attention_mask"]
+        attention_mask = vl_input['attention_mask']
         return BatchFeature(
             data={
-                "backbone_features": embeddings,
-                "backbone_attention_mask": attention_mask,
+                'backbone_features': embeddings,
+                'backbone_attention_mask': attention_mask,
             }
         )  # [B, T2, hidden_size]
 
@@ -232,7 +232,7 @@ class EagleBackbone1_5(nn.Module):
             tune_visual: whether to tune the visual model (default: False)
         """
         super().__init__()
-        assert not reproject_vision, "Reproject vision is not implemented here, set to False"
+        assert not reproject_vision, 'Reproject vision is not implemented here, set to False'
 
         config = AutoConfig.from_pretrained(DEFAULT_EAGLE_PATH, trust_remote_code=True)
         self.eagle_model = AutoModel.from_config(config, trust_remote_code=True)
@@ -259,15 +259,15 @@ class EagleBackbone1_5(nn.Module):
         if not tune_visual:
             self.eagle_model.vision_model.requires_grad_(False)
             self.eagle_model.mlp1.requires_grad_(False)
-        print(f"Tune backbone llm: {self.tune_llm}")
-        print(f"Tune backbone visual: {self.tune_visual}")
+        print(f'Tune backbone llm: {self.tune_llm}')
+        print(f'Tune backbone visual: {self.tune_visual}')
         # Check if any parameters are still trainable. If not, print a warning.
         if not tune_llm and not tune_visual:
             for name, p in self.named_parameters():
                 if p.requires_grad:
-                    print(f"Backbone trainable parameter: {name}")
+                    print(f'Backbone trainable parameter: {name}')
         if not any(p.requires_grad for p in self.parameters()):
-            print("Warning: No backbone trainable parameters found.")
+            print('Warning: No backbone trainable parameters found.')
 
     def set_frozen_modules_to_eval_mode(self):
         """
@@ -285,7 +285,7 @@ class EagleBackbone1_5(nn.Module):
         return BatchFeature(data=batch)
 
     def forward_eagle(self, vl_input: BatchFeature) -> BatchFeature:
-        eagle_prefix = "eagle_"
+        eagle_prefix = 'eagle_'
         eagle_input = {
             k.removeprefix(eagle_prefix): v
             for k, v in vl_input.items()
@@ -297,12 +297,12 @@ class EagleBackbone1_5(nn.Module):
         eagle_features = eagle_output.hidden_states[self.select_layer]
 
         eagle_features = self.eagle_linear(eagle_features)
-        return eagle_features, eagle_input["attention_mask"]
+        return eagle_features, eagle_input['attention_mask']
 
     def forward(self, vl_input: BatchFeature) -> BatchFeature:
         self.set_frozen_modules_to_eval_mode()
 
         eagle_embeds, eagle_mask = self.forward_eagle(vl_input)
         return BatchFeature(
-            data={"backbone_features": eagle_embeds, "backbone_attention_mask": eagle_mask}
+            data={'backbone_features': eagle_embeds, 'backbone_attention_mask': eagle_mask}
         )  # [B, T2, hidden_size]

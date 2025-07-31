@@ -75,14 +75,14 @@ class BasicTransformerBlock(nn.Module):
         attention_head_dim: int,
         dropout=0.0,
         cross_attention_dim: Optional[int] = None,
-        activation_fn: str = "geglu",
+        activation_fn: str = 'geglu',
         attention_bias: bool = False,
         upcast_attention: bool = False,
         norm_elementwise_affine: bool = True,
-        norm_type: str = "layer_norm",  # 'layer_norm', 'ada_norm', 'ada_norm_zero', 'ada_norm_single', 'ada_norm_continuous', 'layer_norm_i2vgen'
+        norm_type: str = 'layer_norm',  # 'layer_norm', 'ada_norm', 'ada_norm_zero', 'ada_norm_single', 'ada_norm_continuous', 'layer_norm_i2vgen'
         norm_eps: float = 1e-5,
         final_dropout: bool = False,
-        attention_type: str = "default",
+        attention_type: str = 'default',
         positional_embeddings: Optional[str] = None,
         num_positional_embeddings: Optional[int] = None,
         ff_inner_dim: Optional[int] = None,
@@ -104,10 +104,10 @@ class BasicTransformerBlock(nn.Module):
 
         if positional_embeddings and (num_positional_embeddings is None):
             raise ValueError(
-                "If `positional_embedding` type is defined, `num_positition_embeddings` must also be defined."
+                'If `positional_embedding` type is defined, `num_positition_embeddings` must also be defined.'
             )
 
-        if positional_embeddings == "sinusoidal":
+        if positional_embeddings == 'sinusoidal':
             self.pos_embed = SinusoidalPositionalEmbedding(
                 dim, max_seq_length=num_positional_embeddings
             )
@@ -116,7 +116,7 @@ class BasicTransformerBlock(nn.Module):
 
         # Define 3 blocks. Each block has its own normalization layer.
         # 1. Self-Attn
-        if norm_type == "ada_norm":
+        if norm_type == 'ada_norm':
             self.norm1 = AdaLayerNorm(dim)
         else:
             self.norm1 = nn.LayerNorm(dim, elementwise_affine=norm_elementwise_affine, eps=norm_eps)
@@ -156,7 +156,7 @@ class BasicTransformerBlock(nn.Module):
         temb: Optional[torch.LongTensor] = None,
     ) -> torch.Tensor:
         # 0. Self-Attention
-        if self.norm_type == "ada_norm":
+        if self.norm_type == 'ada_norm':
             norm_hidden_states = self.norm1(hidden_states, temb)
         else:
             norm_hidden_states = self.norm1(hidden_states)
@@ -199,16 +199,16 @@ class DiT(ModelMixin, ConfigMixin):
         num_layers: int = 12,
         dropout: float = 0.1,
         attention_bias: bool = True,
-        activation_fn: str = "gelu-approximate",
+        activation_fn: str = 'gelu-approximate',
         num_embeds_ada_norm: Optional[int] = 1000,
         upcast_attention: bool = False,
-        norm_type: str = "ada_norm",
+        norm_type: str = 'ada_norm',
         norm_elementwise_affine: bool = False,
         norm_eps: float = 1e-5,
         max_num_positional_embeddings: int = 512,
         compute_dtype=torch.float32,
         final_dropout: bool = True,
-        positional_embeddings: Optional[str] = "sinusoidal",
+        positional_embeddings: Optional[str] = 'sinusoidal',
         interleave_self_attention=False,
         cross_attention_dim: Optional[int] = None,
     ):
@@ -248,14 +248,14 @@ class DiT(ModelMixin, ConfigMixin):
                     cross_attention_dim=curr_cross_attention_dim,
                 )
             ]
-        self.transformer_blocks = nn.ModuleList(all_blocks)            
+        self.transformer_blocks = nn.ModuleList(all_blocks)
 
         # Output blocks
         self.norm_out = nn.LayerNorm(self.inner_dim, elementwise_affine=False, eps=1e-6)
         self.proj_out_1 = nn.Linear(self.inner_dim, 2 * self.inner_dim)
         self.proj_out_2 = nn.Linear(self.inner_dim, self.output_dim)
         print(
-            "Total number of DiT parameters: ",
+            'Total number of DiT parameters: ',
             sum(p.numel() for p in self.parameters() if p.requires_grad),
         )
 
@@ -318,13 +318,13 @@ class SelfAttentionTransformer(ModelMixin, ConfigMixin):
         num_layers: int = 12,
         dropout: float = 0.1,
         attention_bias: bool = True,
-        activation_fn: str = "gelu-approximate",
+        activation_fn: str = 'gelu-approximate',
         num_embeds_ada_norm: Optional[int] = 1000,
         upcast_attention: bool = False,
         max_num_positional_embeddings: int = 512,
         compute_dtype=torch.float32,
         final_dropout: bool = True,
-        positional_embeddings: Optional[str] = "sinusoidal",
+        positional_embeddings: Optional[str] = 'sinusoidal',
         interleave_self_attention=False,
     ):
         super().__init__()
@@ -351,7 +351,7 @@ class SelfAttentionTransformer(ModelMixin, ConfigMixin):
             ]
         )
         print(
-            "Total number of SelfAttentionTransformer parameters: ",
+            'Total number of SelfAttentionTransformer parameters: ',
             sum(p.numel() for p in self.parameters() if p.requires_grad),
         )
 
@@ -369,7 +369,7 @@ class SelfAttentionTransformer(ModelMixin, ConfigMixin):
         return hidden_states
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     import torch
 
     # Set random seed for reproducibility
@@ -406,16 +406,16 @@ if __name__ == "__main__":
     )
 
     # Print shapes for verification
-    print(f"Input hidden_states shape: {hidden_states.shape}")
-    print(f"Input encoder_hidden_states shape: {encoder_hidden_states.shape}")
-    print(f"Input timestep shape: {timestep.shape}")
-    print(f"Output shape: {output.shape}")
+    print(f'Input hidden_states shape: {hidden_states.shape}')
+    print(f'Input encoder_hidden_states shape: {encoder_hidden_states.shape}')
+    print(f'Input timestep shape: {timestep.shape}')
+    print(f'Output shape: {output.shape}')
 
     # Expected output shape should be (2, 17, 1024)
     assert output.shape == (
         batch_size,
         seq_len,
         hidden_dim,
-    ), f"Expected shape {(batch_size, seq_len, hidden_dim)}, got {output.shape}"
+    ), f'Expected shape {(batch_size, seq_len, hidden_dim)}, got {output.shape}'
 
-    print("All tests passed!")
+    print('All tests passed!')

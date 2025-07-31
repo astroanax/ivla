@@ -24,7 +24,7 @@ from internmanip.dataset.utils.utils import write_json
 from torch.optim import Optimizer
 from torch.optim.lr_scheduler import LambdaLR, LRScheduler
 
-SCHEDULER_STATE = "scheduler_state.json"
+SCHEDULER_STATE = 'scheduler_state.json'
 
 
 
@@ -41,20 +41,20 @@ class LRSchedulerConfig(draccus.ChoiceRegistry, abc.ABC):
         raise NotImplementedError
 
 
-@LRSchedulerConfig.register_subclass("diffuser")
+@LRSchedulerConfig.register_subclass('diffuser')
 @dataclass
 class DiffuserSchedulerConfig(LRSchedulerConfig):
-    name: str = "cosine"
+    name: str = 'cosine'
     num_warmup_steps: int | None = None
 
     def build(self, optimizer: Optimizer, num_training_steps: int) -> LambdaLR:
         from diffusers.optimization import get_scheduler
 
-        kwargs = {**asdict(self), "num_training_steps": num_training_steps, "optimizer": optimizer}
+        kwargs = {**asdict(self), 'num_training_steps': num_training_steps, 'optimizer': optimizer}
         return get_scheduler(**kwargs)
 
 
-@LRSchedulerConfig.register_subclass("vqbet")
+@LRSchedulerConfig.register_subclass('vqbet')
 @dataclass
 class VQBeTSchedulerConfig(LRSchedulerConfig):
     num_warmup_steps: int
@@ -77,7 +77,7 @@ class VQBeTSchedulerConfig(LRSchedulerConfig):
         return LambdaLR(optimizer, lr_lambda, -1)
 
 
-@LRSchedulerConfig.register_subclass("cosine_decay_with_warmup")
+@LRSchedulerConfig.register_subclass('cosine_decay_with_warmup')
 @dataclass
 class CosineDecayWithWarmupSchedulerConfig(LRSchedulerConfig):
     """Used by Physical Intelligence to train Pi0"""

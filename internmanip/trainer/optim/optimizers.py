@@ -26,8 +26,8 @@ from safetensors.torch import load_file, save_file
 
 
 # TODO
-OPTIMIZER_STATE = "optimizer_state.safetensors"
-OPTIMIZER_PARAM_GROUPS = "optimizer_param_groups.json"
+OPTIMIZER_STATE = 'optimizer_state.safetensors'
+OPTIMIZER_PARAM_GROUPS = 'optimizer_param_groups.json'
 
 
 from internmanip.dataset.utils.io_utils import deserialize_json_into_object
@@ -48,7 +48,7 @@ class OptimizerConfig(draccus.ChoiceRegistry, abc.ABC):
 
     @classmethod
     def default_choice_name(cls) -> str | None:
-        return "adam"
+        return 'adam'
 
     @abc.abstractmethod
     def build(self) -> torch.optim.Optimizer | dict[str, torch.optim.Optimizer]:
@@ -64,7 +64,7 @@ class OptimizerConfig(draccus.ChoiceRegistry, abc.ABC):
         raise NotImplementedError
 
 
-@OptimizerConfig.register_subclass("adam")
+@OptimizerConfig.register_subclass('adam')
 @dataclass
 class AdamConfig(OptimizerConfig):
     lr: float = 1e-3
@@ -75,11 +75,11 @@ class AdamConfig(OptimizerConfig):
 
     def build(self, params: dict) -> torch.optim.Optimizer:
         kwargs = asdict(self)
-        kwargs.pop("grad_clip_norm")
+        kwargs.pop('grad_clip_norm')
         return torch.optim.Adam(params, **kwargs)
 
 
-@OptimizerConfig.register_subclass("adamw")
+@OptimizerConfig.register_subclass('adamw')
 @dataclass
 class AdamWConfig(OptimizerConfig):
     lr: float = 1e-3
@@ -90,11 +90,11 @@ class AdamWConfig(OptimizerConfig):
 
     def build(self, params: dict) -> torch.optim.Optimizer:
         kwargs = asdict(self)
-        kwargs.pop("grad_clip_norm")
+        kwargs.pop('grad_clip_norm')
         return torch.optim.AdamW(params, **kwargs)
 
 
-@OptimizerConfig.register_subclass("sgd")
+@OptimizerConfig.register_subclass('sgd')
 @dataclass
 class SGDConfig(OptimizerConfig):
     lr: float = 1e-3
@@ -106,11 +106,11 @@ class SGDConfig(OptimizerConfig):
 
     def build(self, params: dict) -> torch.optim.Optimizer:
         kwargs = asdict(self)
-        kwargs.pop("grad_clip_norm")
+        kwargs.pop('grad_clip_norm')
         return torch.optim.SGD(params, **kwargs)
 
 
-@OptimizerConfig.register_subclass("multi_adam")
+@OptimizerConfig.register_subclass('multi_adam')
 @dataclass
 class MultiAdamConfig(OptimizerConfig):
     """Configuration for multiple Adam optimizers with different parameter groups.
@@ -147,10 +147,10 @@ class MultiAdamConfig(OptimizerConfig):
 
             # Create optimizer with merged parameters (defaults + group-specific)
             optimizer_kwargs = {
-                "lr": group_config.get("lr", self.lr),
-                "betas": group_config.get("betas", (0.9, 0.999)),
-                "eps": group_config.get("eps", 1e-5),
-                "weight_decay": group_config.get("weight_decay", self.weight_decay),
+                'lr': group_config.get('lr', self.lr),
+                'betas': group_config.get('betas', (0.9, 0.999)),
+                'eps': group_config.get('eps', 1e-5),
+                'weight_decay': group_config.get('weight_decay', self.weight_decay),
             }
 
             optimizers[name] = torch.optim.Adam(params, **optimizer_kwargs)
@@ -181,7 +181,7 @@ def save_optimizer_state(
 def _save_single_optimizer_state(optimizer: torch.optim.Optimizer, save_dir: Path) -> None:
     """Save a single optimizer's state to disk."""
     state = optimizer.state_dict()
-    param_groups = state.pop("param_groups")
+    param_groups = state.pop('param_groups')
     flat_state = flatten_dict(state)
     save_file(flat_state, save_dir / OPTIMIZER_STATE)
     write_json(param_groups, save_dir / OPTIMIZER_PARAM_GROUPS)
@@ -221,16 +221,16 @@ def _load_single_optimizer_state(optimizer: torch.optim.Optimizer, save_dir: Pat
     state = unflatten_dict(flat_state)
 
     # Handle case where 'state' key might not exist (for newly created optimizers)
-    if "state" in state:
-        loaded_state_dict = {"state": {int(k): v for k, v in state["state"].items()}}
+    if 'state' in state:
+        loaded_state_dict = {'state': {int(k): v for k, v in state['state'].items()}}
     else:
-        loaded_state_dict = {"state": {}}
+        loaded_state_dict = {'state': {}}
 
-    if "param_groups" in current_state_dict:
+    if 'param_groups' in current_state_dict:
         param_groups = deserialize_json_into_object(
-            save_dir / OPTIMIZER_PARAM_GROUPS, current_state_dict["param_groups"]
+            save_dir / OPTIMIZER_PARAM_GROUPS, current_state_dict['param_groups']
         )
-        loaded_state_dict["param_groups"] = param_groups
+        loaded_state_dict['param_groups'] = param_groups
 
     optimizer.load_state_dict(loaded_state_dict)
     return optimizer

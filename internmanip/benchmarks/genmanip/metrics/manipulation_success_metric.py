@@ -30,7 +30,7 @@ class ManipulationSuccessMetric(BaseMetric):
 
     def __init__(self, config: ManipulationSuccessMetricCfg, task_config: ManipulationTaskCfg):
         super().__init__(config, task_config)
-        
+
         self.step = 0
         self.episode_sr = 0
         self.first_success_step = -1
@@ -39,16 +39,16 @@ class ManipulationSuccessMetric(BaseMetric):
         self.object_prim_paths = set()
         for goal in self.task_config.target:
             for subgoal in goal:
-                if "another_obj2_uid" in subgoal:
-                    self.object_prim_paths.add(subgoal["another_obj2_uid"])
-                self.object_prim_paths.add(subgoal["obj1_uid"])
-                self.object_prim_paths.add(subgoal["obj2_uid"])
+                if 'another_obj2_uid' in subgoal:
+                    self.object_prim_paths.add(subgoal['another_obj2_uid'])
+                self.object_prim_paths.add(subgoal['obj1_uid'])
+                self.object_prim_paths.add(subgoal['obj2_uid'])
 
     def reset(self):
         self.step = 0
         self.episode_sr = 0
         self.first_success_step = -1
-    
+
     def recursive_get_mesh(self, prim, coord_prim) -> np.ndarray:
         vertices = []
 
@@ -77,11 +77,11 @@ class ManipulationSuccessMetric(BaseMetric):
         from omni.isaac.core.utils.stage import get_current_stage
 
         stage = get_current_stage()
-        coord_prim = stage.GetPrimAtPath(f"/World/env_{self.env_id}/scene")
-        
+        coord_prim = stage.GetPrimAtPath(f'/World/env_{self.env_id}/scene')
+
         point_cloud_list = {}
         for uid in self.object_prim_paths:
-            mesh_prim = stage.GetPrimAtPath(f"/World/env_{self.env_id}/scene/obj_{uid}")
+            mesh_prim = stage.GetPrimAtPath(f'/World/env_{self.env_id}/scene/obj_{uid}')
             vertices = self.recursive_get_mesh(mesh_prim, coord_prim)
             if len(vertices) > self.max_vertices_num:
                 step = len(vertices) // self.max_vertices_num + 1
@@ -128,12 +128,12 @@ def check_finished(goals, pclist):
     for goal in goals:
         sr = 0
         for subgoal in goal:
-            if "another_obj2_uid" in subgoal:
-                pcd3 = pclist[subgoal["another_obj2_uid"]]
+            if 'another_obj2_uid' in subgoal:
+                pcd3 = pclist[subgoal['another_obj2_uid']]
             else:
                 pcd3 = None
             if check_subgoal_finished_rigid(
-                subgoal, pclist[subgoal["obj1_uid"]], pclist[subgoal["obj2_uid"]], pcd3
+                subgoal, pclist[subgoal['obj1_uid']], pclist[subgoal['obj2_uid']], pcd3
             ):
                 sr += 1 / len(goal)
         max_sr = max(max_sr, sr)
@@ -142,17 +142,17 @@ def check_finished(goals, pclist):
 
 def check_subgoal_finished_rigid(subgoal, pcd1, pcd2, pcd3=None):
     relation_list = get_related_position(pcd1, pcd2, pcd3)
-    if subgoal["position"] == "top" or subgoal["position"] == "on":
+    if subgoal['position'] == 'top' or subgoal['position'] == 'on':
         croped_pcd2 = crop_pcd(pcd1, pcd2)
         if len(croped_pcd2) > 0:
             relation_list_2 = get_related_position(pcd1, croped_pcd2)
-            if "on" in relation_list_2:
+            if 'on' in relation_list_2:
                 return True
-    if subgoal["position"] == "top" or subgoal["position"] == "on":
-        if "on" not in relation_list and "in" not in relation_list:
+    if subgoal['position'] == 'top' or subgoal['position'] == 'on':
+        if 'on' not in relation_list and 'in' not in relation_list:
             return False
     else:
-        if subgoal["position"] not in relation_list:
+        if subgoal['position'] not in relation_list:
             return False
     return True
 
@@ -193,13 +193,13 @@ def infer_spatial_relationship(
                 target_pts=point_cloud_b,
                 thresh=INSIDE_PROPORTION_THRESH,
             ):
-                relation_list.append("in")
+                relation_list.append('in')
             elif is_inside(
                 src_pts=point_cloud_b,
                 target_pts=point_cloud_a,
                 thresh=INSIDE_PROPORTION_THRESH,
             ):
-                relation_list.append("out of")
+                relation_list.append('out of')
             # on, below
             iou_2d, i_ratios, a_ratios = iou_2d_via_boundaries(
                 min_points_a, max_points_a, min_points_b, max_points_b
@@ -225,11 +225,11 @@ def infer_spatial_relationship(
             ):
                 a_supporting_b = True
             if a_supported_by_b:
-                relation_list.append("on")
+                relation_list.append('on')
             elif a_supporting_b:
-                relation_list.append("below")
+                relation_list.append('below')
             else:
-                relation_list.append("near")
+                relation_list.append('near')
 
         if xy_dist <= XY_DISTANCE_CLOSE_THRESHOLD * (1 + error_margin_percentage):
             x_overlap = (
@@ -246,20 +246,20 @@ def infer_spatial_relationship(
             )
             if x_overlap and y_overlap:
                 # If there is overlap on both X and Y axes, classify as "near"
-                if "near" not in relation_list:
-                    relation_list.append("near")
+                if 'near' not in relation_list:
+                    relation_list.append('near')
             elif x_overlap:
                 # Objects are close in the X axis; determine Left-Right relationship
                 if max_points_a[1] < min_points_b[1]:
-                    relation_list.append("left")
+                    relation_list.append('left')
                 elif max_points_b[1] < min_points_a[1]:
-                    relation_list.append("right")
+                    relation_list.append('right')
             elif y_overlap:
                 # Objects are close in the Y axis; determine Front-Back relationship
                 if max_points_a[0] < min_points_b[0]:
-                    relation_list.append("front")
+                    relation_list.append('front')
                 elif max_points_b[0] < min_points_a[0]:
-                    relation_list.append("back")
+                    relation_list.append('back')
     else:
 
         def compute_centroid(point_cloud):
@@ -275,7 +275,7 @@ def infer_spatial_relationship(
         cosine_angle = np.dot(vector1_norm, vector2_norm)
         angle = np.degrees(np.arccos(cosine_angle))
         if angle < ANGLE_THRESHOLD:
-            relation_list.append("between")
+            relation_list.append('between')
     return relation_list
 
 
@@ -343,24 +343,24 @@ def is_point_in_hull(p, hull):
 
 
 def crop_pcd(pcd1, pcd2):
-    contour1 = get_xy_contour(pcd1, contour_type="concave_hull").buffer(0.05)
+    contour1 = get_xy_contour(pcd1, contour_type='concave_hull').buffer(0.05)
     xy_points = pcd2[:, :2]
     mask = contains(contour1, xy_points[:, 0], xy_points[:, 1])
     return pcd2[mask]
 
 
-def get_xy_contour(points, contour_type="convex_hull"):
+def get_xy_contour(points, contour_type='convex_hull'):
     if type(points) == o3d.geometry.PointCloud:
         points = np.asarray(points.points)
     if points.shape[1] == 3:
         points = points[:, :2]
-    if contour_type == "convex_hull":
+    if contour_type == 'convex_hull':
         xy_points = points
         hull = scipy.spatial.ConvexHull(xy_points)
         hull_points = xy_points[hull.vertices]
         sorted_points = sort_points_clockwise(hull_points)
         polygon = Polygon(sorted_points)
-    elif contour_type == "concave_hull":
+    elif contour_type == 'concave_hull':
         xy_points = points
         concave_hull_points = concave_hull(xy_points)
         polygon = Polygon(concave_hull_points)

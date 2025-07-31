@@ -62,7 +62,7 @@ class InverseKinematicsController(BaseController):
             robot_urdf_path=config.robot_urdf_path,
             end_effector_frame_name=config.end_effector_frame_name,
         )
-        
+
         if config.reference:
             assert config.reference in [
                 'world',
@@ -92,7 +92,7 @@ class InverseKinematicsController(BaseController):
 
             return (
                 subset.make_articulation_action(
-                    joint_positions=subset.get_joint_positions(), 
+                    joint_positions=subset.get_joint_positions(),
                     joint_velocities=subset.get_joint_velocities()
                 ),
                 True,
@@ -100,7 +100,7 @@ class InverseKinematicsController(BaseController):
 
         ik_base_pose = self.get_ik_base_world_pose()
         self._kinematics_solver.set_robot_base_pose(
-            robot_position=ik_base_pose[0] / self._robot.get_robot_scale(), 
+            robot_position=ik_base_pose[0] / self._robot.get_robot_scale(),
             robot_orientation=ik_base_pose[1]
         )
 

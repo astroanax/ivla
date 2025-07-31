@@ -72,7 +72,7 @@ class Gr00tPolicy(BasePolicy):
         modality_config: Dict[str, ModalityConfig],
         modality_transform: ComposedModalityTransform,
         denoising_steps: Optional[int] = None,
-        device: Union[int, str] = "cuda" if torch.cuda.is_available() else "cpu",
+        device: Union[int, str] = 'cuda' if torch.cuda.is_available() else 'cpu',
     ):
         """
         Initialize the Gr00tPolicy.
@@ -88,11 +88,11 @@ class Gr00tPolicy(BasePolicy):
         try:
             # NOTE(YL) this returns the local path to the model which is normally
             # saved in ~/.cache/huggingface/hub/
-            model_path = snapshot_download(model_path, repo_type="model")
+            model_path = snapshot_download(model_path, repo_type='model')
             # HFValidationError, RepositoryNotFoundError
         except (HFValidationError, RepositoryNotFoundError):
             print(
-                f"Model not found or avail in the huggingface hub. Loading from local path: {model_path}"
+                f'Model not found or avail in the huggingface hub. Loading from local path: {model_path}'
             )
 
         self._modality_config = modality_config
@@ -110,15 +110,15 @@ class Gr00tPolicy(BasePolicy):
         # Load model
         self._load_model(model_path)
         # Load transforms
-        self._load_metadata(self.model_path / "experiment_cfg")
+        self._load_metadata(self.model_path / 'experiment_cfg')
         # Load horizons
         self._load_horizons()
         if denoising_steps is not None:
-            if hasattr(self.model, "action_head") and hasattr(
-                self.model.action_head, "num_inference_timesteps"
+            if hasattr(self.model, 'action_head') and hasattr(
+                self.model.action_head, 'num_inference_timesteps'
             ):
                 self.model.action_head.num_inference_timesteps = denoising_steps
-                print(f"Set action denoising steps to {denoising_steps}")
+                print(f'Set action denoising steps to {denoising_steps}')
 
     def apply_transforms(self, obs: Dict[str, Any]) -> Dict[str, Any]:
         """
@@ -181,14 +181,14 @@ class Gr00tPolicy(BasePolicy):
 
     def _get_action_from_normalized_input(self, normalized_input: Dict[str, Any]) -> torch.Tensor:
         # Set up autocast context if needed
-        with torch.inference_mode(), torch.autocast(device_type="cuda", dtype=COMPUTE_DTYPE):
+        with torch.inference_mode(), torch.autocast(device_type='cuda', dtype=COMPUTE_DTYPE):
             model_pred = self.model.get_action(normalized_input)
 
-        normalized_action = model_pred["action_pred"].float()
+        normalized_action = model_pred['action_pred'].float()
         return normalized_action
 
     def _get_unnormalized_action(self, normalized_action: torch.Tensor) -> Dict[str, Any]:
-        return self.unapply_transforms({"action": normalized_action.cpu()})
+        return self.unapply_transforms({'action': normalized_action.cpu()})
 
     def get_modality_config(self) -> Dict[str, ModalityConfig]:
         """
@@ -226,7 +226,7 @@ class Gr00tPolicy(BasePolicy):
 
     def _check_state_is_batched(self, obs: Dict[str, Any]) -> bool:
         for k, v in obs.items():
-            if "state" in k and len(v.shape) < 3:  # (B, Time, Dim)
+            if 'state' in k and len(v.shape) < 3:  # (B, Time, Dim)
                 return False
         return True
 
@@ -240,16 +240,16 @@ class Gr00tPolicy(BasePolicy):
     def _load_metadata(self, exp_cfg_dir: Path):
         """Load the transforms for the model."""
         # Load metadata for normalization stats
-        metadata_path = exp_cfg_dir / "metadata.json"
-        with open(metadata_path, "r") as f:
+        metadata_path = exp_cfg_dir / 'metadata.json'
+        with open(metadata_path, 'r') as f:
             metadatas = json.load(f)
 
         # Get metadata for the specific embodiment
         metadata_dict = metadatas.get(self.embodiment_tag.value)
         if metadata_dict is None:
             raise ValueError(
-                f"No metadata found for embodiment tag: {self.embodiment_tag.value}",
-                f"make sure the metadata.json file is present at {metadata_path}",
+                f'No metadata found for embodiment tag: {self.embodiment_tag.value}',
+                f'make sure the metadata.json file is present at {metadata_path}',
             )
 
         metadata = DatasetMetadata.model_validate(metadata_dict)
@@ -261,12 +261,12 @@ class Gr00tPolicy(BasePolicy):
         """Load the horizons needed for the model."""
         # Get modality configs
         # Video horizons
-        self._video_delta_indices = np.array(self._modality_config["video"].delta_indices)
+        self._video_delta_indices = np.array(self._modality_config['video'].delta_indices)
         self._assert_delta_indices(self._video_delta_indices)
         self._video_horizon = len(self._video_delta_indices)
         # State horizons (if used)
-        if "state" in self._modality_config:
-            self._state_delta_indices = np.array(self._modality_config["state"].delta_indices)
+        if 'state' in self._modality_config:
+            self._state_delta_indices = np.array(self._modality_config['state'].delta_indices)
             self._assert_delta_indices(self._state_delta_indices)
             self._state_horizon = len(self._state_delta_indices)
         else:
@@ -276,16 +276,16 @@ class Gr00tPolicy(BasePolicy):
     def _assert_delta_indices(self, delta_indices: np.ndarray):
         """Assert that the delta indices are valid."""
         # All delta indices should be non-positive because there's no way to get the future observations
-        assert np.all(delta_indices <= 0), f"{delta_indices=}"
+        assert np.all(delta_indices <= 0), f'{delta_indices=}'
         # The last delta index should be 0 because it doesn't make sense to not use the latest observation
-        assert delta_indices[-1] == 0, f"{delta_indices=}"
+        assert delta_indices[-1] == 0, f'{delta_indices=}'
         if len(delta_indices) > 1:
             # The step is consistent
             assert np.all(
                 np.diff(delta_indices) == delta_indices[1] - delta_indices[0]
-            ), f"{delta_indices=}"
+            ), f'{delta_indices=}'
             # And the step is positive
-            assert (delta_indices[1] - delta_indices[0]) > 0, f"{delta_indices=}"
+            assert (delta_indices[1] - delta_indices[0]) > 0, f'{delta_indices=}'
 
 
 #######################################################################################################

@@ -1,4 +1,3 @@
-# coding=utf-8
 # Copyright 2024 The HuggingFace Inc. team. All rights reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -74,10 +73,10 @@ def crop(
         np.ndarray: Cropped image.
     """
     if not isinstance(img, np.ndarray):
-        raise TypeError("img should be numpy array. Got {}".format(type(img)))
+        raise TypeError('img should be numpy array. Got {}'.format(type(img)))
 
     if img.ndim not in [2, 3]:
-        raise ValueError("Image should have 2 or 3 dimensions. Got {}".format(img.ndim))
+        raise ValueError('Image should have 2 or 3 dimensions. Got {}'.format(img.ndim))
 
     if input_data_format == ChannelDimension.LAST:
         img_height = img.shape[0]
@@ -87,10 +86,10 @@ def crop(
         img_width = img.shape[2]
 
     if top < 0 or left < 0 or bottom > img_height or right > img_width:
-        raise ValueError("Crop coordinates out of bounds")
+        raise ValueError('Crop coordinates out of bounds')
 
     if top >= bottom or left >= right:
-        raise ValueError("Invalid crop coordinates")
+        raise ValueError('Invalid crop coordinates')
     if input_data_format == ChannelDimension.LAST:
         return img[top:bottom, left:right, :]
     else:
@@ -203,7 +202,7 @@ class Eagle2ImageProcessor(BaseImageProcessor):
             Whether to convert the image to RGB.
     """
 
-    model_input_names = ["pixel_values_videos"]
+    model_input_names = ['pixel_values_videos']
 
     def __init__(
         self,
@@ -224,7 +223,7 @@ class Eagle2ImageProcessor(BaseImageProcessor):
         **kwargs,
     ) -> None:
         super().__init__(**kwargs)
-        size = size if size is not None else {"height": 384, "width": 384}
+        size = size if size is not None else {'height': 384, 'width': 384}
         size = get_size_dict(size, default_to_square=False)
 
         self.do_resize = do_resize
@@ -297,15 +296,15 @@ class Eagle2ImageProcessor(BaseImageProcessor):
         if input_data_format is None:
             input_data_format = infer_channel_dimension_format(image)
         if mode == PaddingMode.CONSTANT:
-            image = np.pad(image, padding, mode="constant", constant_values=constant_values)
+            image = np.pad(image, padding, mode='constant', constant_values=constant_values)
         elif mode == PaddingMode.REFLECT:
-            image = np.pad(image, padding, mode="reflect")
+            image = np.pad(image, padding, mode='reflect')
         elif mode == PaddingMode.REPLICATE:
-            image = np.pad(image, padding, mode="edge")
+            image = np.pad(image, padding, mode='edge')
         elif mode == PaddingMode.SYMMETRIC:
-            image = np.pad(image, padding, mode="symmetric")
+            image = np.pad(image, padding, mode='symmetric')
         else:
-            raise ValueError(f"Invalid padding mode: {mode}")
+            raise ValueError(f'Invalid padding mode: {mode}')
         image = (
             to_channel_dimension_format(image, data_format, input_data_format)
             if data_format is not None
@@ -368,7 +367,7 @@ class Eagle2ImageProcessor(BaseImageProcessor):
         previous version mainly foucs on ratio.
         We also consider area ratio here.
         """
-        best_factor = float("-inf")
+        best_factor = float('-inf')
         best_ratio = (1, 1)
         area = width * height
         for ratio in target_ratios:
@@ -565,7 +564,7 @@ class Eagle2ImageProcessor(BaseImageProcessor):
                 - `"none"` or `ChannelDimension.NONE`: image in (height, width) format.
         """
         if do_resize:
-            assert False, "do_resize is not supported"
+            assert False, 'do_resize is not supported'
             images = [
                 resize(
                     image=image, size=size, resample=resample, input_data_format=input_data_format
@@ -676,8 +675,8 @@ class Eagle2ImageProcessor(BaseImageProcessor):
 
         if not valid_images(images):
             raise ValueError(
-                "Invalid image type. Must be of type PIL.Image.Image, numpy.ndarray, "
-                "torch.Tensor, tf.Tensor or jax.ndarray."
+                'Invalid image type. Must be of type PIL.Image.Image, numpy.ndarray, '
+                'torch.Tensor, tf.Tensor or jax.ndarray.'
             )
 
         validate_preprocess_arguments(
@@ -699,8 +698,8 @@ class Eagle2ImageProcessor(BaseImageProcessor):
 
         if do_rescale and is_scaled_image(images[0]):
             logger.warning_once(
-                "It looks like you are trying to rescale already rescaled images. If the input"
-                " images have pixel values between 0 and 1, set `do_rescale=False` to avoid rescaling them again."
+                'It looks like you are trying to rescale already rescaled images. If the input'
+                ' images have pixel values between 0 and 1, set `do_rescale=False` to avoid rescaling them again.'
             )
 
         if input_data_format is None:
@@ -713,16 +712,16 @@ class Eagle2ImageProcessor(BaseImageProcessor):
             # convert image into a list of patches
             # we intentially use the same data format as the input data format
             size_tuple = (
-                (size["height"], size["width"])
-                if "height" in size and "width" in size
-                else (size["shortest_edge"], size["shortest_edge"])
+                (size['height'], size['width'])
+                if 'height' in size and 'width' in size
+                else (size['shortest_edge'], size['shortest_edge'])
             )
             image_patches = self.get_image_patches(
                 image,
                 min_num=self.min_dynamic_tiles,
                 max_num=self.max_dynamic_tiles,
                 size=size_tuple,
-                tile_size=size["height"],
+                tile_size=size['height'],
                 resample=resample,
                 data_format=input_data_format,
                 input_data_format=input_data_format,
@@ -750,9 +749,9 @@ class Eagle2ImageProcessor(BaseImageProcessor):
             processed_images = self._pad_for_batching(processed_images)
 
         return BatchFeature(
-            data={"pixel_values": processed_images, "image_sizes": image_sizes},
+            data={'pixel_values': processed_images, 'image_sizes': image_sizes},
             tensor_type=return_tensors,
         )
 
 
-__all__ = ["Eagle2ImageProcessor"]
+__all__ = ['Eagle2ImageProcessor']

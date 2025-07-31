@@ -39,16 +39,16 @@ from internmanip.model.data_collator_registry import DataCollatorRegistry
 from run_configs.base_cfg import TrainCfg
 
 POLICY_NAME_TO_ID = {
-    "pi0": "lerobot/pi0",
-    "pi0fast": "pi0fast_base",
-    "gr00t_n1": "nvidia/GR00T-N1-2B",
-    "gr00t_n1_5": "nvidia/GR00T-N1.5-3B",
-    "dp_clip": None,  # No model_id associated
-    "act_clip": None, # No model_id associated
+    'pi0': 'lerobot/pi0',
+    'pi0fast': 'pi0fast_base',
+    'gr00t_n1': 'nvidia/GR00T-N1-2B',
+    'gr00t_n1_5': 'nvidia/GR00T-N1.5-3B',
+    'dp_clip': None,  # No model_id associated
+    'act_clip': None, # No model_id associated
 }
 
 
-    
+
 #####################################################################################
 # main training function
 #####################################################################################
@@ -57,10 +57,10 @@ def main(config: TrainCfg):
     """Main training function."""
     # ------------ load model ------------
 
-    
+
     kwargs = config.model_dump()
-    kwargs.pop("model_type")
-    
+    kwargs.pop('model_type')
+
     if config.base_model_path == '':
         config.base_model_path = POLICY_NAME_TO_ID[config.model_type]
     if config.base_model_path is None:
@@ -113,7 +113,7 @@ def main(config: TrainCfg):
         output_dir=config.output_dir,
         run_name=None,
         remove_unused_columns=False,
-        deepspeed="",
+        deepspeed='',
         gradient_checkpointing=False,
         bf16=True,
         tf32=True,
@@ -122,20 +122,20 @@ def main(config: TrainCfg):
         dataloader_num_workers=config.dataloader_num_workers,
         dataloader_pin_memory=False,
         dataloader_persistent_workers=True,
-        optim="adamw_torch",
+        optim='adamw_torch',
         adam_beta1=0.95,
         adam_beta2=0.999,
         adam_epsilon=1e-8,
         learning_rate=config.learning_rate,
         weight_decay=config.weight_decay,
         warmup_ratio=config.warmup_ratio,
-        lr_scheduler_type="cosine",
+        lr_scheduler_type='cosine',
         logging_steps=10.0,
         num_train_epochs=300,
         max_steps=config.max_steps,
-        save_strategy="steps",
+        save_strategy='steps',
         save_steps=config.save_steps,
-        eval_strategy="no",
+        eval_strategy='no',
         save_total_limit=8,
         report_to=config.report_to,
         seed=42,
@@ -163,40 +163,40 @@ def main(config: TrainCfg):
     # eval_dl_len = len(trainer.get_eval_dataloader()) # @note (k2): How to manage eval dataloader?
 
     print(
-        f"train dataloader length: {train_dl_len}\n"
+        f'train dataloader length: {train_dl_len}\n'
         # f"eval dataloader length: {eval_dl_len}\n"
-        f"train dataset length: {len(trainer.train_dataset)}\n"
-        f"GPU memory before training: {torch.cuda.memory_allocated() / 1024 / 1024 / 1024} GB",
+        f'train dataset length: {len(trainer.train_dataset)}\n'
+        f'GPU memory before training: {torch.cuda.memory_allocated() / 1024 / 1024 / 1024} GB',
         flush=True,
     )
     total = sum(p.numel() for p in model.parameters())
     trainable = sum(p.numel() for p in model.parameters() if p.requires_grad)
-    print("grm")
-    print(f"🔢 Total parameters: {total:,}")
-    print(f"🎯 Trainable parameters: {trainable:,}")
-    print(f"📉 Non-trainable parameters: {total - trainable:,}")
+    print('grm')
+    print(f'🔢 Total parameters: {total:,}')
+    print(f'🎯 Trainable parameters: {trainable:,}')
+    print(f'📉 Non-trainable parameters: {total - trainable:,}')
     def print_model_parameters(model):
-        print("\n🔍 [Trainable Parameters]")
+        print('\n🔍 [Trainable Parameters]')
         for name, param in model.named_parameters():
             if param.requires_grad:
-                print(f"[✓] {name:<80} | dtype: {param.dtype}")
+                print(f'[✓] {name:<80} | dtype: {param.dtype}')
 
-        print("\n🚫 [Frozen Parameters (not trainable)]")
+        print('\n🚫 [Frozen Parameters (not trainable)]')
         for name, param in model.named_parameters():
             if not param.requires_grad:
-                print(f"[✗] {name:<80} | dtype: {param.dtype}")
+                print(f'[✗] {name:<80} | dtype: {param.dtype}')
     print_model_parameters(model)
 
 
     import torch.distributed as dist
-    print("\n==============================")
-    print(f"✅ torch.distributed.is_initialized: {dist.is_initialized()}")
+    print('\n==============================')
+    print(f'✅ torch.distributed.is_initialized: {dist.is_initialized()}')
     if dist.is_initialized():
-        print(f"🔢 Rank: {dist.get_rank()} / World Size: {dist.get_world_size()}")
-        print(f"📦 Backend: {dist.get_backend()}")
+        print(f'🔢 Rank: {dist.get_rank()} / World Size: {dist.get_world_size()}')
+        print(f'📦 Backend: {dist.get_backend()}')
     else:
-        print("❌ DDP not initialized!")
-    print("==============================\n")
+        print('❌ DDP not initialized!')
+    print('==============================\n')
 
     trainer.train(resume_from_checkpoint=training_args.resume_from_checkpoint)
     # trainer.evaluate(eval_dataset=train_dataset)
@@ -204,7 +204,7 @@ def main(config: TrainCfg):
 
 
 class BaseTrainerWrapper(BaseTrainer):
-    import torch.nn as nn 
+    import torch.nn as nn
 
     def prediction_step(self, model: nn.Module,
         inputs: Dict[str, Union[torch.Tensor, Any]]):
@@ -265,32 +265,32 @@ class CheckpointFormatCallback(TrainerCallback):
     def on_save(self, args, state, control, **kwargs):
         """Called after the trainer saves a checkpoint."""
         if state.is_world_process_zero:
-            exp_cfg_dir = Path(self.exp_cfg_dir) / f"checkpoint-{state.global_step}/experiment_cfg"
+            exp_cfg_dir = Path(self.exp_cfg_dir) / f'checkpoint-{state.global_step}/experiment_cfg'
             if not os.path.exists(exp_cfg_dir):
                 os.makedirs(exp_cfg_dir)
             # Copy experiment config directory if provided
             metadata_json = {}
-            if os.path.exists(exp_cfg_dir / "metadata.json"):
-                with open(exp_cfg_dir / "metadata.json", "r") as f:
+            if os.path.exists(exp_cfg_dir / 'metadata.json'):
+                with open(exp_cfg_dir / 'metadata.json', 'r') as f:
                     metadata_json = json.load(f)
             metadata_json.update(
-                {self.train_dataset.tag: self.train_dataset.metadata.model_dump(mode="json")}
+                {self.train_dataset.tag: self.train_dataset.metadata.model_dump(mode='json')}
             )
-            with open(exp_cfg_dir / "metadata.json", "w") as f:
+            with open(exp_cfg_dir / 'metadata.json', 'w') as f:
                 json.dump(metadata_json, f, indent=4)
 
 @dataclass
 class Args:
     """Path to the training configuration YAML file. If provided, it will override the default values."""
     config: Optional[str] = None
-    
 
-if __name__ == "__main__":
+
+if __name__ == '__main__':
     # Parse arguments using tyro, provide argument in the command
     args = tyro.cli(Args)
     if args.config is not None:
         # Load the configuration from the specified YAML file
-        with open(args.config, "r") as f:
+        with open(args.config, 'r') as f:
             cfg = yaml.safe_load(f)
         # Update the config with the loaded values
         config = TrainCfg(**cfg)
@@ -298,19 +298,19 @@ if __name__ == "__main__":
         config = TrainCfg()
 
     # Print the config
-    print("\n" + "=" * 50)
-    print("TRAINING CONFIGURATION:")
-    print("=" * 50)
+    print('\n' + '=' * 50)
+    print('TRAINING CONFIGURATION:')
+    print('=' * 50)
     for key, value in vars(config).items():
-        print(f"{key}: {value}")
-    print("=" * 50 + "\n")
+        print(f'{key}: {value}')
+    print('=' * 50 + '\n')
 
     available_gpus = torch.cuda.device_count() if torch.cuda.is_available() else 1
 
     # Validate GPU configuration
     assert (
         config.num_gpus <= available_gpus
-    ), f"Number of GPUs requested ({config.num_gpus}) is greater than the available GPUs ({available_gpus})"
-    assert config.num_gpus > 0, "Number of GPUs must be greater than 0"
-    print(f"Using {config.num_gpus} GPUs")
+    ), f'Number of GPUs requested ({config.num_gpus}) is greater than the available GPUs ({available_gpus})'
+    assert config.num_gpus > 0, 'Number of GPUs must be greater than 0'
+    print(f'Using {config.num_gpus} GPUs')
     main(config)

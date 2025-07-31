@@ -22,11 +22,11 @@ torch.backends.cudnn.benchmark = True
 
 
 def main():
-    device = "cuda"
-    dataset_repo_id = "danaaubakirova/koch_test"
+    device = 'cuda'
+    dataset_repo_id = 'danaaubakirova/koch_test'
     # model_name = "pi0_base"
     # ckpt_torch_dir = Path.home() / f".cache/openpi/openpi-assets/checkpoints/{model_name}_pytorch"
-    ckpt_torch_dir = "lerobot/pi0"
+    ckpt_torch_dir = 'lerobot/pi0'
 
     dataset = LeRobotDataset(dataset_repo_id, episodes=[0])
 
@@ -74,9 +74,9 @@ def main():
     elapsed_time_ms = start_event.elapsed_time(end_event)
 
     avg_time_per_iter = elapsed_time_ms / benchmark_iters
-    print(f"Average execution time per iteration: {avg_time_per_iter:.3f} ms")
+    print(f'Average execution time per iteration: {avg_time_per_iter:.3f} ms')
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     with torch.inference_mode():
         main()

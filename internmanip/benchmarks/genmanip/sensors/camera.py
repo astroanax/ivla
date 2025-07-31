@@ -32,21 +32,21 @@ class Camera(BaseSensor):
         """
         # Use the configured camera resolution if provided.
         if self.name=='realsense':
-            if self.config.gripper_type=="panda":
+            if self.config.gripper_type=='panda':
                 prim_path = self._robot.prim_path + '/franka/panda_hand/geometry/realsense'
             else:
                 prim_path = self._robot.prim_path + '/robotiq/arm/panda_link8/realsense'
         elif self.name=='obs_camera':
-            if self.config.gripper_type=="panda":
+            if self.config.gripper_type=='panda':
                 prim_path = self._robot.prim_path + '/franka/obs_camera'
             else:
                 prim_path = self._robot.prim_path + '/robotiq/obs_camera'
         else:
-            if self.config.gripper_type=="panda":
+            if self.config.gripper_type=='panda':
                 prim_path = self._robot.prim_path + '/franka/obs_camera_2'
             else:
                 prim_path = self._robot.prim_path + '/robotiq/obs_camera_2'
-        
+
         log.debug('camera_prim_path: ' + prim_path)
         log.debug('name            : ' + self.name)
         camera = ICamera.create(
@@ -64,7 +64,7 @@ class Camera(BaseSensor):
 
         if isinstance(rgba_data, np.ndarray) and rgba_data.size > 0:
             data['rgb'] = rgba_data[:, :, :3]
-        
+
         if isinstance(depth_data, np.ndarray) and depth_data.size > 0:
             data['depth'] = depth_data
 

@@ -91,7 +91,7 @@ class FlashAttention(nn.Module):
             batch_size = qkv.shape[0]
             seqlen = qkv.shape[1]
             if key_padding_mask is None:
-                qkv = rearrange(qkv, "b s ... -> (b s) ...")
+                qkv = rearrange(qkv, 'b s ... -> (b s) ...')
                 max_s = seqlen
                 cu_seqlens = torch.arange(
                     0, (batch_size + 1) * seqlen, step=seqlen, dtype=torch.int32, device=qkv.device
@@ -104,12 +104,12 @@ class FlashAttention(nn.Module):
                     softmax_scale=self.softmax_scale,
                     causal=causal,
                 )
-                output = rearrange(output, "(b s) ... -> b s ...", b=batch_size)
+                output = rearrange(output, '(b s) ... -> b s ...', b=batch_size)
             else:
                 nheads = qkv.shape[-2]
-                x = rearrange(qkv, "b s three h d -> b s (three h d)")
+                x = rearrange(qkv, 'b s three h d -> b s (three h d)')
                 x_unpad, indices, cu_seqlens, max_s = unpad_input(x, key_padding_mask)
-                x_unpad = rearrange(x_unpad, "nnz (three h d) -> nnz three h d", three=3, h=nheads)
+                x_unpad = rearrange(x_unpad, 'nnz (three h d) -> nnz three h d', three=3, h=nheads)
                 output_unpad = flash_attn_unpadded_qkvpacked_func(
                     x_unpad,
                     cu_seqlens,
@@ -120,9 +120,9 @@ class FlashAttention(nn.Module):
                 )
                 output = rearrange(
                     pad_input(
-                        rearrange(output_unpad, "nnz h d -> nnz (h d)"), indices, batch_size, seqlen
+                        rearrange(output_unpad, 'nnz h d -> nnz (h d)'), indices, batch_size, seqlen
                     ),
-                    "b s (h d) -> b s h d",
+                    'b s (h d) -> b s h d',
                     h=nheads,
                 )
         else:
@@ -149,11 +149,11 @@ def _flash_attn(self, x: torch.Tensor) -> torch.Tensor:
         qkv[:, 0] = self.q_norm(qkv[:, 0])
         qkv[:, 1] = self.k_norm(qkv[:, 1])
 
-    qkv = rearrange(qkv, "b t s h d -> b s t h d")
+    qkv = rearrange(qkv, 'b t s h d -> b s t h d')
 
     context, _ = self.inner_attn(qkv, key_padding_mask=None, need_weights=False, causal=False)
 
-    x = rearrange(context, "b s h d -> b s (h d)")
+    x = rearrange(context, 'b s h d -> b s (h d)')
     x = self.proj(x)
     x = self.proj_drop(x)
     return x
@@ -162,7 +162,7 @@ def _flash_attn(self, x: torch.Tensor) -> torch.Tensor:
 def forward(self, x: torch.Tensor) -> torch.Tensor:
     assert (
         x.dtype == torch.bfloat16
-    ), "Flash attention is only supported on A100 or H100 GPU during training due to head dim > 64 backward."
+    ), 'Flash attention is only supported on A100 or H100 GPU during training due to head dim > 64 backward.'
     result = self._flash_attn(x)
     return result
 
@@ -171,8 +171,8 @@ def replace_vit_attn_with_flash_attn():
     cuda_major, cuda_minor = torch.cuda.get_device_capability()
     if cuda_major < 8:
         warnings.warn(
-            "Flash attention is only supported on A100 or H100 GPU during training due to head dim > 64 backward."
-            "ref: https://github.com/HazyResearch/flash-attention/issues/190#issuecomment-1523359593"
+            'Flash attention is only supported on A100 or H100 GPU during training due to head dim > 64 backward.'
+            'ref: https://github.com/HazyResearch/flash-attention/issues/190#issuecomment-1523359593'
         )
 
     Attention.forward = forward
@@ -243,7 +243,7 @@ class ClsToken(nn.Module):
 
     def no_weight_decay(self):
         return [
-            "token",
+            'token',
         ]
 
 
@@ -340,7 +340,7 @@ class ViTPatchGenerator(nn.Module):
 
     def no_weight_decay(self):
         return [
-            "pos_embed",
+            'pos_embed',
         ]
 
     def _load_projection(self, src_proj_weight: torch.Tensor, targ_proj_weight: torch.Tensor):
@@ -349,19 +349,19 @@ class ViTPatchGenerator(nn.Module):
 
             assert (src_patch_size**2) * 3 == src_proj_weight.shape[
                 1
-            ], "Unable to interpolate non-square patch size"
+            ], 'Unable to interpolate non-square patch size'
 
             src_proj_weight = rearrange(
-                src_proj_weight, "b (c h w) -> b c h w", c=3, h=src_patch_size, w=src_patch_size
+                src_proj_weight, 'b (c h w) -> b c h w', c=3, h=src_patch_size, w=src_patch_size
             )
             src_proj_weight = F.interpolate(
                 src_proj_weight,
                 size=(self.patch_size, self.patch_size),
-                mode="bicubic",
+                mode='bicubic',
                 align_corners=True,
                 antialias=False,
             )
-            src_proj_weight = rearrange(src_proj_weight, "b c h w -> b (c h w)")
+            src_proj_weight = rearrange(src_proj_weight, 'b c h w -> b (c h w)')
         targ_proj_weight.data.copy_(src_proj_weight)
 
     def embed_patches(self, x: torch.Tensor) -> torch.Tensor:
@@ -465,8 +465,8 @@ class ViTPatchGenerator(nn.Module):
                 pos_embed = F.grid_sample(
                     pos_embed.float().expand(batch_size, -1, -1, -1),
                     grid=grid_xy,
-                    mode="bilinear",
-                    padding_mode="zeros",
+                    mode='bilinear',
+                    padding_mode='zeros',
                     align_corners=True,
                 ).to(pos_embed.dtype)
             else:
@@ -479,7 +479,7 @@ class ViTPatchGenerator(nn.Module):
                 # else:
                 max_dim = max(input_dims)
                 pos_embed = F.interpolate(
-                    pos_embed.float(), size=(max_dim, max_dim), align_corners=True, mode="bilinear"
+                    pos_embed.float(), size=(max_dim, max_dim), align_corners=True, mode='bilinear'
                 ).to(pos_embed.dtype)
 
                 pos_embed = window_select(pos_embed)
@@ -488,7 +488,7 @@ class ViTPatchGenerator(nn.Module):
 
         if pos_embed.shape[-2:] != input_dims:
             pos_embed = F.interpolate(
-                pos_embed.float(), size=input_dims, align_corners=True, mode="bilinear"
+                pos_embed.float(), size=input_dims, align_corners=True, mode='bilinear'
             ).to(pos_embed.dtype)
 
         pos_embed = pos_embed.flatten(2).permute(0, 2, 1)
@@ -511,7 +511,7 @@ class Im2Patches(nn.Module):
         px = x.shape[-1] // self.patch_size
         patches = rearrange(
             x,
-            "b c (py yy) (px xx) -> b (py px) (c yy xx)",
+            'b c (py yy) (px xx) -> b (py px) (c yy xx)',
             py=py,
             yy=self.patch_size,
             px=px,
@@ -528,7 +528,7 @@ class ViTPatchLinear(nn.Linear):
 
 def _forward_cpe(self: VisionTransformer, x: torch.Tensor) -> torch.Tensor:
     x = self.patch_generator(x)
-    if getattr(self, "grad_checkpointing", False) and not torch.jit.is_scripting():
+    if getattr(self, 'grad_checkpointing', False) and not torch.jit.is_scripting():
         x = checkpoint_seq(self.blocks, x)
     else:
         x = self.blocks(x)
@@ -557,7 +557,7 @@ def _enable_cpe_for_timm_vit(
     num_registers: int = Optional[None],
 ):
     if not isinstance(model, VisionTransformer):
-        raise ValueError("CPE only support for VisionTransformer models!")
+        raise ValueError('CPE only support for VisionTransformer models!')
 
     patch_size = model.patch_embed.patch_size[0]
     embed_dim = model.embed_dim
@@ -599,7 +599,7 @@ def enable_cpe(
     if isinstance(model, VisionTransformer):
         _enable_cpe_for_timm_vit(model, *args, **kwargs)
     else:
-        raise ValueError(f"CPE not supported for this model type: {type(model)}")
+        raise ValueError(f'CPE not supported for this model type: {type(model)}')
 
 
 ###
@@ -625,8 +625,8 @@ class Dinov2LayerScale(nn.Module):
         # Huggingface is absurd and it will rename strings that contain `gamma`, which means that the normal DINO implementation
         # of LayerScale won't work with HFHub. So we rename the variable to 'grandma', and support loading checkpoints in either
         # format
-        key_a = f"{prefix}gamma"
-        key_b = f"{prefix}grandma"
+        key_a = f'{prefix}gamma'
+        key_b = f'{prefix}grandma'
         if key_a in state_dict:
             gamma = state_dict[key_a]
         elif key_b in state_dict:
@@ -670,15 +670,15 @@ def _patch_layer_scale(model: VisionTransformer):
 @register_model
 def vit_huge_patch16_224(pretrained=False, **kwargs) -> VisionTransformer:
     """ViT-Huge model (ViT-H/16) from original paper (https://arxiv.org/abs/2010.11929)."""
-    model_args = dict(patch_size=16, embed_dim=1280, depth=32, num_heads=16, weight_init="skip")
+    model_args = dict(patch_size=16, embed_dim=1280, depth=32, num_heads=16, weight_init='skip')
     if pretrained:
         # There is no pretrained version of ViT-H/16, but we can adapt a ViT-H/14 for this purpose
         model = _create_vision_transformer(
-            "vit_huge_patch14_224", pretrained=True, **dict(model_args, **kwargs)
+            'vit_huge_patch14_224', pretrained=True, **dict(model_args, **kwargs)
         )
     else:
         model = _create_vision_transformer(
-            "vit_huge_patch16_224", pretrained=False, **dict(model_args, **kwargs)
+            'vit_huge_patch16_224', pretrained=False, **dict(model_args, **kwargs)
         )
     return model
 
@@ -701,13 +701,13 @@ class RADIOModelBase(nn.Module):
 
     @property
     def num_cls_tokens(self) -> int:
-        if hasattr(self.model, "num_cls_tokens"):
+        if hasattr(self.model, 'num_cls_tokens'):
             return self.model.num_cls_tokens
 
-        patch_gen = getattr(self.model, "patch_generator", None)
+        patch_gen = getattr(self.model, 'patch_generator', None)
         if patch_gen is not None:
             return patch_gen.num_cls_tokens
-        elif self.model.global_pool == "avg":
+        elif self.model.global_pool == 'avg':
             return 0
         return 1
 
@@ -715,9 +715,9 @@ class RADIOModelBase(nn.Module):
     def patch_size(self) -> int:
         if self._patch_size is not None:
             return self._patch_size
-        if hasattr(self.model, "patch_size"):
+        if hasattr(self.model, 'patch_size'):
             return self.model.patch_size
-        patch_gen = getattr(self.model, "patch_generator", None)
+        patch_gen = getattr(self.model, 'patch_generator', None)
         if patch_gen is not None:
             return patch_gen.patch_size
         return None
@@ -728,7 +728,7 @@ class RADIOModelBase(nn.Module):
 
     @property
     def blocks(self) -> Iterable[nn.Module]:
-        blocks = getattr(self.model, "blocks", None)
+        blocks = getattr(self.model, 'blocks', None)
         if blocks is not None:
             return blocks
         return None
@@ -738,7 +738,7 @@ class RADIOModelBase(nn.Module):
         return self.model.embed_dim
 
     def forward(
-        self, x: torch.Tensor, feature_fmt: str = "NLC"
+        self, x: torch.Tensor, feature_fmt: str = 'NLC'
     ) -> Union[torch.Tensor, Tuple[torch.Tensor, torch.Tensor]]:
         """
         Forward process for model.
@@ -749,7 +749,7 @@ class RADIOModelBase(nn.Module):
         """
 
         y = self.model.forward_features(x)
-        patch_gen = getattr(self.model, "patch_generator", None)
+        patch_gen = getattr(self.model, 'patch_generator', None)
         if patch_gen is not None:
             return y[:, patch_gen.num_skip :]
         return y
@@ -763,7 +763,7 @@ def create_model_from_args(args) -> nn.Module:
         in_chans = args.input_size[0]
 
     # Skip weight initialization unless it's explicitly requested.
-    weight_init = args.model_kwargs.pop("weight_init", "skip")
+    weight_init = args.model_kwargs.pop('weight_init', 'skip')
 
     model = create_model(
         args.model,
@@ -782,19 +782,19 @@ def create_model_from_args(args) -> nn.Module:
         **args.model_kwargs,
     )
 
-    if hasattr(model, "norm") and not getattr(args, "model_norm", False):
+    if hasattr(model, 'norm') and not getattr(args, 'model_norm', False):
         model.norm = nn.Identity()
 
     model.head = nn.Identity()
 
     if args.cpe_max_size is not None:
-        uq_teachers = set(t["name"] for t in args.teachers)
+        uq_teachers = set(t['name'] for t in args.teachers)
         enable_cpe(
             model,
             args.cpe_max_size,
             num_cls_tokens=len(uq_teachers) if args.cls_token_per_teacher else 1,
-            register_multiple=getattr(args, "register_multiple", None),
-            num_registers=getattr(args, "cpe_num_registers", None),
+            register_multiple=getattr(args, 'register_multiple', None),
+            num_registers=getattr(args, 'cpe_num_registers', None),
         )
 
     return model
@@ -809,23 +809,23 @@ class RADIOConfig(PretrainedConfig):
     def __init__(
         self,
         args: Optional[dict] = None,
-        version: Optional[str] = "radio_v2.5-h",
+        version: Optional[str] = 'radio_v2.5-h',
         patch_size: Optional[int] = None,
         max_resolution: Optional[int] = None,
-        model_type: Optional[str] = "radio",
+        model_type: Optional[str] = 'radio',
         hidden_size: Optional[int] = 1280,
         **kwargs,
     ):
         self.args = args
-        if version == "radio_v2.5-h":
+        if version == 'radio_v2.5-h':
             resource = dict(
-                url="https://huggingface.co/nvidia/RADIO/resolve/main/radio_v2.5-h.pth.tar?download=true",
+                url='https://huggingface.co/nvidia/RADIO/resolve/main/radio_v2.5-h.pth.tar?download=true',
                 patch_size=16,
                 max_resolution=2048,
                 vitdet_num_global=4,
             )
-        self.patch_size = patch_size or resource["patch_size"]
-        self.max_resolution = max_resolution or resource["max_resolution"]
+        self.patch_size = patch_size or resource['patch_size']
+        self.max_resolution = max_resolution or resource['max_resolution']
         self.model_type = model_type
         self.hidden_size = hidden_size
         super().__init__(**kwargs)
@@ -838,8 +838,8 @@ class RADIOConfig(PretrainedConfig):
             `Dict[str, any]`: Dictionary of all the attributes that make up this configuration instance,
         """
         output = copy.deepcopy(self.__dict__)
-        output["model_type"] = self.model_type
-        output["hidden_size"] = self.hidden_size
+        output['model_type'] = self.model_type
+        output['hidden_size'] = self.hidden_size
         return output
 
 
@@ -860,7 +860,7 @@ class RADIOModel(PreTrainedModel):
     def __init__(self, config: RADIOConfig):
         super().__init__(config)
 
-        RADIOArgs = namedtuple("RADIOArgs", config.args.keys())
+        RADIOArgs = namedtuple('RADIOArgs', config.args.keys())
         args = RADIOArgs(**config.args)
         self.config = config
 

@@ -22,7 +22,7 @@ import numpy as np
 
 def collator_pi0(features):
     batch = {}
-    
+
     for k in features[0].keys():
         if type(features[0][k]) == list:
             batch[k] = [f[k] if k in f else '' for f in features]
@@ -30,5 +30,5 @@ def collator_pi0(features):
             batch[k] = np.stack([f[k] for f in features])
         else:
             batch[k] = torch.stack([f[k] for f in features])
-            
+
     return batch

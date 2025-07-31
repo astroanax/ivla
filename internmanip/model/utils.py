@@ -87,7 +87,7 @@ def get_output_shape(module: torch.nn.Module, input_shape: tuple) -> tuple:
 
 
 def none_or_int(value):
-    if value == "None":
+    if value == 'None':
         return None
     return int(value)
 
@@ -95,20 +95,20 @@ def none_or_int(value):
 def inside_slurm():
     """Check whether the python process was launched through slurm"""
     # TODO(rcadene): return False for interactive mode `--pty bash`
-    return "SLURM_JOB_ID" in os.environ
+    return 'SLURM_JOB_ID' in os.environ
 
 
 def auto_select_torch_device() -> torch.device:
     """Tries to select automatically a torch device."""
     if torch.cuda.is_available():
-        logging.info("Cuda backend detected, using cuda.")
-        return torch.device("cuda")
+        logging.info('Cuda backend detected, using cuda.')
+        return torch.device('cuda')
     elif torch.backends.mps.is_available():
-        logging.info("Metal backend detected, using cuda.")
-        return torch.device("mps")
+        logging.info('Metal backend detected, using cuda.')
+        return torch.device('mps')
     else:
-        logging.warning("No accelerated backend detected. Using default cpu, this will be slow.")
-        return torch.device("cpu")
+        logging.warning('No accelerated backend detected. Using default cpu, this will be slow.')
+        return torch.device('cpu')
 
 
 # TODO(Steven): Remove log. log shouldn't be an argument, this should be handled by the logger level
@@ -116,20 +116,20 @@ def get_safe_torch_device(try_device: str, log: bool = False) -> torch.device:
     """Given a string, return a torch.device with checks on whether the device is available."""
     try_device = str(try_device)
     match try_device:
-        case "cuda":
+        case 'cuda':
             assert torch.cuda.is_available()
-            device = torch.device("cuda")
-        case "mps":
+            device = torch.device('cuda')
+        case 'mps':
             assert torch.backends.mps.is_available()
-            device = torch.device("mps")
-        case "cpu":
-            device = torch.device("cpu")
+            device = torch.device('mps')
+        case 'cpu':
+            device = torch.device('cpu')
             if log:
-                logging.warning("Using CPU, this will be slow.")
+                logging.warning('Using CPU, this will be slow.')
         case _:
             device = torch.device(try_device)
             if log:
-                logging.warning(f"Using custom {try_device} device.")
+                logging.warning(f'Using custom {try_device} device.')
 
     return device
 
@@ -140,7 +140,7 @@ def get_safe_dtype(dtype: torch.dtype, device: str | torch.device):
     """
     if isinstance(device, torch.device):
         device = device.type
-    if device == "mps" and dtype == torch.float64:
+    if device == 'mps' and dtype == torch.float64:
         return torch.float32
     else:
         return dtype
@@ -148,20 +148,20 @@ def get_safe_dtype(dtype: torch.dtype, device: str | torch.device):
 
 def is_torch_device_available(try_device: str) -> bool:
     try_device = str(try_device)  # Ensure try_device is a string
-    if try_device == "cuda":
+    if try_device == 'cuda':
         return torch.cuda.is_available()
-    elif try_device == "mps":
+    elif try_device == 'mps':
         return torch.backends.mps.is_available()
-    elif try_device == "cpu":
+    elif try_device == 'cpu':
         return True
     else:
-        raise ValueError(f"Unknown device {try_device}. Supported devices are: cuda, mps or cpu.")
+        raise ValueError(f'Unknown device {try_device}. Supported devices are: cuda, mps or cpu.')
 
 
 def is_amp_available(device: str):
-    if device in ["cuda", "cpu"]:
+    if device in ['cuda', 'cpu']:
         return True
-    elif device == "mps":
+    elif device == 'mps':
         return False
     else:
         raise ValueError(f"Unknown device '{device}.")
@@ -169,15 +169,15 @@ def is_amp_available(device: str):
 
 def init_logging(log_file: Path | None = None, display_pid: bool = False):
     def custom_format(record):
-        dt = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        fnameline = f"{record.pathname}:{record.lineno}"
+        dt = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        fnameline = f'{record.pathname}:{record.lineno}'
 
         # NOTE: Display PID is useful for multi-process logging.
         if display_pid:
-            pid_str = f"[PID: {os.getpid()}]"
-            message = f"{record.levelname} {pid_str} {dt} {fnameline[-15:]:>15} {record.msg}"
+            pid_str = f'[PID: {os.getpid()}]'
+            message = f'{record.levelname} {pid_str} {dt} {fnameline[-15:]:>15} {record.msg}'
         else:
-            message = f"{record.levelname} {dt} {fnameline[-15:]:>15} {record.msg}"
+            message = f'{record.levelname} {dt} {fnameline[-15:]:>15} {record.msg}'
         return message
 
     logging.basicConfig(level=logging.INFO)
@@ -199,12 +199,12 @@ def init_logging(log_file: Path | None = None, display_pid: bool = False):
 
 
 def format_big_number(num, precision=0):
-    suffixes = ["", "K", "M", "B", "T", "Q"]
+    suffixes = ['', 'K', 'M', 'B', 'T', 'Q']
     divisor = 1000.0
 
     for suffix in suffixes:
         if abs(num) < divisor:
-            return f"{num:.{precision}f}{suffix}"
+            return f'{num:.{precision}f}{suffix}'
         num /= divisor
 
     return num
@@ -219,7 +219,7 @@ def _relative_path_between(path1: Path, path2: Path) -> Path:
     except ValueError:  # most likely because path1 is not a subpath of path2
         common_parts = Path(osp.commonpath([path1, path2])).parts
         return Path(
-            "/".join([".."] * (len(path2.parts) - len(common_parts)) + list(path1.parts[len(common_parts) :]))
+            '/'.join(['..'] * (len(path2.parts) - len(common_parts)) + list(path1.parts[len(common_parts) :]))
         )
 
 
@@ -230,10 +230,10 @@ def print_cuda_memory_usage():
     gc.collect()
     # Also clear the cache if you want to fully release the memory
     torch.cuda.empty_cache()
-    print("Current GPU Memory Allocated: {:.2f} MB".format(torch.cuda.memory_allocated(0) / 1024**2))
-    print("Maximum GPU Memory Allocated: {:.2f} MB".format(torch.cuda.max_memory_allocated(0) / 1024**2))
-    print("Current GPU Memory Reserved: {:.2f} MB".format(torch.cuda.memory_reserved(0) / 1024**2))
-    print("Maximum GPU Memory Reserved: {:.2f} MB".format(torch.cuda.max_memory_reserved(0) / 1024**2))
+    print('Current GPU Memory Allocated: {:.2f} MB'.format(torch.cuda.memory_allocated(0) / 1024**2))
+    print('Maximum GPU Memory Allocated: {:.2f} MB'.format(torch.cuda.max_memory_allocated(0) / 1024**2))
+    print('Current GPU Memory Reserved: {:.2f} MB'.format(torch.cuda.memory_reserved(0) / 1024**2))
+    print('Maximum GPU Memory Reserved: {:.2f} MB'.format(torch.cuda.max_memory_reserved(0) / 1024**2))
 
 
 def capture_timestamp_utc():
@@ -243,29 +243,29 @@ def capture_timestamp_utc():
 def say(text, blocking=False):
     system = platform.system()
 
-    if system == "Darwin":
-        cmd = ["say", text]
+    if system == 'Darwin':
+        cmd = ['say', text]
 
-    elif system == "Linux":
-        cmd = ["spd-say", text]
+    elif system == 'Linux':
+        cmd = ['spd-say', text]
         if blocking:
-            cmd.append("--wait")
+            cmd.append('--wait')
 
-    elif system == "Windows":
+    elif system == 'Windows':
         cmd = [
-            "PowerShell",
-            "-Command",
-            "Add-Type -AssemblyName System.Speech; "
+            'PowerShell',
+            '-Command',
+            'Add-Type -AssemblyName System.Speech; '
             f"(New-Object System.Speech.Synthesis.SpeechSynthesizer).Speak('{text}')",
         ]
 
     else:
-        raise RuntimeError("Unsupported operating system for text-to-speech.")
+        raise RuntimeError('Unsupported operating system for text-to-speech.')
 
     if blocking:
         subprocess.run(cmd, check=True)
     else:
-        subprocess.Popen(cmd, creationflags=subprocess.CREATE_NO_WINDOW if system == "Windows" else 0)
+        subprocess.Popen(cmd, creationflags=subprocess.CREATE_NO_WINDOW if system == 'Windows' else 0)
 
 
 def log_say(text, play_sounds, blocking=False):
@@ -303,20 +303,20 @@ def is_valid_numpy_dtype_string(dtype_str: str) -> bool:
 
 
 def enter_pressed() -> bool:
-    if platform.system() == "Windows":
+    if platform.system() == 'Windows':
         import msvcrt
 
         if msvcrt.kbhit():
             key = msvcrt.getch()
-            return key in (b"\r", b"\n")  # enter key
+            return key in (b'\r', b'\n')  # enter key
         return False
     else:
-        return select.select([sys.stdin], [], [], 0)[0] and sys.stdin.readline().strip() == ""
+        return select.select([sys.stdin], [], [], 0)[0] and sys.stdin.readline().strip() == ''
 
 
 def move_cursor_up(lines):
     """Move the cursor up by a specified number of lines."""
-    print(f"\033[{lines}A", end="")
+    print(f'\033[{lines}A', end='')
 
 
 class TimerManager:
@@ -346,7 +346,7 @@ class TimerManager:
 
     def __init__(
         self,
-        label: str = "Elapsed-time",
+        label: str = 'Elapsed-time',
         log: bool = True,
         logger: logging.Logger | None = None,
     ):
@@ -368,15 +368,15 @@ class TimerManager:
 
     def stop(self) -> float:
         if self._start is None:
-            raise RuntimeError("Timer was never started.")
+            raise RuntimeError('Timer was never started.')
         elapsed = time.perf_counter() - self._start
         self._history.append(elapsed)
         self._start = None
         if self.log:
             if self.logger is not None:
-                self.logger.info(f"{self.label}: {elapsed:.6f} s")
+                self.logger.info(f'{self.label}: {elapsed:.6f} s')
             else:
-                logging.info(f"{self.label}: {elapsed:.6f} s")
+                logging.info(f'{self.label}: {elapsed:.6f} s')
         return elapsed
 
     def reset(self):

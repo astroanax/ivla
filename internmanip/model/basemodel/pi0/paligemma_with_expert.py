@@ -56,8 +56,8 @@ def apply_rope(x, positions, max_wavelength=10_000):
 
 
 class PaliGemmaWithExpertConfig(PretrainedConfig):
-    model_type = "PaliGemmaWithExpertModel"
-    sub_configs = {"paligemma_config": AutoConfig, "gemma_expert_config": AutoConfig}
+    model_type = 'PaliGemmaWithExpertModel'
+    sub_configs = {'paligemma_config': AutoConfig, 'gemma_expert_config': AutoConfig}
 
     def __init__(
         self,
@@ -65,7 +65,7 @@ class PaliGemmaWithExpertConfig(PretrainedConfig):
         gemma_expert_config: dict | None = None,
         freeze_vision_encoder: bool = True,
         train_expert_only: bool = True,
-        attention_implementation: str = "eager",
+        attention_implementation: str = 'eager',
         **kwargs,
     ):
         self.freeze_vision_encoder = freeze_vision_encoder
@@ -74,82 +74,82 @@ class PaliGemmaWithExpertConfig(PretrainedConfig):
 
         if paligemma_config is None:
             # Default config from Pi0
-            self.paligemma_config = CONFIG_MAPPING["paligemma"](
-                transformers_version="4.48.1",
+            self.paligemma_config = CONFIG_MAPPING['paligemma'](
+                transformers_version='4.48.1',
                 _vocab_size=257152,
                 bos_token_id=2,
                 eos_token_id=1,
                 hidden_size=2048,
                 image_token_index=257152,
-                model_type="paligemma",
+                model_type='paligemma',
                 pad_token_id=0,
                 projection_dim=2048,
                 text_config={
-                    "hidden_activation": "gelu_pytorch_tanh",
-                    "hidden_size": 2048,
-                    "intermediate_size": 16384,
-                    "model_type": "gemma",
-                    "num_attention_heads": 8,
-                    "num_hidden_layers": 18,
-                    "num_image_tokens": 256,
-                    "num_key_value_heads": 1,
-                    "torch_dtype": "float32",
-                    "vocab_size": 257152,
+                    'hidden_activation': 'gelu_pytorch_tanh',
+                    'hidden_size': 2048,
+                    'intermediate_size': 16384,
+                    'model_type': 'gemma',
+                    'num_attention_heads': 8,
+                    'num_hidden_layers': 18,
+                    'num_image_tokens': 256,
+                    'num_key_value_heads': 1,
+                    'torch_dtype': 'float32',
+                    'vocab_size': 257152,
                 },
                 vision_config={
-                    "hidden_size": 1152,
-                    "intermediate_size": 4304,
-                    "model_type": "siglip_vision_model",
-                    "num_attention_heads": 16,
-                    "num_hidden_layers": 27,
-                    "num_image_tokens": 256,
-                    "patch_size": 14,
-                    "projection_dim": 2048,
-                    "projector_hidden_act": "gelu_fast",
-                    "torch_dtype": "float32",
-                    "vision_use_head": False,
+                    'hidden_size': 1152,
+                    'intermediate_size': 4304,
+                    'model_type': 'siglip_vision_model',
+                    'num_attention_heads': 16,
+                    'num_hidden_layers': 27,
+                    'num_image_tokens': 256,
+                    'patch_size': 14,
+                    'projection_dim': 2048,
+                    'projector_hidden_act': 'gelu_fast',
+                    'torch_dtype': 'float32',
+                    'vision_use_head': False,
                 },
             )
         elif isinstance(self.paligemma_config, dict):
             # Override Pi0 default config for PaliGemma
-            if "model_type" not in gemma_expert_config:
-                paligemma_config["model_type"] = "paligemma"
+            if 'model_type' not in gemma_expert_config:
+                paligemma_config['model_type'] = 'paligemma'
 
-            cfg_cls = CONFIG_MAPPING[paligemma_config["model_type"]]
+            cfg_cls = CONFIG_MAPPING[paligemma_config['model_type']]
             self.paligemma_config = cfg_cls(**paligemma_config)
 
         if gemma_expert_config is None:
             # Default config from Pi0
-            self.gemma_expert_config = CONFIG_MAPPING["gemma"](
+            self.gemma_expert_config = CONFIG_MAPPING['gemma'](
                 attention_bias=False,
                 attention_dropout=0.0,
                 bos_token_id=2,
                 eos_token_id=1,
                 head_dim=256,
-                hidden_act="gelu_pytorch_tanh",
-                hidden_activation="gelu_pytorch_tanh",
+                hidden_act='gelu_pytorch_tanh',
+                hidden_activation='gelu_pytorch_tanh',
                 hidden_size=1024,
                 initializer_range=0.02,
                 intermediate_size=4096,
                 max_position_embeddings=8192,
-                model_type="gemma",
+                model_type='gemma',
                 num_attention_heads=8,
                 num_hidden_layers=18,
                 num_key_value_heads=1,
                 pad_token_id=0,
                 rms_norm_eps=1e-06,
                 rope_theta=10000.0,
-                torch_dtype="float32",
-                transformers_version="4.48.1",
+                torch_dtype='float32',
+                transformers_version='4.48.1',
                 use_cache=True,
                 vocab_size=257152,
             )
         elif isinstance(self.gemma_expert_config, dict):
             # Override Pi0 default config for Gemma Expert
-            if "model_type" not in gemma_expert_config:
-                gemma_expert_config["model_type"] = "gemma"
+            if 'model_type' not in gemma_expert_config:
+                gemma_expert_config['model_type'] = 'gemma'
 
-            cfg_cls = CONFIG_MAPPING[paligemma_config["model_type"]]
+            cfg_cls = CONFIG_MAPPING[paligemma_config['model_type']]
             self.gemma_expert_config = cfg_cls(**gemma_expert_config)
 
         super().__init__(**kwargs)
@@ -158,10 +158,10 @@ class PaliGemmaWithExpertConfig(PretrainedConfig):
         super().__post_init__()
         if self.train_expert_only and not self.freeze_vision_encoder:
             raise ValueError(
-                "You set `freeze_vision_encoder=False` and `train_expert_only=True` which are not compatible."
+                'You set `freeze_vision_encoder=False` and `train_expert_only=True` which are not compatible.'
             )
 
-        if self.attention_implementation not in ["eager", "fa2", "flex"]:
+        if self.attention_implementation not in ['eager', 'fa2', 'flex']:
             raise ValueError(
                 f"Wrong value provided for `attention_implementation` ({self.attention_implementation}). Expected 'eager', 'fa2' or 'flex'."
             )
@@ -205,10 +205,10 @@ class PaliGemmaWithExpertModel(PreTrainedModel):
         self.paligemma = self.paligemma.to(dtype=torch.bfloat16)
 
         params_to_change_dtype = [
-            "language_model.model.layers",
-            "gemma_expert.model.layers",
-            "vision_tower",
-            "multi_modal",
+            'language_model.model.layers',
+            'gemma_expert.model.layers',
+            'vision_tower',
+            'multi_modal',
         ]
         for name, param in self.named_parameters():
             if any(selector in name for selector in params_to_change_dtype):
@@ -216,7 +216,7 @@ class PaliGemmaWithExpertModel(PreTrainedModel):
 
     def embed_image(self, image: torch.Tensor):
         # Handle different transformers versions
-        if hasattr(self.paligemma, "get_image_features"):
+        if hasattr(self.paligemma, 'get_image_features'):
             return self.paligemma.get_image_features(image)
         else:
             return self.paligemma.model.get_image_features(image)
@@ -243,7 +243,7 @@ class PaliGemmaWithExpertModel(PreTrainedModel):
             if hidden_states is None:
                 continue
             batch_size = hidden_states.shape[0]
-            
+
         # RMSNorm
         num_layers = self.paligemma.config.text_config.num_hidden_layers
         head_dim = self.paligemma.config.text_config.head_dim
@@ -257,7 +257,7 @@ class PaliGemmaWithExpertModel(PreTrainedModel):
                 try:
                     layer = models[i].layers[layer_idx]
                 except:
-                    layer = models[i].model.layers[layer_idx] 
+                    layer = models[i].model.layers[layer_idx]
                 # normalizer = torch.tensor(models[i].config.hidden_size**0.5, dtype=hidden_states.dtype)
                 # hidden_states = hidden_states * normalizer
 
@@ -290,17 +290,17 @@ class PaliGemmaWithExpertModel(PreTrainedModel):
             if use_cache:
                 if fill_kv_cache:
                     past_key_values[layer_idx] = {
-                        "key_states": key_states,
-                        "value_states": value_states,
+                        'key_states': key_states,
+                        'value_states': value_states,
                     }
                 else:
                     # TODO here, some optimization can be done - similar to a `StaticCache` we can declare the `max_len` before.
                     # so we create an empty cache, with just one cuda malloc, and if (in autoregressive case) we reach
                     # the max len, then we (for instance) double the cache size. This implementation already exists
                     # in `transformers`. (molbap)
-                    key_states = torch.cat([past_key_values[layer_idx]["key_states"], key_states], dim=1)
+                    key_states = torch.cat([past_key_values[layer_idx]['key_states'], key_states], dim=1)
                     value_states = torch.cat(
-                        [past_key_values[layer_idx]["value_states"], value_states], dim=1
+                        [past_key_values[layer_idx]['value_states'], value_states], dim=1
                     )
 
             attention_interface = self.get_attention_interface()
@@ -316,7 +316,7 @@ class PaliGemmaWithExpertModel(PreTrainedModel):
                 try:
                     layer = models[i].layers[layer_idx]
                 except:
-                    layer = models[i].model.layers[layer_idx] 
+                    layer = models[i].model.layers[layer_idx]
 
                 if hidden_states is not None:
                     end = start + hidden_states.shape[1]
@@ -363,9 +363,9 @@ class PaliGemmaWithExpertModel(PreTrainedModel):
         return outputs_embeds, past_key_values
 
     def get_attention_interface(self):
-        if self.config.attention_implementation == "fa2":
+        if self.config.attention_implementation == 'fa2':
             attention_interface = self.flash_attention_forward
-        elif self.config.attention_implementation == "flex":
+        elif self.config.attention_implementation == 'flex':
             attention_interface = flex_attention_forward
         else:
             attention_interface = self.eager_attention_forward
@@ -374,7 +374,7 @@ class PaliGemmaWithExpertModel(PreTrainedModel):
     def flash_attention_forward(
         self, attention_mask, batch_size, head_dim, query_states, key_states, value_states
     ):
-        raise NotImplementedError("FA2 is not implemented (yet)")
+        raise NotImplementedError('FA2 is not implemented (yet)')
 
     def eager_attention_forward(
         self, attention_mask, batch_size, head_dim, query_states, key_states, value_states

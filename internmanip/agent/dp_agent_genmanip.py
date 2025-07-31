@@ -39,7 +39,7 @@ def data_collator_single(features):
 
 def quaternion_to_euler_wxyz(
     quaternion: Sequence[float],
-    order: str = "xyz",
+    order: str = 'xyz',
 ) -> np.ndarray:
     """
     将四元数 (w,x,y,z) 转换为欧拉角 (默认 roll-pitch-yaw，对应 order)。
@@ -58,7 +58,7 @@ def quaternion_to_euler_wxyz(
     """
     q = np.asarray(quaternion, dtype=np.float64)
     if q.shape[-1] != 4:
-        raise ValueError("Quaternion must have 4 components [w, x, y, z]")
+        raise ValueError('Quaternion must have 4 components [w, x, y, z]')
     # 归一化
     q = q / np.linalg.norm(q)
     # SciPy 需要 (x,y,z,w) ⇒ 做一次重排
@@ -69,7 +69,7 @@ def quaternion_to_euler_wxyz(
 
 def euler_to_quaternion_wxyz(
     euler_angles: Sequence[float],
-    order: str = "xyz",
+    order: str = 'xyz',
 ) -> np.ndarray:
     """
     将欧拉角转换成四元数，返回格式 [w, x, y, z]。
@@ -100,11 +100,11 @@ class DPAgent(BaseAgent):
         # 确保config有model_kwargs参数
         if not hasattr(config, 'model_kwargs') or config.model_kwargs is None:
             config.model_kwargs = {}
-        
+
         super().__init__(config)
 
-        self.policy_model.compute_dtype = "bfloat16" # type: ignore
-        self.policy_model.config.compute_dtype = "bfloat16" # type: ignore
+        self.policy_model.compute_dtype = 'bfloat16' # type: ignore
+        self.policy_model.config.compute_dtype = 'bfloat16' # type: ignore
         # self.device = get_device_from_parameters(self.policy_model)  # 注释掉，改为动态获取
 
         # 适配新的配置格式
@@ -112,9 +112,9 @@ class DPAgent(BaseAgent):
             settings = config.agent_settings
         else:
             settings = config.model_cfg.model_settings # type: ignore
-        
+
         self.n_obs_steps = settings['n_obs_steps']
-        self.data_config_name = settings.get("data_config", "genmanip")
+        self.data_config_name = settings.get('data_config', 'genmanip')
         # modality configs and transforms
         embodiment_tag = EmbodimentTag(settings['embodiment_tag'])
         data_config_cls: BaseDataConfig = DATA_CONFIG_MAP[self.data_config_name]
@@ -128,7 +128,7 @@ class DPAgent(BaseAgent):
             modality_configs=modality_configs,
             transforms=self.transforms, # type: ignore
             embodiment_tag=embodiment_tag,
-            video_backend="decord",
+            video_backend='decord',
         )
 
         self.video_base_view = deque(maxlen=self.n_obs_steps)
@@ -154,7 +154,7 @@ class DPAgent(BaseAgent):
         gripper = action_dict['action.gripper']
         action = joints.tolist() +  ([0.4, 0.4] if gripper[0] <=0 else [0.0, 0.0])
         return action
-    
+
     def transform_action_back_eef(self,action):
         action = action.detach().cpu()
         ee_pos = action[:3]
@@ -168,7 +168,7 @@ class DPAgent(BaseAgent):
             'gripper_action': -1 if gripper < 0.5 else 1
         }
         return processed_action
-    
+
     def _predict_action(self, request):
         """
         predict the action based on the observation
@@ -192,10 +192,10 @@ class DPAgent(BaseAgent):
             self.ee_rot_state.append(self.ee_rot_state[-1])
             self.gripper_state.append(self.gripper_state[-1])
             self.language.append(self.language[-1])
-        
+
         raw_observation = {
             'video.base_view': np.array([x['rgb'] for x in self.video_base_view]),
-            'video.ego_view': np.array([x['rgb'] for x in self.video_ego_view]), 
+            'video.ego_view': np.array([x['rgb'] for x in self.video_ego_view]),
             'state.ee_pos': np.array(self.ee_pos_state),
             'state.ee_rot': np.array(self.ee_rot_state),
             'state.gripper': np.array(self.gripper_state),
@@ -213,7 +213,7 @@ class DPAgent(BaseAgent):
         actions = self.policy_model.inference(observation)
         actions = actions[0]
         return actions
-    
+
     def action_execution(self, request):
         """
         Execute the action in the action queue
@@ -227,9 +227,9 @@ class DPAgent(BaseAgent):
             current_action = self.action_queue.popleft()
             current_action = self.transform_action_back_eef(current_action)
         return current_action
-    
+
     def step(self, request: Dict[str, Any]):
-        if request[0]["franka_robot"]["step"] == 0:
+        if request[0]['franka_robot']['step'] == 0:
             _ = self.reset()
 
         # action = actions[0][0].detach().cpu().tolist()
@@ -238,7 +238,7 @@ class DPAgent(BaseAgent):
         # if len(self.action_history) == 0:
         #     for i in range(8):
         #         self.action_history.append(actions[i])
-            
+
         #     current_action = self.action_history.popleft()
         # else:
         #     current_action = self.action_history.popleft()
@@ -248,7 +248,7 @@ class DPAgent(BaseAgent):
         # current_action = actions[0]
         # current_action = self.transform_action_back_eef(current_action)
         current_action = self.action_execution(request)
-        print(f"action to be executed is {current_action}")
+        print(f'action to be executed is {current_action}')
         return [current_action]
 
     def reset(self):
@@ -261,5 +261,5 @@ class DPAgent(BaseAgent):
         self.language.clear()
         self.action_history.clear()
         self.action_queue.clear()
-        print("Reset the model......")
-        return {"status": "success"}
+        print('Reset the model......')
+        return {'status': 'success'}

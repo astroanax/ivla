@@ -8,4 +8,4 @@ from internmanip.configs.env.simpler_env import SimplerEnvSettings
 from internmanip.configs.env.genmanip_env import GenmanipEnvSettings
 
 
-__all__ = ["AgentCfg", "EnvCfg", "EvalCfg", "ServerCfg", "DistributedCfg", "CalvinEnvSettings", "SimplerEnvSettings", "GenmanipEnvSettings"]
+__all__ = ['AgentCfg', 'EnvCfg', 'EvalCfg', 'ServerCfg', 'DistributedCfg', 'CalvinEnvSettings', 'SimplerEnvSettings', 'GenmanipEnvSettings']

@@ -26,60 +26,60 @@ from lerobot.configs.policies import PreTrainedConfig
 def display(tensor: torch.Tensor):
     if tensor.dtype == torch.bool:
         tensor = tensor.float()
-    print(f"Shape: {tensor.shape}")
-    print(f"Mean: {tensor.mean().item()}")
-    print(f"Std: {tensor.std().item()}")
-    print(f"Min: {tensor.min().item()}")
-    print(f"Max: {tensor.max().item()}")
+    print(f'Shape: {tensor.shape}')
+    print(f'Mean: {tensor.mean().item()}')
+    print(f'Std: {tensor.std().item()}')
+    print(f'Min: {tensor.min().item()}')
+    print(f'Max: {tensor.max().item()}')
 
 
 def main():
     num_motors = 14
-    device = "cuda"
+    device = 'cuda'
     # model_name = "pi0_aloha_towel"
-    model_name = "pi0_aloha_sim"
+    model_name = 'pi0_aloha_sim'
 
-    if model_name == "pi0_aloha_towel":
-        dataset_repo_id = "lerobot/aloha_static_towel"
+    if model_name == 'pi0_aloha_towel':
+        dataset_repo_id = 'lerobot/aloha_static_towel'
     else:
-        dataset_repo_id = "lerobot/aloha_sim_transfer_cube_human"
+        dataset_repo_id = 'lerobot/aloha_sim_transfer_cube_human'
 
-    ckpt_torch_dir = Path.home() / f".cache/openpi/openpi-assets/checkpoints/{model_name}_pytorch"
-    ckpt_jax_dir = Path.home() / f".cache/openpi/openpi-assets/checkpoints/{model_name}"
-    save_dir = Path(f"../openpi/data/{model_name}/save")
+    ckpt_torch_dir = Path.home() / f'.cache/openpi/openpi-assets/checkpoints/{model_name}_pytorch'
+    ckpt_jax_dir = Path.home() / f'.cache/openpi/openpi-assets/checkpoints/{model_name}'
+    save_dir = Path(f'../openpi/data/{model_name}/save')
 
-    with open(save_dir / "example.pkl", "rb") as f:
+    with open(save_dir / 'example.pkl', 'rb') as f:
         example = pickle.load(f)
-    with open(save_dir / "outputs.pkl", "rb") as f:
+    with open(save_dir / 'outputs.pkl', 'rb') as f:
         outputs = pickle.load(f)
-    with open(save_dir / "noise.pkl", "rb") as f:
+    with open(save_dir / 'noise.pkl', 'rb') as f:
         noise = pickle.load(f)
 
-    with open(ckpt_jax_dir / "assets/norm_stats.json") as f:
+    with open(ckpt_jax_dir / 'assets/norm_stats.json') as f:
         norm_stats = json.load(f)
 
     # Override stats
     dataset_meta = LeRobotDatasetMetadata(dataset_repo_id)
-    dataset_meta.stats["observation.state"]["mean"] = torch.tensor(
-        norm_stats["norm_stats"]["state"]["mean"][:num_motors], dtype=torch.float32
+    dataset_meta.stats['observation.state']['mean'] = torch.tensor(
+        norm_stats['norm_stats']['state']['mean'][:num_motors], dtype=torch.float32
     )
-    dataset_meta.stats["observation.state"]["std"] = torch.tensor(
-        norm_stats["norm_stats"]["state"]["std"][:num_motors], dtype=torch.float32
+    dataset_meta.stats['observation.state']['std'] = torch.tensor(
+        norm_stats['norm_stats']['state']['std'][:num_motors], dtype=torch.float32
     )
 
     # Create LeRobot batch from Jax
     batch = {}
-    for cam_key, uint_chw_array in example["images"].items():
-        batch[f"observation.images.{cam_key}"] = torch.from_numpy(uint_chw_array) / 255.0
-    batch["observation.state"] = torch.from_numpy(example["state"])
-    batch["action"] = torch.from_numpy(outputs["actions"])
-    batch["task"] = example["prompt"]
+    for cam_key, uint_chw_array in example['images'].items():
+        batch[f'observation.images.{cam_key}'] = torch.from_numpy(uint_chw_array) / 255.0
+    batch['observation.state'] = torch.from_numpy(example['state'])
+    batch['action'] = torch.from_numpy(outputs['actions'])
+    batch['task'] = example['prompt']
 
-    if model_name == "pi0_aloha_towel":
-        del batch["observation.images.cam_low"]
-    elif model_name == "pi0_aloha_sim":
-        batch["observation.images.top"] = batch["observation.images.cam_high"]
-        del batch["observation.images.cam_high"]
+    if model_name == 'pi0_aloha_towel':
+        del batch['observation.images.cam_low']
+    elif model_name == 'pi0_aloha_sim':
+        batch['observation.images.top'] = batch['observation.images.cam_high']
+        del batch['observation.images.cam_high']
 
     # Batchify
     for key in batch:
@@ -88,7 +88,7 @@ def main():
         elif isinstance(batch[key], str):
             batch[key] = [batch[key]]
         else:
-            raise ValueError(f"{key}, {batch[key]}")
+            raise ValueError(f'{key}, {batch[key]}')
 
     # To device
     for k in batch:
@@ -116,16 +116,16 @@ def main():
         actions.append(action)
 
     actions = torch.stack(actions, dim=1)
-    pi_actions = batch["action"]
-    print("actions")
+    pi_actions = batch['action']
+    print('actions')
     display(actions)
     print()
-    print("pi_actions")
+    print('pi_actions')
     display(pi_actions)
-    print("atol=3e-2", torch.allclose(actions, pi_actions, atol=3e-2))
-    print("atol=2e-2", torch.allclose(actions, pi_actions, atol=2e-2))
-    print("atol=1e-2", torch.allclose(actions, pi_actions, atol=1e-2))
+    print('atol=3e-2', torch.allclose(actions, pi_actions, atol=3e-2))
+    print('atol=2e-2', torch.allclose(actions, pi_actions, atol=2e-2))
+    print('atol=1e-2', torch.allclose(actions, pi_actions, atol=1e-2))
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()

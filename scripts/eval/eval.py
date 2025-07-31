@@ -51,19 +51,19 @@ def calc_mse_for_single_trajectory(
         data_point = dataset.get_step_data(traj_id, step_count)
 
         concat_gt_action = np.concatenate(
-            [data_point[f"action.{key}"][0] for key in modality_keys], axis=0
+            [data_point[f'action.{key}'][0] for key in modality_keys], axis=0
         )
 
         gt_action_joints_across_time.append(concat_gt_action)
 
-        if step_count % action_horizon == 0: 
-            print("inferencing at step: ", step_count)
+        if step_count % action_horizon == 0:
+            print('inferencing at step: ', step_count)
             action_chunk = policy.get_action(data_point)
             for j in range(action_horizon):
                 # NOTE: concat_pred_action = action[f"action.{modality_keys[0]}"][j]
                 # the np.atleast_1d is to ensure the action is a 1D array, handle where single value is returned
                 concat_pred_action = np.concatenate(
-                    [np.atleast_1d(action_chunk[f"action.{key}"][j]) for key in modality_keys],
+                    [np.atleast_1d(action_chunk[f'action.{key}'][j]) for key in modality_keys],
                     axis=0,
                 )
                 if 'gripper' in keys:
@@ -82,7 +82,7 @@ def calc_mse_for_single_trajectory(
     # calc MSE across time
     se = (gt_action_joints_across_time - pred_action_joints_across_time) ** 2
     mse = np.mean(se)
-    print("Unnormalized Action MSE across single traj:", mse)
+    print('Unnormalized Action MSE across single traj:', mse)
     # calc MSE across time for different action step
     mse_=[]
     indices = np.arange(steps)
@@ -91,7 +91,7 @@ def calc_mse_for_single_trajectory(
         group_loss = np.mean(se[mask])
         mse_.append(group_loss)
 
-    print("Unnormalized Action Group MSE across single traj:", mse_)
+    print('Unnormalized Action Group MSE across single traj:', mse_)
 
     num_of_joints = gt_action_joints_across_time.shape[1]
 
@@ -102,27 +102,27 @@ def calc_mse_for_single_trajectory(
         fig.suptitle(
             f"Trajectory {traj_id} - Modalities: {', '.join(modality_keys)}",
             fontsize=16,
-            color="blue",
+            color='blue',
         )
 
         for i, ax in enumerate(axes):
-            ax.plot(gt_action_joints_across_time[:, i], label="gt action joints")
-            ax.plot(pred_action_joints_across_time[:, i], label="pred action joints")
+            ax.plot(gt_action_joints_across_time[:, i], label='gt action joints')
+            ax.plot(pred_action_joints_across_time[:, i], label='pred action joints')
 
             # put a dot every ACTION_HORIZON
             for j in range(0, steps, action_horizon):
                 if j == 0:
-                    ax.plot(j, gt_action_joints_across_time[j, i], "ro", label="inference point")
+                    ax.plot(j, gt_action_joints_across_time[j, i], 'ro', label='inference point')
                 else:
-                    ax.plot(j, gt_action_joints_across_time[j, i], "ro")
+                    ax.plot(j, gt_action_joints_across_time[j, i], 'ro')
 
             ax.set_title(keys[i])
             ax.legend()
         plt.tight_layout()
-        save_dir = "Checkpoints/tmp/{}/".format(
-            str(policy.model_path).split("/")[-2]
+        save_dir = 'Checkpoints/tmp/{}/'.format(
+            str(policy.model_path).split('/')[-2]
         )
         os.makedirs(save_dir, exist_ok=True)
-        plt.savefig(os.path.join(save_dir, f"{traj_id}.png"))
+        plt.savefig(os.path.join(save_dir, f'{traj_id}.png'))
 
     return mse, mse_

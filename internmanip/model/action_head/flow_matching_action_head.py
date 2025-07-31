@@ -114,7 +114,7 @@ class MultiEmbodimentActionEncoder(nn.Module):
             timesteps = timesteps.unsqueeze(1).expand(-1, T)
         else:
             raise ValueError(
-                "Expected `timesteps` to have shape (B,) so we can replicate across T."
+                'Expected `timesteps` to have shape (B,) so we can replicate across T.'
             )
 
         # 2) Standard action MLP step for shape => (B, T, w)
@@ -135,36 +135,36 @@ class MultiEmbodimentActionEncoder(nn.Module):
 @dataclass
 class FlowmatchingActionHeadConfig(PretrainedConfig):
     add_pos_embed: bool = field(
-        default=True, metadata={"help": "Whether to add positional embedding"}
+        default=True, metadata={'help': 'Whether to add positional embedding'}
     )
-    model_dtype: str = field(default="float32", metadata={"help": "Model data type."})
+    model_dtype: str = field(default='float32', metadata={'help': 'Model data type.'})
     diffusion_model_cfg: dict = field(
-        default=None, metadata={"help": "Diffusion model configuration."}
+        default=None, metadata={'help': 'Diffusion model configuration.'}
     )
     input_embedding_dim: int = field(
-        default=1536, metadata={"help": "Input embedding channel dimension."}
+        default=1536, metadata={'help': 'Input embedding channel dimension.'}
     )
 
-    hidden_size: int = field(default=1024, metadata={"help": "Input embedding dimension."})
-    max_seq_len: int = field(default=1024, metadata={"help": "Maxium Sequence Length"})
-    action_dim: int = field(default=None, metadata={"help": "Action dimension."})
-    action_horizon: int = field(default=None, metadata={"help": "Action horizon."})
-    noise_beta_alpha: float = field(default=1.5, metadata={"help": ""})
-    noise_beta_beta: float = field(default=1.0, metadata={"help": ""})
+    hidden_size: int = field(default=1024, metadata={'help': 'Input embedding dimension.'})
+    max_seq_len: int = field(default=1024, metadata={'help': 'Maxium Sequence Length'})
+    action_dim: int = field(default=None, metadata={'help': 'Action dimension.'})
+    action_horizon: int = field(default=None, metadata={'help': 'Action horizon.'})
+    noise_beta_alpha: float = field(default=1.5, metadata={'help': ''})
+    noise_beta_beta: float = field(default=1.0, metadata={'help': ''})
     noise_s: float = field(
-        default=0.999, metadata={"help": "Flow matching noise Beta distribution s."}
+        default=0.999, metadata={'help': 'Flow matching noise Beta distribution s.'}
     )
     num_timestep_buckets: int = field(
-        default=1000, metadata={"help": "Number of timestep discretization buckets."}
+        default=1000, metadata={'help': 'Number of timestep discretization buckets.'}
     )
     num_inference_timesteps: int = field(
         default=None,
-        metadata={"help": "Number of inference steps for noise diffusion."},
+        metadata={'help': 'Number of inference steps for noise diffusion.'},
     )
-    max_num_embodiments: int = field(default=32, metadata={"help": "Number of embodiments."})
-    tune_projector: bool = field(default=True, metadata={"help": "Whether to tune the projector."})
+    max_num_embodiments: int = field(default=32, metadata={'help': 'Number of embodiments.'})
+    tune_projector: bool = field(default=True, metadata={'help': 'Whether to tune the projector.'})
     tune_diffusion_model: bool = field(
-        default=True, metadata={"help": "Whether to tune the diffusion model."}
+        default=True, metadata={'help': 'Whether to tune the diffusion model.'}
     )
 
     def __init__(self, **kwargs):
@@ -227,15 +227,15 @@ class FlowmatchingActionHead(nn.Module):
                 self.position_embedding.requires_grad_(False)
         if not tune_diffusion_model:
             self.model.requires_grad_(False)
-        print(f"Tune action head projector: {self.tune_projector}")
-        print(f"Tune action head diffusion model: {self.tune_diffusion_model}")
+        print(f'Tune action head projector: {self.tune_projector}')
+        print(f'Tune action head diffusion model: {self.tune_diffusion_model}')
         # Check if any parameters are still trainable. If not, print a warning.
         if not tune_projector and not tune_diffusion_model:
             for name, p in self.named_parameters():
                 if p.requires_grad:
-                    print(f"Action head trainable parameter: {name}")
+                    print(f'Action head trainable parameter: {name}')
         if not any(p.requires_grad for p in self.parameters()):
-            print("Warning: No action head trainable parameters found.")
+            print('Warning: No action head trainable parameters found.')
 
     def set_frozen_modules_to_eval_mode(self):
         """
@@ -307,11 +307,11 @@ class FlowmatchingActionHead(nn.Module):
         pred = self.action_decoder(model_output, embodiment_id)
         pred_actions_velocity = pred[:, -actions.shape[1] :] # only action, without state
         action_mask = action_input.action_mask
-        loss = F.mse_loss(pred_actions_velocity, velocity, reduction="none") * action_mask
+        loss = F.mse_loss(pred_actions_velocity, velocity, reduction='none') * action_mask
         loss = loss.sum() / action_mask.sum()
         output_dict = {
-            "loss": loss,
-            "predictions": pred_actions_velocity
+            'loss': loss,
+            'predictions': pred_actions_velocity
         }
         return BatchFeature(data=output_dict)
 
@@ -322,13 +322,13 @@ class FlowmatchingActionHead(nn.Module):
         Calculate the loss.
         """
         action_mask = action_input.action_mask
-        loss = F.mse_loss(outputs['predictions'], self.velocity, reduction="none") * action_mask
+        loss = F.mse_loss(outputs['predictions'], self.velocity, reduction='none') * action_mask
         loss = loss.sum() / action_mask.sum()
         output_dict = {
-            "loss": loss,
+            'loss': loss,
         }
         return BatchFeature(data=output_dict)
-    
+
 
     @torch.no_grad()
     def inference(self, backbone_output: BatchFeature, action_input: BatchFeature) -> BatchFeature:
@@ -384,7 +384,7 @@ class FlowmatchingActionHead(nn.Module):
 
             # Update actions using euler integration.
             actions = actions + dt * pred_velocity
-        return BatchFeature(data={"action_pred": actions})
+        return BatchFeature(data={'action_pred': actions})
 
     @property
     def device(self):
@@ -401,44 +401,44 @@ class FlowmatchingActionHeadConfig_1_5(PretrainedConfig):
     """NOTE: N1.5 uses XEmbFlowmatchingPolicyHeadConfig as action head"""
 
     add_pos_embed: bool = field(
-        default=True, metadata={"help": "Whether to add positional embedding"}
+        default=True, metadata={'help': 'Whether to add positional embedding'}
     )
-    model_dtype: str = field(default="float32", metadata={"help": "Model data type."})
+    model_dtype: str = field(default='float32', metadata={'help': 'Model data type.'})
     diffusion_model_cfg: dict = field(
-        default=None, metadata={"help": "Diffusion model configuration."}
+        default=None, metadata={'help': 'Diffusion model configuration.'}
     )
     input_embedding_dim: int = field(
-        default=1536, metadata={"help": "Input embedding channel dimension."}
+        default=1536, metadata={'help': 'Input embedding channel dimension.'}
     )
     backbone_embedding_dim: int = field(
-        default=1536, metadata={"help": "Backbone embedding channel dimension."}
+        default=1536, metadata={'help': 'Backbone embedding channel dimension.'}
     )
 
-    hidden_size: int = field(default=1024, metadata={"help": "Input embedding dimension."})
-    max_seq_len: int = field(default=1024, metadata={"help": "Maxium Sequence Length"})
-    action_dim: int = field(default=None, metadata={"help": "Action dimension."})
-    action_horizon: int = field(default=None, metadata={"help": "Action horizon."})
-    noise_beta_alpha: float = field(default=1.5, metadata={"help": ""})
-    noise_beta_beta: float = field(default=1.0, metadata={"help": ""})
+    hidden_size: int = field(default=1024, metadata={'help': 'Input embedding dimension.'})
+    max_seq_len: int = field(default=1024, metadata={'help': 'Maxium Sequence Length'})
+    action_dim: int = field(default=None, metadata={'help': 'Action dimension.'})
+    action_horizon: int = field(default=None, metadata={'help': 'Action horizon.'})
+    noise_beta_alpha: float = field(default=1.5, metadata={'help': ''})
+    noise_beta_beta: float = field(default=1.0, metadata={'help': ''})
     noise_s: float = field(
-        default=0.999, metadata={"help": "Flow matching noise Beta distribution s."}
+        default=0.999, metadata={'help': 'Flow matching noise Beta distribution s.'}
     )
     num_timestep_buckets: int = field(
-        default=1000, metadata={"help": "Number of timestep discretization buckets."}
+        default=1000, metadata={'help': 'Number of timestep discretization buckets.'}
     )
     num_inference_timesteps: int = field(
         default=None,
-        metadata={"help": "Number of inference steps for noise diffusion."},
+        metadata={'help': 'Number of inference steps for noise diffusion.'},
     )
-    max_num_embodiments: int = field(default=32, metadata={"help": "Number of embodiments."})
-    tune_projector: bool = field(default=True, metadata={"help": "Whether to tune the projector."})
+    max_num_embodiments: int = field(default=32, metadata={'help': 'Number of embodiments.'})
+    tune_projector: bool = field(default=True, metadata={'help': 'Whether to tune the projector.'})
     tune_diffusion_model: bool = field(
-        default=True, metadata={"help": "Whether to tune the diffusion model."}
+        default=True, metadata={'help': 'Whether to tune the diffusion model.'}
     )
     load_pretrained_det_decode_layer_path: str = field(
-        default=None, metadata={"help": "Path to pretrained detection model."}
+        default=None, metadata={'help': 'Path to pretrained detection model.'}
     )
-    detection_coeff: float = field(default=1.0, metadata={"help": "Detection coefficient."})
+    detection_coeff: float = field(default=1.0, metadata={'help': 'Detection coefficient.'})
 
     freeze_decode_layer: bool = field(default=False)
     expand_batch: int = field(default=None)
@@ -518,15 +518,15 @@ class FlowmatchingActionHead_1_5(nn.Module):
                 self.position_embedding.requires_grad_(False)
         if not tune_diffusion_model:
             self.model.requires_grad_(False)
-        print(f"Tune action head projector: {self.tune_projector}")
-        print(f"Tune action head diffusion model: {self.tune_diffusion_model}")
+        print(f'Tune action head projector: {self.tune_projector}')
+        print(f'Tune action head diffusion model: {self.tune_diffusion_model}')
         # Check if any parameters are still trainable. If not, print a warning.
         if not tune_projector and not tune_diffusion_model:
             for name, p in self.named_parameters():
                 if p.requires_grad:
-                    print(f"Action head trainable parameter: {name}")
+                    print(f'Action head trainable parameter: {name}')
         if not any(p.requires_grad for p in self.parameters()):
-            print("Warning: No action head trainable parameters found.")
+            print('Warning: No action head trainable parameters found.')
 
         # if self.freeze_decode_layer:
         #     self.decode_layer.requires_grad_(False)
@@ -555,10 +555,10 @@ class FlowmatchingActionHead_1_5(nn.Module):
         return BatchFeature(data=batch)
 
     def process_backbone_output(self, backbone_output: BatchFeature) -> BatchFeature:
-        backbone_features = backbone_output["backbone_features"]
+        backbone_features = backbone_output['backbone_features']
         backbone_features = self.vlln(backbone_features)
         backbone_features = self.vl_self_attention(backbone_features)
-        backbone_output["backbone_features"] = backbone_features
+        backbone_output['backbone_features'] = backbone_features
         return backbone_output
 
     def forward(self, backbone_output: BatchFeature, action_input: BatchFeature) -> BatchFeature:
@@ -632,19 +632,19 @@ class FlowmatchingActionHead_1_5(nn.Module):
 
         # Slice out only the action portion of pred and target.
         action_mask = action_input.action_mask
-        loss = F.mse_loss(pred_actions, velocity, reduction="none") * action_mask
+        loss = F.mse_loss(pred_actions, velocity, reduction='none') * action_mask
         loss = loss.sum() / action_mask.sum()
         # output_dict = {
         #     "loss": loss,
         # }
         # return BatchFeature(data=output_dict)
         output_dict = {
-            "loss": loss,
-            "predictions": pred_actions
+            'loss': loss,
+            'predictions': pred_actions
         }
         return BatchFeature(data=output_dict)
-    
-    
+
+
 
 
 
@@ -705,7 +705,7 @@ class FlowmatchingActionHead_1_5(nn.Module):
 
             # Update actions using euler integration.
             actions = actions + dt * pred_velocity
-        return BatchFeature(data={"action_pred": actions})
+        return BatchFeature(data={'action_pred': actions})
 
     @property
     def device(self):

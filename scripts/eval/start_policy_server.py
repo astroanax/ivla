@@ -20,8 +20,8 @@ import argparse
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--host", type=str, default="localhost")
-    parser.add_argument("--port", type=int, default=5000)
+    parser.add_argument('--host', type=str, default='localhost')
+    parser.add_argument('--port', type=int, default=5000)
     args = parser.parse_args()
     server_cfg = ServerCfg(server_host=args.host, server_port=args.port)
 

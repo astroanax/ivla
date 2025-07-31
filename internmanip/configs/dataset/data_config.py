@@ -44,10 +44,10 @@ class BaseDataConfig(ABC):
 
 class SweepDataConfig(BaseDataConfig):
 
-    video_keys = ["video.base_view","video.ego_view"]
-    state_keys = ["state.ee_pos","state.ee_rot"]
-    action_keys = ["action.delta_ee_pos","action.delta_ee_rot", "action.gripper"]
-    language_keys = ["annotation.human.action.task_description"]
+    video_keys = ['video.base_view','video.ego_view']
+    state_keys = ['state.ee_pos','state.ee_rot']
+    action_keys = ['action.delta_ee_pos','action.delta_ee_rot', 'action.gripper']
+    language_keys = ['annotation.human.action.task_description']
 
     def modality_config(self, observation_indices, action_indices) -> dict[str, ModalityConfig]:
         self.action_indices = action_indices
@@ -73,10 +73,10 @@ class SweepDataConfig(BaseDataConfig):
         )
 
         modality_configs = {
-            "video": video_modality,
-            "state": state_modality,
-            "action": action_modality,
-            "language": language_modality,
+            'video': video_modality,
+            'state': state_modality,
+            'action': action_modality,
+            'language': language_modality,
         }
 
         return modality_configs
@@ -85,7 +85,7 @@ class SweepDataConfig(BaseDataConfig):
         transforms = [
             VideoToTensor(apply_to=self.video_keys),
             VideoCrop(apply_to=self.video_keys, scale=0.95),
-            VideoResize(apply_to=self.video_keys, height=224, width=224, interpolation="linear"),
+            VideoResize(apply_to=self.video_keys, height=224, width=224, interpolation='linear'),
             VideoColorJitter(
                 apply_to=self.video_keys,
                 brightness=0.3,
@@ -98,8 +98,8 @@ class SweepDataConfig(BaseDataConfig):
             StateActionTransform(
                 apply_to=self.state_keys,
                 normalization_modes={
-                    "state.ee_pos": "mean_std",
-                    "state.ee_rot": "mean_std",
+                    'state.ee_pos': 'mean_std',
+                    'state.ee_rot': 'mean_std',
                 },
             ),
             # action transforms
@@ -107,9 +107,9 @@ class SweepDataConfig(BaseDataConfig):
             StateActionTransform(
                 apply_to=self.action_keys,
                 normalization_modes={
-                    "action.delta_ee_pos": "mean_std",
-                    "action.delta_ee_rot": "mean_std",
-                    "action.gripper": "binary"
+                    'action.delta_ee_pos': 'mean_std',
+                    'action.delta_ee_rot': 'mean_std',
+                    'action.gripper': 'binary'
                 }
             ),
             # concat transforms
@@ -125,10 +125,10 @@ class SweepDataConfig(BaseDataConfig):
 
 class BridgeDataV2DataConfig(BaseDataConfig):
 
-    video_keys = ["video.image_0"]
-    state_keys = ["state.ee_pos","state.ee_rot","state.gripper"]
-    action_keys = ["action.delta_ee_pos","action.delta_ee_rot","action.gripper"]
-    language_keys = ["annotation.human.action.task_description"]
+    video_keys = ['video.image_0']
+    state_keys = ['state.ee_pos','state.ee_rot','state.gripper']
+    action_keys = ['action.delta_ee_pos','action.delta_ee_rot','action.gripper']
+    language_keys = ['annotation.human.action.task_description']
 
     def modality_config(self, observation_indices, action_indices) -> dict[str, ModalityConfig]:
         self.action_indices = action_indices
@@ -154,10 +154,10 @@ class BridgeDataV2DataConfig(BaseDataConfig):
         )
 
         modality_configs = {
-            "video": video_modality,
-            "state": state_modality,
-            "action": action_modality,
-            "language": language_modality,
+            'video': video_modality,
+            'state': state_modality,
+            'action': action_modality,
+            'language': language_modality,
         }
 
         return modality_configs
@@ -166,7 +166,7 @@ class BridgeDataV2DataConfig(BaseDataConfig):
         transforms = [
             VideoToTensor(apply_to=self.video_keys),
             VideoCrop(apply_to=self.video_keys, scale=0.95),
-            VideoResize(apply_to=self.video_keys, height=224, width=224, interpolation="linear"),
+            VideoResize(apply_to=self.video_keys, height=224, width=224, interpolation='linear'),
             VideoColorJitter(
                 apply_to=self.video_keys,
                 brightness=0.3,
@@ -179,9 +179,9 @@ class BridgeDataV2DataConfig(BaseDataConfig):
             StateActionTransform(
                 apply_to=self.state_keys,
                 normalization_modes={
-                    "state.ee_pos": "mean_std",
-                    "state.ee_rot": "mean_std",
-                    "state.gripper": "binary"
+                    'state.ee_pos': 'mean_std',
+                    'state.ee_rot': 'mean_std',
+                    'state.gripper': 'binary'
                 },
             ),
             # action transforms
@@ -189,9 +189,9 @@ class BridgeDataV2DataConfig(BaseDataConfig):
             StateActionTransform(
                 apply_to=self.action_keys,
                 normalization_modes={
-                    "action.delta_ee_pos": "mean_std",
-                    "action.delta_ee_rot": "mean_std",
-                    "action.gripper": "binary"
+                    'action.delta_ee_pos': 'mean_std',
+                    'action.delta_ee_rot': 'mean_std',
+                    'action.gripper': 'binary'
                 }
             ),
             # concat transforms
@@ -206,10 +206,10 @@ class BridgeDataV2DataConfig(BaseDataConfig):
 ###########################################################################################
 
 class GenManipDataConfig(BaseDataConfig):
-    video_keys = ["video.ego_view", "video.base_view", "video.base_2_view"]
-    state_keys = ["state.joints","state.gripper","state.joints_vel","state.gripper_vel","state.ee_pos","state.ee_rot"]
-    action_keys = ["action.gripper","action.delta_ee_pos","action.delta_ee_rot"]
-    language_keys = ["annotation.human.action.task_description"]
+    video_keys = ['video.ego_view', 'video.base_view', 'video.base_2_view']
+    state_keys = ['state.joints','state.gripper','state.joints_vel','state.gripper_vel','state.ee_pos','state.ee_rot']
+    action_keys = ['action.gripper','action.delta_ee_pos','action.delta_ee_rot']
+    language_keys = ['annotation.human.action.task_description']
 
     def modality_config(self, observation_indices, action_indices) -> dict[str, ModalityConfig]:
         self.action_indices = action_indices
@@ -236,10 +236,10 @@ class GenManipDataConfig(BaseDataConfig):
 
 
         modality_configs = {
-            "video": video_modality,
-            "state": state_modality,
-            "action": action_modality,
-            "language": language_modality,
+            'video': video_modality,
+            'state': state_modality,
+            'action': action_modality,
+            'language': language_modality,
         }
 
         return modality_configs
@@ -248,7 +248,7 @@ class GenManipDataConfig(BaseDataConfig):
         transforms = [
             VideoToTensor(apply_to=self.video_keys),
             VideoCrop(apply_to=self.video_keys, scale=0.95),
-            VideoResize(apply_to=self.video_keys, height=224, width=224, interpolation="linear"),
+            VideoResize(apply_to=self.video_keys, height=224, width=224, interpolation='linear'),
             VideoColorJitter(
                 apply_to=self.video_keys,
                 brightness=0.3,
@@ -261,12 +261,12 @@ class GenManipDataConfig(BaseDataConfig):
             StateActionTransform(
                 apply_to=self.state_keys,
                 normalization_modes={
-                    "state.joints": "mean_std",
-                    "state.gripper": "binary",
-                    "state.joints_vel": "mean_std",
-                    "state.gripper_vel": "binary",
-                    "state.ee_pos": "mean_std",
-                    "state.ee_rot": "mean_std"
+                    'state.joints': 'mean_std',
+                    'state.gripper': 'binary',
+                    'state.joints_vel': 'mean_std',
+                    'state.gripper_vel': 'binary',
+                    'state.ee_pos': 'mean_std',
+                    'state.ee_rot': 'mean_std'
                 },
             ),
             # action transforms
@@ -274,9 +274,9 @@ class GenManipDataConfig(BaseDataConfig):
             StateActionTransform(
                 apply_to=self.action_keys,
                 normalization_modes={
-                    "action.gripper": "binary",
-                    "action.delta_ee_pos": "mean_std",
-                    "action.delta_ee_rot": "mean_std"
+                    'action.gripper': 'binary',
+                    'action.delta_ee_pos': 'mean_std',
+                    'action.delta_ee_rot': 'mean_std'
                 }
             ),
             # concat transforms
@@ -291,10 +291,10 @@ class GenManipDataConfig(BaseDataConfig):
 ###########################################################################################
 
 class GoogleRobotDataConfig(BaseDataConfig):
-    video_keys = ["video.image"]
-    state_keys = ["state.ee_pos","state.ee_rot","state.gripper"]
-    action_keys = ["action.delta_ee_pos","action.delta_ee_rot", "action.gripper"]
-    language_keys = ["annotation.human.action.task_description"]
+    video_keys = ['video.image']
+    state_keys = ['state.ee_pos','state.ee_rot','state.gripper']
+    action_keys = ['action.delta_ee_pos','action.delta_ee_rot', 'action.gripper']
+    language_keys = ['annotation.human.action.task_description']
 
     def modality_config(self, observation_indices, action_indices) -> dict[str, ModalityConfig]:
         self.action_indices = action_indices
@@ -320,10 +320,10 @@ class GoogleRobotDataConfig(BaseDataConfig):
         )
 
         modality_configs = {
-            "video": video_modality,
-            "state": state_modality,
-            "action": action_modality,
-            "language": language_modality,
+            'video': video_modality,
+            'state': state_modality,
+            'action': action_modality,
+            'language': language_modality,
         }
 
         return modality_configs
@@ -332,7 +332,7 @@ class GoogleRobotDataConfig(BaseDataConfig):
         transforms = [
             VideoToTensor(apply_to=self.video_keys),
             VideoCrop(apply_to=self.video_keys, scale=0.95),
-            VideoResize(apply_to=self.video_keys, height=224, width=224, interpolation="linear"),
+            VideoResize(apply_to=self.video_keys, height=224, width=224, interpolation='linear'),
             VideoColorJitter(
                 apply_to=self.video_keys,
                 brightness=0.3,
@@ -345,9 +345,9 @@ class GoogleRobotDataConfig(BaseDataConfig):
             StateActionTransform(
                 apply_to=self.state_keys,
                 normalization_modes={
-                    "state.ee_pos": "mean_std",
-                    "state.ee_rot": "mean_std",
-                    "state.gripper": "binary"
+                    'state.ee_pos': 'mean_std',
+                    'state.ee_rot': 'mean_std',
+                    'state.gripper': 'binary'
                 },
             ),
             # action transforms
@@ -355,9 +355,9 @@ class GoogleRobotDataConfig(BaseDataConfig):
             StateActionTransform(
                 apply_to=self.action_keys,
                 normalization_modes={
-                    "action.delta_ee_pos": "mean_std",
-                    "action.delta_ee_rot": "mean_std",
-                    "action.gripper": "binary"
+                    'action.delta_ee_pos': 'mean_std',
+                    'action.delta_ee_rot': 'mean_std',
+                    'action.gripper': 'binary'
                 }
             ),
             # concat transforms
@@ -372,10 +372,10 @@ class GoogleRobotDataConfig(BaseDataConfig):
 ###########################################################################################
 
 class CalvinDataConfig(BaseDataConfig):
-    video_keys = ["video.image_base", "video.image_wrist"]
-    state_keys = ["state.ee_pos","state.ee_rot"]
-    action_keys = ["action.delta_ee_pos","action.delta_ee_rot","action.gripper"]
-    language_keys = ["annotation.human.action.task_description"]
+    video_keys = ['video.image_base', 'video.image_wrist']
+    state_keys = ['state.ee_pos','state.ee_rot']
+    action_keys = ['action.delta_ee_pos','action.delta_ee_rot','action.gripper']
+    language_keys = ['annotation.human.action.task_description']
 
     def modality_config(self, observation_indices, action_indices) -> dict[str, ModalityConfig]:
         self.action_indices = action_indices
@@ -401,10 +401,10 @@ class CalvinDataConfig(BaseDataConfig):
         )
 
         modality_configs = {
-            "video": video_modality,
-            "state": state_modality,
-            "action": action_modality,
-            "language": language_modality,
+            'video': video_modality,
+            'state': state_modality,
+            'action': action_modality,
+            'language': language_modality,
         }
 
         return modality_configs
@@ -413,10 +413,10 @@ class CalvinDataConfig(BaseDataConfig):
         transforms = [
             VideoToTensor(apply_to=[self.video_keys[0]]),
             VideoCrop(apply_to=[self.video_keys[0]], scale=0.95),
-            VideoResize(apply_to=[self.video_keys[0]], height=224, width=224, interpolation="linear"),
+            VideoResize(apply_to=[self.video_keys[0]], height=224, width=224, interpolation='linear'),
             VideoToTensor(apply_to=[self.video_keys[1]]),
             VideoCrop(apply_to=[self.video_keys[1]], scale=0.95),
-            VideoResize(apply_to=[self.video_keys[1]], height=224, width=224, interpolation="linear"),
+            VideoResize(apply_to=[self.video_keys[1]], height=224, width=224, interpolation='linear'),
             VideoColorJitter(
                 apply_to=self.video_keys,
                 brightness=0.3,
@@ -429,8 +429,8 @@ class CalvinDataConfig(BaseDataConfig):
             StateActionTransform(
                 apply_to=self.state_keys,
                 normalization_modes={
-                    "state.ee_pos": "mean_std",
-                    "state.ee_rot": "mean_std",
+                    'state.ee_pos': 'mean_std',
+                    'state.ee_rot': 'mean_std',
                 },
             ),
             # action transforms
@@ -438,9 +438,9 @@ class CalvinDataConfig(BaseDataConfig):
             StateActionTransform(
                 apply_to=self.action_keys,
                 normalization_modes={
-                    "action.delta_ee_pos": "mean_std",
-                    "action.delta_ee_rot": "mean_std",
-                    "action.gripper": "binary"
+                    'action.delta_ee_pos': 'mean_std',
+                    'action.delta_ee_rot': 'mean_std',
+                    'action.gripper': 'binary'
                 }
             ),
             # concat transforms
@@ -455,10 +455,10 @@ class CalvinDataConfig(BaseDataConfig):
 ###########################################################################################
 
 class So100DataConfig(BaseDataConfig):
-    video_keys = ["video.webcam"]
-    state_keys = ["state.single_arm", "state.gripper"]
-    action_keys = ["action.single_arm", "action.gripper"]
-    language_keys = ["annotation.human.task_description"]
+    video_keys = ['video.webcam']
+    state_keys = ['state.single_arm', 'state.gripper']
+    action_keys = ['action.single_arm', 'action.gripper']
+    language_keys = ['annotation.human.task_description']
 
     def modality_config(self, observation_indices, action_indices) -> dict[str, ModalityConfig]:
         self.action_indices = action_indices
@@ -484,10 +484,10 @@ class So100DataConfig(BaseDataConfig):
         )
 
         modality_configs = {
-            "video": video_modality,
-            "state": state_modality,
-            "action": action_modality,
-            "language": language_modality,
+            'video': video_modality,
+            'state': state_modality,
+            'action': action_modality,
+            'language': language_modality,
         }
 
         return modality_configs
@@ -497,7 +497,7 @@ class So100DataConfig(BaseDataConfig):
             # video transforms
             VideoToTensor(apply_to=self.video_keys),
             VideoCrop(apply_to=self.video_keys, scale=0.95),
-            VideoResize(apply_to=self.video_keys, height=224, width=224, interpolation="linear"),
+            VideoResize(apply_to=self.video_keys, height=224, width=224, interpolation='linear'),
             VideoColorJitter(
                 apply_to=self.video_keys,
                 brightness=0.3,
@@ -509,13 +509,13 @@ class So100DataConfig(BaseDataConfig):
             StateActionToTensor(apply_to=self.state_keys),
             StateActionTransform(
                 apply_to=self.state_keys,
-                normalization_modes={key: "min_max" for key in self.state_keys},
+                normalization_modes={key: 'min_max' for key in self.state_keys},
             ),
             # action transforms
             StateActionToTensor(apply_to=self.action_keys),
             StateActionTransform(
                 apply_to=self.action_keys,
-                normalization_modes={key: "min_max" for key in self.action_keys},
+                normalization_modes={key: 'min_max' for key in self.action_keys},
             ),
             # concat transforms
             ConcatTransform(
@@ -529,10 +529,10 @@ class So100DataConfig(BaseDataConfig):
 ###########################################################################################
 
 DATA_CONFIG_MAP = {
-    "sweep": SweepDataConfig(),
-    "bridgedata_v2": BridgeDataV2DataConfig(),
-    "genmanip_v1": GenManipDataConfig(),
-    "google_robot": GoogleRobotDataConfig(),
-    "calvin_abcd": CalvinDataConfig(),
-    "so100": So100DataConfig()
+    'sweep': SweepDataConfig(),
+    'bridgedata_v2': BridgeDataV2DataConfig(),
+    'genmanip_v1': GenManipDataConfig(),
+    'google_robot': GoogleRobotDataConfig(),
+    'calvin_abcd': CalvinDataConfig(),
+    'so100': So100DataConfig()
 }

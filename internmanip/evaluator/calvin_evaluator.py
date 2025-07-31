@@ -18,27 +18,27 @@ from datetime import datetime
 
 
 class CalvinEvaluator(Evaluator):
-    
+
     num_sequences: int = 1000
     results: List[int] = None
     episodes_data: List[Any] = []
-    eval_log_dir: str = f"{Path(__file__).parents[2]}/logs/eval/calvin"
+    eval_log_dir: str = f'{Path(__file__).parents[2]}/logs/eval/calvin'
     timestamp: str = datetime.now().strftime('%Y%m%d_%H%M%S')
-    episodes_config_path: str = f"{Path(__file__).absolute().parents[1]}/benchmarks/utils/calvin/eval_sequences.json"
-    
+    episodes_config_path: str = f'{Path(__file__).absolute().parents[1]}/benchmarks/utils/calvin/eval_sequences.json'
+
     def __init__(self, config: EvalCfg):
         super().__init__(config)
         # task oracle
-        conf_dir = f"{Path(__file__).absolute().parents[1]}/benchmarks/calvin/calvin_models/conf"
-        task_cfg = OmegaConf.load(Path(conf_dir) / "callbacks/rollout/tasks/new_playtable_tasks.yaml")
+        conf_dir = f'{Path(__file__).absolute().parents[1]}/benchmarks/calvin/calvin_models/conf'
+        task_cfg = OmegaConf.load(Path(conf_dir) / 'callbacks/rollout/tasks/new_playtable_tasks.yaml')
         self.task_oracle = hydra.utils.instantiate(task_cfg)
         # val annotations
         self.env: CalvinEnv
         if self.env.env_settings.diverse_inst:
-            with open(f"{Path(__file__).absolute().parents[1]}/benchmarks/utils/calvin/lang_annotation_cache.json", 'r') as f:
+            with open(f'{Path(__file__).absolute().parents[1]}/benchmarks/utils/calvin/lang_annotation_cache.json', 'r') as f:
                 self.val_annotations = json.load(f)
         else:
-            self.val_annotations = OmegaConf.load(Path(conf_dir) / "annotations/new_playtable_validation.yaml")
+            self.val_annotations = OmegaConf.load(Path(conf_dir) / 'annotations/new_playtable_validation.yaml')
         # eval log dir
         if self.config.logging_dir is not None:
             CalvinEvaluator.eval_log_dir = self.config.logging_dir
@@ -63,18 +63,18 @@ class CalvinEvaluator(Evaluator):
         eval_sequences = eval_sequences[:cls.num_sequences]
         cls.results = [None] * len(eval_sequences)
 
-        return [{"episode_i": i, "episode_setting": sequence_data} for i, sequence_data in enumerate(eval_sequences)]
+        return [{'episode_i': i, 'episode_setting': sequence_data} for i, sequence_data in enumerate(eval_sequences)]
 
     @classmethod
     def _update_results(cls, result):
-        cls.results[result["episode_i"]] = result["success_counter"]
+        cls.results[result['episode_i']] = result['success_counter']
 
     @classmethod
     def _print_and_save_results(cls):
-        cls.eval_log_dir = cls.eval_log_dir + "/" + cls.timestamp
+        cls.eval_log_dir = cls.eval_log_dir + '/' + cls.timestamp
         Path(cls.eval_log_dir).mkdir(parents=True, exist_ok=True)
-        print_and_save(cls.results, [episode_data["episode_setting"] for episode_data in cls.episodes_data], Path(cls.eval_log_dir), None)
-        print(f"Results saved to {Path(cls.eval_log_dir).absolute()}/results.json")
+        print_and_save(cls.results, [episode_data['episode_setting'] for episode_data in cls.episodes_data], Path(cls.eval_log_dir), None)
+        print(f'Results saved to {Path(cls.eval_log_dir).absolute()}/results.json')
 
     def eval(self):
         """
@@ -84,42 +84,42 @@ class CalvinEvaluator(Evaluator):
         CalvinEvaluator.episodes_data = self._get_all_episodes_setting_data(CalvinEvaluator.episodes_config_path)
         if not self.env.env_settings.debug:
             CalvinEvaluator.episodes_data = tqdm(CalvinEvaluator.episodes_data, position=0, leave=True)
-        
+
         for episode_data in CalvinEvaluator.episodes_data:
             result = self._eval_single_episode(episode_data)
             self._update_results(result)
             CalvinEvaluator.episodes_data.set_description(
-                " ".join([f"{i + 1}/5 : {v * 100:.1f}% |" for i, v in enumerate(count_success([result for result in CalvinEvaluator.results if result is not None]))]) + "|"
+                ' '.join([f'{i + 1}/5 : {v * 100:.1f}% |' for i, v in enumerate(count_success([result for result in CalvinEvaluator.results if result is not None]))]) + '|'
             )
         self._print_and_save_results()
-    
+
     def _eval_single_episode(self, episode_data: Dict[str, Any]):
         """
         Evaluate the policy for one episode. It contains multiple subtasks(a sequence of natural language instructions).
         """
-        initial_state, eval_sequence = episode_data["episode_setting"][0], episode_data["episode_setting"][1]
+        initial_state, eval_sequence = episode_data['episode_setting'][0], episode_data['episode_setting'][1]
         robot_obs, scene_obs = get_env_state_for_initial_condition(initial_state)
-        self.env.reset(options={"robot_obs": robot_obs, "scene_obs": scene_obs})
+        self.env.reset(options={'robot_obs': robot_obs, 'scene_obs': scene_obs})
         success_counter = 0
 
         for subtask_i, subtask in enumerate(eval_sequence):
             if self.env.env_settings.reset:
-                success = self.rollout(subtask, subtask_i, episode_data["episode_i"], robot_obs=robot_obs, scene_obs=scene_obs)
+                success = self.rollout(subtask, subtask_i, episode_data['episode_i'], robot_obs=robot_obs, scene_obs=scene_obs)
             else:
-                success = self.rollout(subtask, subtask_i, episode_data["episode_i"])
+                success = self.rollout(subtask, subtask_i, episode_data['episode_i'])
             if success:
                 success_counter += 1
             else:
-                return {"episode_i": episode_data["episode_i"], "success_counter": success_counter}
-        return {"episode_i": episode_data["episode_i"], "success_counter": success_counter}
-    
+                return {'episode_i': episode_data['episode_i'], 'success_counter': success_counter}
+        return {'episode_i': episode_data['episode_i'], 'success_counter': success_counter}
+
     def rollout(self, subtask, subtask_i, episode_i, robot_obs=None, scene_obs=None):
         """
         Run the actual rollout on one subtask (which is one natural language instruction).
         """
         planned_actions = []
         if robot_obs is not None and scene_obs is not None:
-            self.env.reset({"robot_obs": robot_obs, "scene_obs": scene_obs})
+            self.env.reset({'robot_obs': robot_obs, 'scene_obs': scene_obs})
         obs = self.env.get_obs()
         # get lang annotation for subtask
         if self.env.env_settings.diverse_inst:

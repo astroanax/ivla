@@ -1,3 +1,3 @@
-from internmanip.evaluator.base import Evaluator        
+from internmanip.evaluator.base import Evaluator
 
-__all__ = ["Evaluator"]
+__all__ = ['Evaluator']

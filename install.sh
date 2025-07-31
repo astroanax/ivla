@@ -15,9 +15,9 @@ declare -A INSTALLED_ENVS=()
 create_env() {
     local env_name=$1
     local python_version=$2
-    
+
     echo -e "\n🌟 Creating environment for \033[1;34m${env_name}\033[0m..."
-    
+
     local env_path="$VENV_DIR/$env_name"
     if [[ -d "$env_path" ]]; then
         echo -e "\n⚠️  Environment \033[1;31m${env_name}\033[0m already exists, skipping creation"
@@ -26,21 +26,21 @@ create_env() {
         uv python pin $python_version
         return
     fi
-    
+
     echo -e "🐍 Creating Python $python_version virtual environment..."
     if ! uv venv "$env_path" --python $python_version; then
         echo -e "❌ \033[1;31mFailed to create virtual environment\033[0m" >&2
         exit 1
     fi
-    
+
     local python_path="$env_path/bin/python"
     if [[ ! -f "$python_path" ]]; then
         echo -e "❌ \033[1;31mPython executable not found in virtual environment\033[0m" >&2
         exit 1
     fi
-    
+
     INSTALLED_ENVS["$env_name"]=1
-    
+
     echo "Python version: $("$python_path" --version)"
     echo "Python path: $python_path"
 
@@ -53,7 +53,7 @@ create_env() {
 ##############################################################
 install_base_requirements() {
     echo -e "\n📦 Installing framework base dependencies..."
-    
+
     if [[ -z "${VIRTUAL_ENV:-}" ]]; then
         echo -e "❌ \033[1;31mNo virtual environment activated\033[0m" >&2
         exit 1
@@ -91,7 +91,7 @@ install_calvin() {
     echo -e "\n🔗 Installing Calvin benchmark dependencies..."
     echo -e "📍 Virtual environment: ${VIRTUAL_ENV}"
     echo -e "📍 Python version: $(python --version)"
-    
+
     local calvin_root="${PROJECT_ROOT}/internmanip/benchmarks/calvin"
     if [[ ! -d "$calvin_root" ]]; then
         echo -e "❌ \033[1;31mCalvin directory not found: ${calvin_root}\033[0m" >&2
@@ -141,7 +141,7 @@ install_simpler_env() {
     echo -e "\n🔗 Installing SimplerEnv dependencies..."
     echo -e "📍 Virtual environment: ${VIRTUAL_ENV}"
     echo -e "📍 Python version: $(python --version)"
-    
+
     local simpler_env_dir="${PROJECT_ROOT}/internmanip/benchmarks/SimplerEnv"
     if [[ ! -d "$simpler_env_dir" ]]; then
         echo -e "❌ \033[1;31mSimplerEnv directory not found: ${simpler_env_dir}\033[0m" >&2
@@ -161,7 +161,7 @@ install_simpler_env() {
 
     # Return to project root
     cd "$PROJECT_ROOT"
-    
+
     deactivate
     echo -e "✅ \033[1;32mSimplerEnv dependencies installed\033[0m"
 }
@@ -171,12 +171,12 @@ install_simpler_env() {
 ##############################################################
 install_genmanip() {
     echo -e "\n🔗 Installing GenManip dependencies..."
-    
+
     # Check if git submodule exists, if not add it
     if [[ ! -d "internmanip/benchmarks/genmanip/utils/InternUtopia" ]]; then
         git submodule add --force https://github.com/InternRobotics/InternUtopia.git internmanip/benchmarks/genmanip/utils/InternUtopia
     fi
-    
+
     cd internmanip/benchmarks/genmanip/utils/InternUtopia
     git checkout tags/v2.2.0
 
@@ -197,10 +197,10 @@ install_genmanip() {
     echo "y" | conda remove libxcb
     conda deactivate
     echo -e "Use \033[1;33mconda activate genmanip\033[0m to activate the environment"
-    
+
     # Return to project root
     cd "$PROJECT_ROOT"
-    
+
     echo -e "✅ \033[1;32mGenManip dependencies installed\033[0m"
 }
 
@@ -214,10 +214,10 @@ install_model() {
         echo -e "❌ \033[1;31mFailed to activate virtual environment\033[0m" >&2
         exit 1
     fi
-    
+
     # Check system requirements
     echo -e "🔍 Checking system requirements..."
-    
+
     # Check Ubuntu version
     if [[ -f /etc/os-release ]]; then
         source /etc/os-release
@@ -236,18 +236,18 @@ install_model() {
     else
         echo -e "⚠️  \033[1;33mWarning: Unable to detect system version\033[0m"
     fi
-    
+
     # Check CUDA version using multiple methods
     cuda_detected=false
     cuda_version=""
-    
+
     # Method 1: Check nvcc command
     if command -v nvcc &> /dev/null; then
         cuda_version=$(nvcc --version | grep "release" | awk '{print $6}' | cut -c2-)
         cuda_detected=true
         echo -e "📍 CUDA detected via nvcc: $cuda_version"
     fi
-    
+
     # Method 2: Check nvidia-smi command (for runtime version)
     if command -v nvidia-smi &> /dev/null; then
         runtime_cuda=$(nvidia-smi | grep "CUDA Version" | awk '{print $9}')
@@ -259,7 +259,7 @@ install_model() {
             fi
         fi
     fi
-    
+
     # Validate CUDA version
     if [[ "$cuda_detected" == true ]]; then
         # Extract major.minor version (e.g., "12.4" from "12.4.1")
@@ -275,28 +275,28 @@ install_model() {
 
     # Check for additional system dependencies required by models
     echo -e "\n🔍 Checking additional system dependencies required by Gr00t models: ffmpeg, libsm6, libxext6..."
-    
+
     # Check for ffmpeg
     if command -v ffmpeg &> /dev/null; then
         echo -e "✅ ffmpeg is installed"
     else
         echo -e "⚠️  \033[1;33mWarning: ffmpeg is not installed. Please install it using: sudo apt-get install ffmpeg\033[0m according to the GR00T prerequisites: https://github.com/NVIDIA/Isaac-GR00T?tab=readme-ov-file#prerequisites"
     fi
-    
+
     # Check for libsm6
     if dpkg -l | grep -q libsm6; then
         echo -e "✅ libsm6 is installed"
     else
         echo -e "⚠️  \033[1;33mWarning: libsm6 is not installed. Please install it using: sudo apt-get install libsm6\033[0m according to the GR00T prerequisites: https://github.com/NVIDIA/Isaac-GR00T?tab=readme-ov-file#prerequisites"
     fi
-    
+
     # Check for libxext6
     if dpkg -l | grep -q libxext6; then
         echo -e "✅ libxext6 is installed"
     else
         echo -e "⚠️  \033[1;33mWarning: libxext6 is not installed. Please install it using: sudo apt-get install libxext6\033[0m according to the GR00T prerequisites: https://github.com/NVIDIA/Isaac-GR00T?tab=readme-ov-file#prerequisites"
     fi
-    
+
     echo -e "\n📋 To install all missing dependencies at once, run:"
     echo -e "   sudo apt-get update && sudo apt-get install ffmpeg libsm6 libxext6"
 
@@ -322,7 +322,7 @@ install_model() {
 main() {
     local install_all=false
     local install_beginner=false
-    
+
     if [[ $# -eq 0 ]] || [[ "$1" == "--help" ]]; then
         echo -e "\033[1mUsage:\033[0m"
         echo "  --calvin [NAME]         Create Calvin benchmark virtual environment and install dependencies"
@@ -350,7 +350,7 @@ main() {
     local args=("$@")
     local install_commands=()
     local i=0
-    
+
     while (( i < ${#args[@]} )); do
         case "${args[i]}" in
             --venv-dir)
@@ -370,13 +370,13 @@ main() {
                     ((i += 1))
                 fi
                 ;;
-            *) 
+            *)
                 echo -e "❌ \033[1;31mInvalid option: ${args[i]}\033[0m" >&2
                 exit 1
                 ;;
         esac
     done
-    
+
     # Second pass: handle installation commands
     i=0
     while (( i < ${#install_commands[@]} )); do
@@ -417,12 +417,12 @@ main() {
                 fi
                 install_model
                 ;;
-            --all) 
-                install_all=true 
+            --all)
+                install_all=true
                 ((i += 1))
                 ;;
-            --beginner) 
-                install_beginner=true 
+            --beginner)
+                install_beginner=true
                 ((i += 1))
                 ;;
         esac

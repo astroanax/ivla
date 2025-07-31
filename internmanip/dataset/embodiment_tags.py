@@ -16,22 +16,22 @@
 from enum import Enum
 
 class EmbodimentTag(Enum):
-    GR1 = "gr1"
+    GR1 = 'gr1'
     """
     The GR1 dataset.
     """
 
-    OXE_DROID = "oxe_droid"
+    OXE_DROID = 'oxe_droid'
     """
     The OxE Droid dataset.
     """
 
-    AGIBOT_GENIE1 = "agibot_genie1"
+    AGIBOT_GENIE1 = 'agibot_genie1'
     """
     The AgiBot Genie-1 with gripper dataset.
     """
 
-    NEW_EMBODIMENT = "new_embodiment"
+    NEW_EMBODIMENT = 'new_embodiment'
     """
     Any new embodiment for finetuning.
     """

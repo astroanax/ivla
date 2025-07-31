@@ -25,7 +25,7 @@ from scripts.eval.eval import calc_mse_for_single_trajectory
 from internmanip.model.basemodel.gr00t.gr00t import GR00T_N1
 from internmanip.dataset.transform.base import ComposedModalityTransform
 
-warnings.simplefilter("ignore", category=FutureWarning)
+warnings.simplefilter('ignore', category=FutureWarning)
 
 """
 Example command:
@@ -42,36 +42,36 @@ python scripts/eval_policy.py --host localhost --port 5555 --plot
     --model_path /PATH/TO/YOUR/GR00T_FINETUNED_CHECKPOINT
 """
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument("--host", type=str, default="localhost", help="host")
-    parser.add_argument("--port", type=int, default=5555, help="port")
-    parser.add_argument("--plot", action="store_true", help="plot images")
-    parser.add_argument("--modality_keys", nargs="+", type=str, default=["right_arm", "right_hand"])
-    parser.add_argument("--keys", nargs="+", type=str, default=["right_arm", "right_hand"])
+    parser.add_argument('--host', type=str, default='localhost', help='host')
+    parser.add_argument('--port', type=int, default=5555, help='port')
+    parser.add_argument('--plot', action='store_true', help='plot images')
+    parser.add_argument('--modality_keys', nargs='+', type=str, default=['right_arm', 'right_hand'])
+    parser.add_argument('--keys', nargs='+', type=str, default=['right_arm', 'right_hand'])
     parser.add_argument(
-        "--data_config",
+        '--data_config',
         type=str,
-        default="gr1_arms_waist",
+        default='gr1_arms_waist',
         choices=list(DATA_CONFIG_MAP.keys()),
-        help="data config name",
+        help='data config name',
     )
-    parser.add_argument("--steps", type=int, default=150, help="number of steps to run")
-    parser.add_argument("--trajs", type=int, default=1, help="trajectories to run")
-    parser.add_argument("--action_horizon", type=int, default=16)
-    parser.add_argument("--video_backend", type=str, default="decord")
-    parser.add_argument("--dataset_path", type=str, default="demo_data/robot_sim.PickNPlace/")
+    parser.add_argument('--steps', type=int, default=150, help='number of steps to run')
+    parser.add_argument('--trajs', type=int, default=1, help='trajectories to run')
+    parser.add_argument('--action_horizon', type=int, default=16)
+    parser.add_argument('--video_backend', type=str, default='decord')
+    parser.add_argument('--dataset_path', type=str, default='demo_data/robot_sim.PickNPlace/')
     parser.add_argument(
-        "--embodiment_tag",
+        '--embodiment_tag',
         type=str,
-        help="The embodiment tag for the model.",
-        default="gr1",
+        help='The embodiment tag for the model.',
+        default='gr1',
     )
     parser.add_argument(
-        "--model_path",
+        '--model_path',
         type=str,
         default=None,
-        help="[Optional] Path to the model checkpoint directory, this will disable client server mode.",
+        help='[Optional] Path to the model checkpoint directory, this will disable client server mode.',
     )
     args = parser.parse_args()
 
@@ -100,12 +100,12 @@ if __name__ == "__main__":
             modality_config=modality_config,
             modality_transform=modality_transform,
             embodiment_tag=args.embodiment_tag,
-            device="cuda" if torch.cuda.is_available() else "cpu",
+            device='cuda' if torch.cuda.is_available() else 'cpu',
             data_path=args.dataset_path,
         )
     else:
         raise NotImplementedError(
-            "Client server mode is not implemented yet. Please provide a model path."
+            'Client server mode is not implemented yet. Please provide a model path.'
         )
 
     all_gt_actions = []
@@ -141,14 +141,14 @@ if __name__ == "__main__":
         else:
             print(k, v)
 
-    print("Total trajectories:", len(dataset.trajectory_lengths))
-    print("All trajectories:", dataset.trajectory_lengths)
-    print("Running on all trajs with modality keys:", args.modality_keys)
+    print('Total trajectories:', len(dataset.trajectory_lengths))
+    print('All trajectories:', dataset.trajectory_lengths)
+    print('Running on all trajs with modality keys:', args.modality_keys)
 
     all_mse = []
     all_mse_ = []
     for traj_id in range(args.trajs):
-        print("Running trajectory:", traj_id)
+        print('Running trajectory:', traj_id)
         steps = dataset.trajectory_lengths[traj_id]
         mse, mse_ = calc_mse_for_single_trajectory(
             policy,
@@ -164,7 +164,7 @@ if __name__ == "__main__":
         all_mse_.append(mse_)
     import ipdb
     ipdb.set_trace()
-    print("Average MSE across all trajs:", np.mean(all_mse))
-    print("Average Group MSE across all trajs:", np.mean(all_mse_,axis=0))
-    print("Done")
+    print('Average MSE across all trajs:', np.mean(all_mse))
+    print('Average Group MSE across all trajs:', np.mean(all_mse_,axis=0))
+    print('Done')
     exit()

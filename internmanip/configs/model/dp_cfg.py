@@ -107,76 +107,76 @@ class DiffusionConfig(PretrainedConfig):
         eval_device: str = field(default="cpu", metadata={"help": "Device for evaluation"})
     """
 
-    model_type = "dp_clip"
-    
+    model_type = 'dp_clip'
+
     # Inputs / output structure.
-    n_obs_steps: int = field(default=1, metadata={"help": "Number of observation steps"})
-    horizon: int = field(default=16, metadata={"help": "Diffusion model action prediction size"})
-    n_action_steps: int = field(default=8, metadata={"help": "Number of action steps"})
+    n_obs_steps: int = field(default=1, metadata={'help': 'Number of observation steps'})
+    horizon: int = field(default=16, metadata={'help': 'Diffusion model action prediction size'})
+    n_action_steps: int = field(default=8, metadata={'help': 'Number of action steps'})
 
     normalization_mapping: dict[str, NormalizationMode] = field(
         default_factory=lambda: {
-            "VISUAL": NormalizationMode.MEAN_STD,
-            "STATE": NormalizationMode.MIN_MAX,
-            "ACTION": NormalizationMode.MIN_MAX,
+            'VISUAL': NormalizationMode.MEAN_STD,
+            'STATE': NormalizationMode.MIN_MAX,
+            'ACTION': NormalizationMode.MIN_MAX,
         },
-        metadata={"help": "Normalization mapping for different modalities"}
+        metadata={'help': 'Normalization mapping for different modalities'}
     )
 
     # The original implementation doesn't sample frames for the last 7 steps,
     # which avoids excessive padding and leads to improved training results.
-    drop_n_last_frames: int = field(default=7, metadata={"help": "Drop n last frames"})  # horizon - n_action_steps - n_obs_steps + 1
+    drop_n_last_frames: int = field(default=7, metadata={'help': 'Drop n last frames'})  # horizon - n_action_steps - n_obs_steps + 1
 
     # Architecture / modeling.
     # Vision backbone.
-    vision_backbone: str = field(default="resnet101", metadata={"help": "Vision backbone name"})
-    crop_shape: tuple[int, int] | None = field(default=None, metadata={"help": "Crop shape for images"}) # cropping in this file is not used
-    crop_is_random: bool = field(default=True, metadata={"help": "Whether crop is random"})
-    pretrained_backbone_weights: str | None = field(default=None, metadata={"help": "Pretrained backbone weights"})
-    use_group_norm: bool = field(default=True, metadata={"help": "Whether to use group norm"})
-    spatial_softmax_num_keypoints: int = field(default=64, metadata={"help": "Number of keypoints for spatial softmax"})
-    use_separate_rgb_encoder_per_camera: bool = field(default=False, metadata={"help": "Whether to use separate RGB encoder per camera"})
+    vision_backbone: str = field(default='resnet101', metadata={'help': 'Vision backbone name'})
+    crop_shape: tuple[int, int] | None = field(default=None, metadata={'help': 'Crop shape for images'}) # cropping in this file is not used
+    crop_is_random: bool = field(default=True, metadata={'help': 'Whether crop is random'})
+    pretrained_backbone_weights: str | None = field(default=None, metadata={'help': 'Pretrained backbone weights'})
+    use_group_norm: bool = field(default=True, metadata={'help': 'Whether to use group norm'})
+    spatial_softmax_num_keypoints: int = field(default=64, metadata={'help': 'Number of keypoints for spatial softmax'})
+    use_separate_rgb_encoder_per_camera: bool = field(default=False, metadata={'help': 'Whether to use separate RGB encoder per camera'})
     # Unet.
-    down_dims: tuple[int, ...] = field(default=(512, 1024, 2048), metadata={"help": "Down dimensions for Unet"})
-    kernel_size: int = field(default=5, metadata={"help": "Kernel size for Unet"})
-    n_groups: int = field(default=8, metadata={"help": "Number of groups for group norm"})
-    diffusion_step_embed_dim: int = field(default=128, metadata={"help": "Diffusion step embedding dimension"})
-    use_film_scale_modulation: bool = field(default=True, metadata={"help": "Whether to use FiLM scale modulation"})
+    down_dims: tuple[int, ...] = field(default=(512, 1024, 2048), metadata={'help': 'Down dimensions for Unet'})
+    kernel_size: int = field(default=5, metadata={'help': 'Kernel size for Unet'})
+    n_groups: int = field(default=8, metadata={'help': 'Number of groups for group norm'})
+    diffusion_step_embed_dim: int = field(default=128, metadata={'help': 'Diffusion step embedding dimension'})
+    use_film_scale_modulation: bool = field(default=True, metadata={'help': 'Whether to use FiLM scale modulation'})
     # Noise scheduler.
-    noise_scheduler_type: str = field(default="DDPM", metadata={"help": "Noise scheduler type"})
-    num_train_timesteps: int = field(default=100, metadata={"help": "Number of training timesteps"})
-    beta_schedule: str = field(default="squaredcos_cap_v2", metadata={"help": "Beta schedule"})
-    beta_start: float = field(default=0.0001, metadata={"help": "Beta start value"})
-    beta_end: float = field(default=0.02, metadata={"help": "Beta end value"})
-    prediction_type: str = field(default="epsilon", metadata={"help": "Prediction type"}) # epsilon, sample
-    clip_sample: bool = field(default=False, metadata={"help": "Whether to clip sample"})
-    clip_sample_range: float = field(default=1.0, metadata={"help": "Clip sample range"})
+    noise_scheduler_type: str = field(default='DDPM', metadata={'help': 'Noise scheduler type'})
+    num_train_timesteps: int = field(default=100, metadata={'help': 'Number of training timesteps'})
+    beta_schedule: str = field(default='squaredcos_cap_v2', metadata={'help': 'Beta schedule'})
+    beta_start: float = field(default=0.0001, metadata={'help': 'Beta start value'})
+    beta_end: float = field(default=0.02, metadata={'help': 'Beta end value'})
+    prediction_type: str = field(default='epsilon', metadata={'help': 'Prediction type'}) # epsilon, sample
+    clip_sample: bool = field(default=False, metadata={'help': 'Whether to clip sample'})
+    clip_sample_range: float = field(default=1.0, metadata={'help': 'Clip sample range'})
 
     # Inference
-    num_inference_steps: int | None = field(default=None, metadata={"help": "Number of inference steps"})
+    num_inference_steps: int | None = field(default=None, metadata={'help': 'Number of inference steps'})
 
     # Loss computation
-    do_mask_loss_for_padding: bool = field(default=False, metadata={"help": "Whether to mask loss for padding"})
+    do_mask_loss_for_padding: bool = field(default=False, metadata={'help': 'Whether to mask loss for padding'})
 
     # Language conditioning parameters
-    use_language_conditioning: bool = field(default=True, metadata={"help": "Whether to use language conditioning"})
-    language_model_name: str = field(default="openai/clip-vit-base-patch32", metadata={"help": "Language model name"})  # You can also use local model path
-    language_embedding_dim: int = field(default=512, metadata={"help": "Language embedding dimension"})
-    language_projection_dim: int = field(default=32, metadata={"help": "Language projection dimension"})  # Reduced dimension for text embeddings
-    language_dropout_prob: float = field(default=0.1, metadata={"help": "Language dropout probability"})
+    use_language_conditioning: bool = field(default=True, metadata={'help': 'Whether to use language conditioning'})
+    language_model_name: str = field(default='openai/clip-vit-base-patch32', metadata={'help': 'Language model name'})  # You can also use local model path
+    language_embedding_dim: int = field(default=512, metadata={'help': 'Language embedding dimension'})
+    language_projection_dim: int = field(default=32, metadata={'help': 'Language projection dimension'})  # Reduced dimension for text embeddings
+    language_dropout_prob: float = field(default=0.1, metadata={'help': 'Language dropout probability'})
 
     # Training presets
-    optimizer_lr: float = field(default=1e-4, metadata={"help": "Optimizer learning rate"})
-    optimizer_betas: tuple = field(default=(0.95, 0.999), metadata={"help": "Optimizer betas"})
-    optimizer_eps: float = field(default=1e-8, metadata={"help": "Optimizer epsilon"})
-    optimizer_weight_decay: float = field(default=1e-6, metadata={"help": "Optimizer weight decay"})
-    scheduler_name: str = field(default="cosine", metadata={"help": "Scheduler name"})
-    scheduler_warmup_steps: int = field(default=500, metadata={"help": "Scheduler warmup steps"})
+    optimizer_lr: float = field(default=1e-4, metadata={'help': 'Optimizer learning rate'})
+    optimizer_betas: tuple = field(default=(0.95, 0.999), metadata={'help': 'Optimizer betas'})
+    optimizer_eps: float = field(default=1e-8, metadata={'help': 'Optimizer epsilon'})
+    optimizer_weight_decay: float = field(default=1e-6, metadata={'help': 'Optimizer weight decay'})
+    scheduler_name: str = field(default='cosine', metadata={'help': 'Scheduler name'})
+    scheduler_warmup_steps: int = field(default=500, metadata={'help': 'Scheduler warmup steps'})
 
     # Feature properties - these will be set during initialization
-    robot_state_dim: int = field(default=0, metadata={"help": "Robot state feature"})
-    image_features: list[int] = field(default_factory=list, metadata={"help": "Image features"})
-    action_dim: int = field(default=7, metadata={"help": "Action feature"})
+    robot_state_dim: int = field(default=0, metadata={'help': 'Robot state feature'})
+    image_features: list[int] = field(default_factory=list, metadata={'help': 'Image features'})
+    action_dim: int = field(default=7, metadata={'help': 'Action feature'})
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -184,75 +184,73 @@ class DiffusionConfig(PretrainedConfig):
             self.set_dim(kwargs['data_config'])
         # for key, value in kwargs.items():
         #     setattr(self, key, value)
-        
+
         # Ensure normalization_mapping attribute exists
         if not hasattr(self, 'normalization_mapping'):
             from internmanip.model.types import NormalizationMode
             self.normalization_mapping = {}
-        
+
         if not hasattr(self, 'image_features'):
             self.image_features = [1,224,224]
-            
+
     # @classmethod
     # def from_dict(cls, config_dict, **kwargs):
     #     """从字典创建 DiffusionConfig 实例，处理序列化/反序列化"""
     #     # 过滤掉 transformers 库传递的额外参数
     #     valid_config_keys = {
-    #         'model_type', 'n_obs_steps', 'horizon', 'n_action_steps', 
+    #         'model_type', 'n_obs_steps', 'horizon', 'n_action_steps',
     #         'normalization_mapping', 'drop_n_last_frames', 'vision_backbone',
     #         'crop_shape', 'crop_is_random', 'pretrained_backbone_weights',
-    #         'use_group_norm', 'spatial_softmax_num_keypoints', 
+    #         'use_group_norm', 'spatial_softmax_num_keypoints',
     #         'use_separate_rgb_encoder_per_camera', 'down_dims', 'kernel_size',
     #         'n_groups', 'diffusion_step_embed_dim', 'use_film_scale_modulation',
     #         'noise_scheduler_type', 'num_train_timesteps', 'beta_schedule',
     #         'beta_start', 'beta_end', 'prediction_type', 'clip_sample',
     #         'clip_sample_range', 'num_inference_steps', 'do_mask_loss_for_padding',
-    #         'use_language_conditioning', 'language_model_name', 
-    #         'language_embedding_dim', 'language_projection_dim', 
+    #         'use_language_conditioning', 'language_model_name',
+    #         'language_embedding_dim', 'language_projection_dim',
     #         'language_dropout_prob', 'optimizer_lr', 'optimizer_betas',
     #         'optimizer_eps', 'optimizer_weight_decay', 'scheduler_name',
     #         'scheduler_warmup_steps', 'robot_state_dim', 'image_features',
     #         'action_dim'
     #     }
-        
+
     #     # 只保留有效的配置键
     #     filtered_config = {k: v for k, v in config_dict.items() if k in valid_config_keys}
-        
+
     #     return cls(**filtered_config)
-    
+
     # def to_dict(self):
     #     """转换为字典，确保包含 model_type"""
     #     result = super().to_dict()
     #     result['model_type'] = self.model_type
     #     return result
-    
+
     def transform(self):
         transforms = None
         return transforms, list(range(self.n_obs_steps)), list(range(self.horizon))
-    
+
     def set_dim(self, data_config):
         # end effector is recommnened for diffusion model
-        if data_config in ["genmanip_eef"]:
+        if data_config in ['genmanip_eef']:
             self.robot_state_dim = 8
             self.action_dim = 7
             self.image_features = [2,3,224,224]
-        elif data_config in ["google","google_minmax","google_q99"]:
+        elif data_config in ['google','google_minmax','google_q99']:
             self.robot_state_dim = 7
             self.action_dim = 7
             self.image_features = [1,3,224,224]
-        elif data_config in ["widowx","widowx_minmax"]:
+        elif data_config in ['widowx','widowx_minmax']:
             self.robot_state_dim = 7
             self.action_dim = 7
             self.image_features = [1,3,224,224]
-        elif data_config in ["calvin"]:
+        elif data_config in ['calvin']:
             self.robot_state_dim = 7
             self.action_dim = 7
             self.image_features = [2,3,224,224]
-        elif data_config in ["sweep"]:
+        elif data_config in ['sweep']:
             self.robot_state_dim = 6
             self.action_dim = 7
             self.image_features = [2,3,224,224]
         else:
-            raise ValueError(f"Unsupported data config: {data_config}.Please add dimension here")
-
-
+            raise ValueError(f'Unsupported data config: {data_config}.Please add dimension here')

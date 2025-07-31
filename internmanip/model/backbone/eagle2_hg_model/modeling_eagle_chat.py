@@ -30,7 +30,7 @@ logger = logging.get_logger(__name__)
 from .configuration_eagle_chat import Eagle2ChatConfig  # noqa
 
 
-def version_cmp(v1, v2, op="eq"):
+def version_cmp(v1, v2, op='eq'):
     import operator
 
     from packaging import version
@@ -41,8 +41,8 @@ def version_cmp(v1, v2, op="eq"):
 
 class Eagle2ChatModel(PreTrainedModel):
     config_class = Eagle2ChatConfig
-    main_input_name = "pixel_values"
-    _no_split_modules = ["LlamaDecoderLayer"]
+    main_input_name = 'pixel_values'
+    _no_split_modules = ['LlamaDecoderLayer']
     _supports_flash_attn_2 = True
     _supports_sdpa = True
     _supports_flex_attn = False
@@ -64,21 +64,21 @@ class Eagle2ChatModel(PreTrainedModel):
         self.template = config.template
         self.downsample_ratio = config.downsample_ratio
 
-        logger.info(f"num_image_token: {self.num_image_token}")
+        logger.info(f'num_image_token: {self.num_image_token}')
         if vision_model is not None:
             self.vision_model = vision_model
         else:
-            if config.vision_config.model_type == "siglip_vision_model":
+            if config.vision_config.model_type == 'siglip_vision_model':
                 self.vision_model = SiglipVisionModel(config.vision_config)
 
         if language_model is not None:
             self.language_model = language_model
         else:
-            if config.llm_config.architectures[0] == "LlamaForCausalLM":
+            if config.llm_config.architectures[0] == 'LlamaForCausalLM':
                 self.language_model = LlamaForCausalLM(config.llm_config)
             else:
                 raise NotImplementedError(
-                    f"{config.llm_config.architectures[0]} is not implemented."
+                    f'{config.llm_config.architectures[0]} is not implemented.'
                 )
 
         vit_hidden_size = config.vision_config.hidden_size
@@ -92,7 +92,7 @@ class Eagle2ChatModel(PreTrainedModel):
             nn.Linear(llm_hidden_size, llm_hidden_size),
         )
         self.img_context_token_id = None
-        self.system_message = "You are a helpful assistant."  # Default system message
+        self.system_message = 'You are a helpful assistant.'  # Default system message
 
         if config.use_backbone_lora:
             self.wrap_backbone_lora(
@@ -105,7 +105,7 @@ class Eagle2ChatModel(PreTrainedModel):
     def wrap_backbone_lora(self, r=128, lora_alpha=256, lora_dropout=0.05):
         lora_config = LoraConfig(
             r=r,
-            target_modules=["attn.qkv", "attn.proj", "mlp.fc1", "mlp.fc2"],
+            target_modules=['attn.qkv', 'attn.proj', 'mlp.fc1', 'mlp.fc2'],
             lora_alpha=lora_alpha,
             lora_dropout=lora_dropout,
         )
@@ -116,17 +116,17 @@ class Eagle2ChatModel(PreTrainedModel):
         lora_config = LoraConfig(
             r=r,
             target_modules=[
-                "self_attn.q_proj",
-                "self_attn.k_proj",
-                "self_attn.v_proj",
-                "self_attn.o_proj",
-                "mlp.gate_proj",
-                "mlp.down_proj",
-                "mlp.up_proj",
+                'self_attn.q_proj',
+                'self_attn.k_proj',
+                'self_attn.v_proj',
+                'self_attn.o_proj',
+                'mlp.gate_proj',
+                'mlp.down_proj',
+                'mlp.up_proj',
             ],
             lora_alpha=lora_alpha,
             lora_dropout=lora_dropout,
-            task_type="CAUSAL_LM",
+            task_type='CAUSAL_LM',
         )
         self.language_model = get_peft_model(self.language_model, lora_config)
         self.language_model.enable_input_require_grads()
@@ -165,7 +165,7 @@ class Eagle2ChatModel(PreTrainedModel):
 
         if torch.distributed.get_rank() == 0:
             print(
-                f"dynamic ViT batch size: {vit_batch_size}, images per sample: {vit_batch_size / B}, dynamic token length: {N}"
+                f'dynamic ViT batch size: {vit_batch_size}, images per sample: {vit_batch_size / B}, dynamic token length: {N}'
             )
 
         input_ids = input_ids.reshape(B * N)
@@ -175,8 +175,8 @@ class Eagle2ChatModel(PreTrainedModel):
         except Exception as e:
             vit_embeds = vit_embeds.reshape(-1, C)
             print(
-                f"warning: {e}, input_embeds[selected].shape={input_embeds[selected].shape}, "
-                f"vit_embeds.shape={vit_embeds.shape}"
+                f'warning: {e}, input_embeds[selected].shape={input_embeds[selected].shape}, '
+                f'vit_embeds.shape={vit_embeds.shape}'
             )
             n_token = selected.sum()
             input_embeds[selected] = input_embeds[selected] * 0.0 + vit_embeds[:n_token]
@@ -240,7 +240,7 @@ class Eagle2ChatModel(PreTrainedModel):
                 pixel_values=pixel_values, output_hidden_states=False, return_dict=True
             )
             # if there is vit_embeds.last_hidden_state, use it.
-            if hasattr(vit_embeds, "last_hidden_state"):
+            if hasattr(vit_embeds, 'last_hidden_state'):
                 vit_embeds = vit_embeds.last_hidden_state
         else:
             vit_embeds = self.vision_model(
@@ -276,36 +276,36 @@ class Eagle2ChatModel(PreTrainedModel):
         num_patches_list=None,
         history=None,
         return_history=False,
-        IMG_START_TOKEN="<img>",
-        IMG_END_TOKEN="</img>",
-        IMG_CONTEXT_TOKEN="<IMG_CONTEXT>",
+        IMG_START_TOKEN='<img>',
+        IMG_END_TOKEN='</img>',
+        IMG_CONTEXT_TOKEN='<IMG_CONTEXT>',
         verbose=False,
         image_counts=None,
     ):
         if history is not None or return_history:
-            print("Now multi-turn chat is not supported in batch_chat.")
+            print('Now multi-turn chat is not supported in batch_chat.')
             raise NotImplementedError
 
         if image_counts is not None:
             num_patches_list = image_counts
-            print("Warning: `image_counts` is deprecated. Please use `num_patches_list` instead.")
+            print('Warning: `image_counts` is deprecated. Please use `num_patches_list` instead.')
 
         img_context_token_id = tokenizer.convert_tokens_to_ids(IMG_CONTEXT_TOKEN)
         self.img_context_token_id = img_context_token_id
 
         if verbose and pixel_values is not None:
             image_bs = pixel_values.shape[0]
-            print(f"dynamic ViT batch size: {image_bs}")
+            print(f'dynamic ViT batch size: {image_bs}')
 
         queries = []
         for idx, num_patches in enumerate(num_patches_list):
             question = questions[idx]
-            if pixel_values is not None and "<image>" not in question:
-                question = "<image>\n" + question
+            if pixel_values is not None and '<image>' not in question:
+                question = '<image>\n' + question
             template_messages = []
             sep = tokenizer.eos_token
-            template_messages.append(("<|im_start|>user", question))
-            template_messages.append(("<|im_end|>assistant", None))
+            template_messages.append(('<|im_start|>user', question))
+            template_messages.append(('<|im_end|>assistant', None))
             query = self.get_prompt(self.system_message, template_messages, sep)
 
             image_tokens = (
@@ -313,15 +313,15 @@ class Eagle2ChatModel(PreTrainedModel):
                 + IMG_CONTEXT_TOKEN * self.num_image_token * num_patches
                 + IMG_END_TOKEN
             )
-            query = query.replace("<image>", image_tokens, 1)
+            query = query.replace('<image>', image_tokens, 1)
             queries.append(query)
 
-        tokenizer.padding_side = "left"
-        model_inputs = tokenizer(queries, return_tensors="pt", padding=True)
-        input_ids = model_inputs["input_ids"].cuda()
-        attention_mask = model_inputs["attention_mask"].cuda()
+        tokenizer.padding_side = 'left'
+        model_inputs = tokenizer(queries, return_tensors='pt', padding=True)
+        input_ids = model_inputs['input_ids'].cuda()
+        attention_mask = model_inputs['attention_mask'].cuda()
         eos_token_id = tokenizer.convert_tokens_to_ids(sep)
-        generation_config["eos_token_id"] = eos_token_id
+        generation_config['eos_token_id'] = eos_token_id
         generation_output = self.generate(
             pixel_values=pixel_values,
             input_ids=input_ids,
@@ -341,14 +341,14 @@ class Eagle2ChatModel(PreTrainedModel):
         history=None,
         return_history=False,
         num_patches_list=None,
-        IMG_START_TOKEN="<img>",
-        IMG_END_TOKEN="</img>",
-        IMG_CONTEXT_TOKEN="<IMG_CONTEXT>",
+        IMG_START_TOKEN='<img>',
+        IMG_END_TOKEN='</img>',
+        IMG_CONTEXT_TOKEN='<IMG_CONTEXT>',
         verbose=False,
         llm_only=False,
     ):
-        if history is None and pixel_values is not None and "<image>" not in question:
-            question = "<image>\n" + question
+        if history is None and pixel_values is not None and '<image>' not in question:
+            question = '<image>\n' + question
 
         if num_patches_list is None:
             num_patches_list = [pixel_values.shape[0]] if pixel_values is not None else []
@@ -358,21 +358,21 @@ class Eagle2ChatModel(PreTrainedModel):
         self.img_context_token_id = img_context_token_id
 
         template_messages = []
-        system_message = f"<|im_start|>system\n{self.system_message}"
+        system_message = f'<|im_start|>system\n{self.system_message}'
         sep = tokenizer.eos_token
         eos_token_id = tokenizer.convert_tokens_to_ids(sep)
 
         history = [] if history is None else history
         for old_question, old_answer in history:
-            template_messages.append(("<|im_start|>user", old_question))
-            template_messages.append(("<|im_start|>assistant", old_answer))
-        template_messages.append(("<|im_start|>user", question))
-        template_messages.append(("<|im_end|>assistant", None))
+            template_messages.append(('<|im_start|>user', old_question))
+            template_messages.append(('<|im_start|>assistant', old_answer))
+        template_messages.append(('<|im_start|>user', question))
+        template_messages.append(('<|im_end|>assistant', None))
         query = self.get_prompt(system_message, template_messages, sep)
 
         if verbose and pixel_values is not None:
             image_bs = pixel_values.shape[0]
-            print(f"dynamic ViT batch size: {image_bs}")
+            print(f'dynamic ViT batch size: {image_bs}')
 
         for num_patches in num_patches_list:
             image_tokens = (
@@ -381,14 +381,14 @@ class Eagle2ChatModel(PreTrainedModel):
                 + IMG_END_TOKEN
             )
             if llm_only:
-                query = query.replace("<image>", "", 1)
+                query = query.replace('<image>', '', 1)
             else:
-                query = query.replace("<image>", image_tokens, 1)
+                query = query.replace('<image>', image_tokens, 1)
 
-        model_inputs = tokenizer(query, return_tensors="pt")
-        input_ids = model_inputs["input_ids"].cuda()
-        attention_mask = model_inputs["attention_mask"].cuda()
-        generation_config["eos_token_id"] = eos_token_id
+        model_inputs = tokenizer(query, return_tensors='pt')
+        input_ids = model_inputs['input_ids'].cuda()
+        attention_mask = model_inputs['attention_mask'].cuda()
+        generation_config['eos_token_id'] = eos_token_id
         generation_output = self.generate(
             pixel_values=pixel_values,
             input_ids=input_ids,
@@ -401,8 +401,8 @@ class Eagle2ChatModel(PreTrainedModel):
         if return_history:
             return response, history
         else:
-            query_to_print = query.replace(IMG_CONTEXT_TOKEN, "")
-            query_to_print = query_to_print.replace(f"{IMG_START_TOKEN}{IMG_END_TOKEN}", "<image>")
+            query_to_print = query.replace(IMG_CONTEXT_TOKEN, '')
+            query_to_print = query_to_print.replace(f'{IMG_START_TOKEN}{IMG_END_TOKEN}', '<image>')
             if verbose:
                 print(query_to_print, response)
             return response
@@ -410,12 +410,12 @@ class Eagle2ChatModel(PreTrainedModel):
     def get_prompt(self, system_prompt, messages, sep) -> str:
         """Get the prompt for generation."""
 
-        ret = "" if system_prompt == "" else system_prompt + sep + "\n"
+        ret = '' if system_prompt == '' else system_prompt + sep + '\n'
         for role, message in messages:
             if message:
-                ret += role + "\n" + message + sep + "\n"
+                ret += role + '\n' + message + sep + '\n'
             else:
-                ret += role + "\n"
+                ret += role + '\n'
         return ret
 
     @torch.no_grad()

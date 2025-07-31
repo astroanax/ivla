@@ -37,10 +37,10 @@ from ...backbone import EagleBackbone
 
 from ..base import BasePolicyModel
 
-BACKBONE_FEATURE_KEY = "backbone_features"
-ACTION_KEY = "action_pred"
-LOSS_KEY = "loss"
-ERROR_MSG = "Error: unexpected input/output"
+BACKBONE_FEATURE_KEY = 'backbone_features'
+ACTION_KEY = 'action_pred'
+LOSS_KEY = 'loss'
+ERROR_MSG = 'Error: unexpected input/output'
 N_COLOR_CHANNELS = 3
 
 
@@ -84,8 +84,8 @@ class GR00T_N1_5(BasePolicyModel):
 
         detected_error = False
         error_msg = ERROR_MSG
-        if "action" in inputs:
-            action = inputs["action"]
+        if 'action' in inputs:
+            action = inputs['action']
             type_ok = isinstance(action, torch.Tensor)
             shape_ok = (
                 len(action.shape) == 3
@@ -93,25 +93,25 @@ class GR00T_N1_5(BasePolicyModel):
                 and action.shape[2] == self.action_dim
             )
             if not type_ok:
-                error_msg += f"\n{action.dtype=}"
+                error_msg += f'\n{action.dtype=}'
                 detected_error = True
             if not shape_ok:
-                error_msg += f"\n{action.shape=}"
+                error_msg += f'\n{action.shape=}'
                 detected_error = True
 
-        if "video" in inputs:
-            video = inputs["video"]
+        if 'video' in inputs:
+            video = inputs['video']
             type_ok = isinstance(video, np.ndarray)
             dtype_ok = video.dtype == np.uint8
             shape_ok = len(video.shape) == 6 and video.shape[3] == N_COLOR_CHANNELS
             if not type_ok:
-                error_msg += f"\n{type(video)=}"
+                error_msg += f'\n{type(video)=}'
                 detected_error = True
             if not dtype_ok:
-                error_msg += f"\n{video.dtype=}"
+                error_msg += f'\n{video.dtype=}'
                 detected_error = True
             if not shape_ok:
-                error_msg += f"\n{video.shape=}"
+                error_msg += f'\n{video.shape=}'
                 detected_error = True
 
         if detected_error:
@@ -125,9 +125,9 @@ class GR00T_N1_5(BasePolicyModel):
 
         if fail_backbone:
             error_msg = ERROR_MSG
-            error_msg += f"\n{isinstance(backbone_outputs, BatchFeature)=}"
-            error_msg += f"\n{BACKBONE_FEATURE_KEY in backbone_outputs=}"
-            error_msg += f"\n{backbone_outputs[BACKBONE_FEATURE_KEY].shape=}"
+            error_msg += f'\n{isinstance(backbone_outputs, BatchFeature)=}'
+            error_msg += f'\n{BACKBONE_FEATURE_KEY in backbone_outputs=}'
+            error_msg += f'\n{backbone_outputs[BACKBONE_FEATURE_KEY].shape=}'
             raise ValueError(error_msg)
 
         fail_action_head = (not isinstance(action_head_outputs, BatchFeature)) or not (
@@ -143,11 +143,11 @@ class GR00T_N1_5(BasePolicyModel):
 
         if fail_action_head:
             error_msg = ERROR_MSG
-            error_msg += f"\n{isinstance(action_head_outputs, BatchFeature)=}"
-            error_msg += f"\n{LOSS_KEY in action_head_outputs=}"
-            error_msg += f"\n{action_head_outputs[ACTION_KEY].shape=}"
-            error_msg += f"\n{self.action_horizon=}"
-            error_msg += f"\n{self.action_dim=}"
+            error_msg += f'\n{isinstance(action_head_outputs, BatchFeature)=}'
+            error_msg += f'\n{LOSS_KEY in action_head_outputs=}'
+            error_msg += f'\n{action_head_outputs[ACTION_KEY].shape=}'
+            error_msg += f'\n{self.action_horizon=}'
+            error_msg += f'\n{self.action_dim=}'
             raise ValueError(error_msg)
 
     def forward(
@@ -190,16 +190,16 @@ class GR00T_N1_5(BasePolicyModel):
 
     @classmethod
     def from_pretrained(cls, pretrained_model_name_or_path: str, **kwargs):
-        tune_visual = kwargs.pop("tune_visual", True)
-        tune_llm = kwargs.pop("tune_llm", False)
-        tune_projector = kwargs.pop("tune_projector", True)
-        tune_diffusion_model = kwargs.pop("tune_diffusion_model", True)
+        tune_visual = kwargs.pop('tune_visual', True)
+        tune_llm = kwargs.pop('tune_llm', False)
+        tune_projector = kwargs.pop('tune_projector', True)
+        tune_diffusion_model = kwargs.pop('tune_diffusion_model', True)
 
-        print(f"Loading pretrained dual brain from {pretrained_model_name_or_path}")
-        print(f"Tune backbone vision tower: {tune_visual}")
-        print(f"Tune backbone LLM: {tune_llm}")
-        print(f"Tune action head projector: {tune_projector}")
-        print(f"Tune action head DiT: {tune_diffusion_model}")
+        print(f'Loading pretrained dual brain from {pretrained_model_name_or_path}')
+        print(f'Tune backbone vision tower: {tune_visual}')
+        print(f'Tune backbone LLM: {tune_llm}')
+        print(f'Tune action head projector: {tune_projector}')
+        print(f'Tune action head DiT: {tune_diffusion_model}')
 
         # get the current model path being downloaded
         pretrained_model = super().from_pretrained(
@@ -213,9 +213,9 @@ class GR00T_N1_5(BasePolicyModel):
             tune_projector=tune_projector, tune_diffusion_model=tune_diffusion_model
         )
 
-        # 
+        #
         pretrained_model.backbone.eagle_model.language_model.lm_head.weight.requires_grad = False
-        pretrained_model.backbone.eagle_model.vision_model.vision_model.head.mlp.fc2.bias.requires_grad=False 
+        pretrained_model.backbone.eagle_model.vision_model.vision_model.head.mlp.fc2.bias.requires_grad=False
         pretrained_model.backbone.eagle_model.vision_model.vision_model.head.mlp.fc2.weight.requires_grad = False
         pretrained_model.backbone.eagle_model.vision_model.vision_model.head.mlp.fc1.bias.requires_grad=False
         pretrained_model.backbone.eagle_model.vision_model.vision_model.head.mlp.fc1.weight.requires_grad=False
@@ -226,12 +226,12 @@ class GR00T_N1_5(BasePolicyModel):
         pretrained_model.backbone.eagle_model.vision_model.vision_model.head.attention.in_proj_bias.requires_grad=False
         pretrained_model.backbone.eagle_model.vision_model.vision_model.head.attention.in_proj_weight.requires_grad=False
         pretrained_model.backbone.eagle_model.vision_model.vision_model.head.probe.requires_grad=False
-        
+
         return pretrained_model
 
 
 # register
-AutoConfig.register("gr00t_n1_5", GR00T_N1_5_Config)
+AutoConfig.register('gr00t_n1_5', GR00T_N1_5_Config)
 AutoModel.register(GR00T_N1_5_Config, GR00T_N1_5)
 
 # real model
@@ -271,8 +271,8 @@ class GR00T_N1(BasePolicyModel):
 
         detected_error = False
         error_msg = ERROR_MSG
-        if "action" in inputs:
-            action = inputs["action"]
+        if 'action' in inputs:
+            action = inputs['action']
             type_ok = isinstance(action, torch.Tensor)
             shape_ok = (
                 len(action.shape) == 3
@@ -280,25 +280,25 @@ class GR00T_N1(BasePolicyModel):
                 and action.shape[2] == self.action_dim
             )
             if not type_ok:
-                error_msg += f"\n{action.dtype=}"
+                error_msg += f'\n{action.dtype=}'
                 detected_error = True
             if not shape_ok:
-                error_msg += f"\n{action.shape=}"
+                error_msg += f'\n{action.shape=}'
                 detected_error = True
 
-        if "video" in inputs:
-            video = inputs["video"]
+        if 'video' in inputs:
+            video = inputs['video']
             type_ok = isinstance(video, np.ndarray)
             dtype_ok = video.dtype == np.uint8
             shape_ok = len(video.shape) == 6 and video.shape[3] == N_COLOR_CHANNELS
             if not type_ok:
-                error_msg += f"\n{type(video)=}"
+                error_msg += f'\n{type(video)=}'
                 detected_error = True
             if not dtype_ok:
-                error_msg += f"\n{video.dtype=}"
+                error_msg += f'\n{video.dtype=}'
                 detected_error = True
             if not shape_ok:
-                error_msg += f"\n{video.shape=}"
+                error_msg += f'\n{video.shape=}'
                 detected_error = True
 
         if detected_error:
@@ -312,9 +312,9 @@ class GR00T_N1(BasePolicyModel):
 
         if fail_backbone:
             error_msg = ERROR_MSG
-            error_msg += f"\n{isinstance(backbone_outputs, BatchFeature)=}"
-            error_msg += f"\n{BACKBONE_FEATURE_KEY in backbone_outputs=}"
-            error_msg += f"\n{backbone_outputs[BACKBONE_FEATURE_KEY].shape=}"
+            error_msg += f'\n{isinstance(backbone_outputs, BatchFeature)=}'
+            error_msg += f'\n{BACKBONE_FEATURE_KEY in backbone_outputs=}'
+            error_msg += f'\n{backbone_outputs[BACKBONE_FEATURE_KEY].shape=}'
             raise ValueError(error_msg)
 
         fail_action_head = (not isinstance(action_head_outputs, BatchFeature)) or not (
@@ -330,11 +330,11 @@ class GR00T_N1(BasePolicyModel):
 
         if fail_action_head:
             error_msg = ERROR_MSG
-            error_msg += f"\n{isinstance(action_head_outputs, BatchFeature)=}"
-            error_msg += f"\n{LOSS_KEY in action_head_outputs=}"
-            error_msg += f"\n{action_head_outputs[ACTION_KEY].shape=}"
-            error_msg += f"\n{self.action_horizon=}"
-            error_msg += f"\n{self.action_dim=}"
+            error_msg += f'\n{isinstance(action_head_outputs, BatchFeature)=}'
+            error_msg += f'\n{LOSS_KEY in action_head_outputs=}'
+            error_msg += f'\n{action_head_outputs[ACTION_KEY].shape=}'
+            error_msg += f'\n{self.action_horizon=}'
+            error_msg += f'\n{self.action_dim=}'
             raise ValueError(error_msg)
 
     def forward(
@@ -358,7 +358,7 @@ class GR00T_N1(BasePolicyModel):
         action_head_outputs, action_inputs = inputs
         loss = self.action_head.calc_loss(action_head_outputs, action_inputs)
         return loss
-    
+
 
     def inference(
         self,
@@ -390,16 +390,16 @@ class GR00T_N1(BasePolicyModel):
 
     @classmethod
     def from_pretrained(cls, pretrained_model_name_or_path: str, **kwargs):
-        tune_visual = kwargs.pop("tune_visual", True)
-        tune_llm = kwargs.pop("tune_llm", False)
-        tune_projector = kwargs.pop("tune_projector", True)
-        tune_diffusion_model = kwargs.pop("tune_diffusion_model", True)
+        tune_visual = kwargs.pop('tune_visual', True)
+        tune_llm = kwargs.pop('tune_llm', False)
+        tune_projector = kwargs.pop('tune_projector', True)
+        tune_diffusion_model = kwargs.pop('tune_diffusion_model', True)
 
-        print(f"Loading pretrained dual brain from {pretrained_model_name_or_path}")
-        print(f"Tune backbone vision tower: {tune_visual}")
-        print(f"Tune backbone LLM: {tune_llm}")
-        print(f"Tune action head projector: {tune_projector}")
-        print(f"Tune action head DiT: {tune_diffusion_model}")
+        print(f'Loading pretrained dual brain from {pretrained_model_name_or_path}')
+        print(f'Tune backbone vision tower: {tune_visual}')
+        print(f'Tune backbone LLM: {tune_llm}')
+        print(f'Tune action head projector: {tune_projector}')
+        print(f'Tune action head DiT: {tune_diffusion_model}')
 
         # get the current model path being downloaded
         pretrained_model = super().from_pretrained(
@@ -412,11 +412,11 @@ class GR00T_N1(BasePolicyModel):
         pretrained_model.action_head.set_trainable_parameters(
             tune_projector=tune_projector, tune_diffusion_model=tune_diffusion_model
         )
-        print("Total number of parameters: ", int(pretrained_model.num_parameters()/1024/1024), "M")
-        print("Total trainable number of parameters: ", int(sum(p.numel() for p in pretrained_model.parameters() if p.requires_grad)/1024/1024), "M")
+        print('Total number of parameters: ', int(pretrained_model.num_parameters()/1024/1024), 'M')
+        print('Total trainable number of parameters: ', int(sum(p.numel() for p in pretrained_model.parameters() if p.requires_grad)/1024/1024), 'M')
         return pretrained_model
 
 
 # # register
-AutoConfig.register("gr00t_n1", GR00T_N1_Config)
+AutoConfig.register('gr00t_n1', GR00T_N1_Config)
 AutoModel.register(GR00T_N1_Config, GR00T_N1)

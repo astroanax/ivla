@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 
 
-def flatten_dict(d: dict, parent_key: str = "", sep: str = "/") -> dict:
+def flatten_dict(d: dict, parent_key: str = '', sep: str = '/') -> dict:
     """Flatten a nested dictionary structure by collapsing nested keys into one key with a separator.
 
     For example:
@@ -15,7 +15,7 @@ def flatten_dict(d: dict, parent_key: str = "", sep: str = "/") -> dict:
     """
     items = []
     for k, v in d.items():
-        new_key = f"{parent_key}{sep}{k}" if parent_key else k
+        new_key = f'{parent_key}{sep}{k}' if parent_key else k
         if isinstance(v, dict):
             items.extend(flatten_dict(v, new_key, sep=sep).items())
         else:
@@ -23,7 +23,7 @@ def flatten_dict(d: dict, parent_key: str = "", sep: str = "/") -> dict:
     return dict(items)
 
 
-def unflatten_dict(d: dict, sep: str = "/") -> dict:
+def unflatten_dict(d: dict, sep: str = '/') -> dict:
     outdict = {}
     for key, value in d.items():
         parts = key.split(sep)
@@ -38,6 +38,5 @@ def unflatten_dict(d: dict, sep: str = "/") -> dict:
 
 def write_json(data: dict, fpath: Path) -> None:
     fpath.parent.mkdir(exist_ok=True, parents=True)
-    with open(fpath, "w") as f:
+    with open(fpath, 'w') as f:
         json.dump(data, f, indent=4, ensure_ascii=False)
-

@@ -25,7 +25,7 @@ logger = logging.get_logger(__name__)
 
 
 class Eagle2ChatConfig(PretrainedConfig):
-    model_type = "eagle_chat"
+    model_type = 'eagle_chat'
     is_composition = True
 
     def __init__(
@@ -52,21 +52,21 @@ class Eagle2ChatConfig(PretrainedConfig):
 
         if vision_config is None:
             vision_config = {}
-            logger.info("vision_config is None. Initializing Vision Encoders with default values.")
+            logger.info('vision_config is None. Initializing Vision Encoders with default values.')
 
         if llm_config is None:
             llm_config = {}
-            logger.info("llm_config is None. Initializing the LLM config with default values")
+            logger.info('llm_config is None. Initializing the LLM config with default values')
 
-        if vision_config["model_type"] == "siglip_vision_model":
+        if vision_config['model_type'] == 'siglip_vision_model':
             self.vision_config = SiglipVisionConfig(**vision_config)
         else:
-            raise ValueError("Unsupported model_type: {}".format(vision_config["model_type"]))
+            raise ValueError('Unsupported model_type: {}'.format(vision_config['model_type']))
 
-        if llm_config["architectures"][0] == "LlamaForCausalLM":
+        if llm_config['architectures'][0] == 'LlamaForCausalLM':
             self.llm_config = LlamaConfig(**llm_config)
         else:
-            raise ValueError("Unsupported architecture: {}".format(llm_config["architectures"][0]))
+            raise ValueError('Unsupported architecture: {}'.format(llm_config['architectures'][0]))
         self.use_backbone_lora = use_backbone_lora
         self.use_llm_lora = use_llm_lora
         self.select_layer = select_layer
@@ -81,10 +81,10 @@ class Eagle2ChatConfig(PretrainedConfig):
         self.pre_feature_reduction = pre_feature_reduction
         self.keep_aspect_ratio = keep_aspect_ratio
         self.vocab_size = self.llm_config.vocab_size
-        logger.info(f"keep_aspect_ratio: {self.keep_aspect_ratio}")
-        logger.info(f"vision_select_layer: {self.select_layer}")
-        logger.info(f"min_dynamic_patch: {self.min_dynamic_patch}")
-        logger.info(f"max_dynamic_patch: {self.max_dynamic_patch}")
+        logger.info(f'keep_aspect_ratio: {self.keep_aspect_ratio}')
+        logger.info(f'vision_select_layer: {self.select_layer}')
+        logger.info(f'min_dynamic_patch: {self.min_dynamic_patch}')
+        logger.info(f'max_dynamic_patch: {self.max_dynamic_patch}')
 
     def to_dict(self):
         """
@@ -94,19 +94,19 @@ class Eagle2ChatConfig(PretrainedConfig):
             `Dict[str, any]`: Dictionary of all the attributes that make up this configuration instance,
         """
         output = copy.deepcopy(self.__dict__)
-        output["vision_config"] = self.vision_config.to_dict()
-        output["llm_config"] = self.llm_config.to_dict()
-        output["model_type"] = self.__class__.model_type
-        output["use_backbone_lora"] = self.use_backbone_lora
-        output["use_llm_lora"] = self.use_llm_lora
-        output["select_layer"] = self.select_layer
-        output["force_image_size"] = self.force_image_size
-        output["downsample_ratio"] = self.downsample_ratio
-        output["template"] = self.template
-        output["dynamic_image_size"] = self.dynamic_image_size
-        output["use_thumbnail"] = self.use_thumbnail
-        output["min_dynamic_patch"] = self.min_dynamic_patch
-        output["max_dynamic_patch"] = self.max_dynamic_patch
-        output["keep_aspect_ratio"] = self.keep_aspect_ratio
+        output['vision_config'] = self.vision_config.to_dict()
+        output['llm_config'] = self.llm_config.to_dict()
+        output['model_type'] = self.__class__.model_type
+        output['use_backbone_lora'] = self.use_backbone_lora
+        output['use_llm_lora'] = self.use_llm_lora
+        output['select_layer'] = self.select_layer
+        output['force_image_size'] = self.force_image_size
+        output['downsample_ratio'] = self.downsample_ratio
+        output['template'] = self.template
+        output['dynamic_image_size'] = self.dynamic_image_size
+        output['use_thumbnail'] = self.use_thumbnail
+        output['min_dynamic_patch'] = self.min_dynamic_patch
+        output['max_dynamic_patch'] = self.max_dynamic_patch
+        output['keep_aspect_ratio'] = self.keep_aspect_ratio
 
         return output

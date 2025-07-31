@@ -31,7 +31,7 @@ from internmanip.model.hub import HubMixin
 from internmanip.model.lerobot_policies import PreTrainedConfig
 
 
-T = TypeVar("T", bound="PreTrainedPolicy")
+T = TypeVar('T', bound='PreTrainedPolicy')
 
 DEFAULT_POLICY_CARD = """
 ---
@@ -57,22 +57,22 @@ class PreTrainedPolicy(nn.Module, HubMixin, abc.ABC):
         super().__init__()
         if not isinstance(config, PreTrainedConfig):
             raise ValueError(
-                f"Parameter config in `{self.__class__.__name__}(config)` should be an instance of class "
-                "`PreTrainedConfig`. To create a model from a pretrained model use "
-                f"`model = {self.__class__.__name__}.from_pretrained(PRETRAINED_MODEL_NAME)`"
+                f'Parameter config in `{self.__class__.__name__}(config)` should be an instance of class '
+                '`PreTrainedConfig`. To create a model from a pretrained model use '
+                f'`model = {self.__class__.__name__}.from_pretrained(PRETRAINED_MODEL_NAME)`'
             )
         self.config = config
 
     def __init_subclass__(cls, **kwargs):
         super().__init_subclass__(**kwargs)
-        if not getattr(cls, "config_class", None):
+        if not getattr(cls, 'config_class', None):
             raise TypeError(f"Class {cls.__name__} must define 'config_class'")
-        if not getattr(cls, "name", None):
+        if not getattr(cls, 'name', None):
             raise TypeError(f"Class {cls.__name__} must define 'name'")
 
     def _save_pretrained(self, save_directory: Path) -> None:
         self.config._save_pretrained(save_directory)
-        model_to_save = self.module if hasattr(self, "module") else self
+        model_to_save = self.module if hasattr(self, 'module') else self
         save_model_as_safetensor(model_to_save, str(save_directory / SAFETENSORS_SINGLE_FILE))
 
     @classmethod
@@ -110,7 +110,7 @@ class PreTrainedPolicy(nn.Module, HubMixin, abc.ABC):
         model_id = str(pretrained_name_or_path)
         instance = cls(config, **kwargs)
         if os.path.isdir(model_id):
-            print("Loading weights from local directory")
+            print('Loading weights from local directory')
             model_file = os.path.join(model_id, SAFETENSORS_SINGLE_FILE)
             policy = cls._load_as_safetensor(instance, model_file, config.device, strict)
         else:
@@ -129,7 +129,7 @@ class PreTrainedPolicy(nn.Module, HubMixin, abc.ABC):
                 policy = cls._load_as_safetensor(instance, model_file, config.device, strict)
             except HfHubHTTPError as e:
                 raise FileNotFoundError(
-                    f"{SAFETENSORS_SINGLE_FILE} not found on the HuggingFace Hub in {model_id}"
+                    f'{SAFETENSORS_SINGLE_FILE} not found on the HuggingFace Hub in {model_id}'
                 ) from e
 
         policy.to(config.device)
@@ -138,14 +138,14 @@ class PreTrainedPolicy(nn.Module, HubMixin, abc.ABC):
 
     @classmethod
     def _load_as_safetensor(cls, model: T, model_file: str, map_location: str, strict: bool) -> T:
-        if packaging.version.parse(safetensors.__version__) < packaging.version.parse("0.4.3"):
+        if packaging.version.parse(safetensors.__version__) < packaging.version.parse('0.4.3'):
             load_model_as_safetensor(model, model_file, strict=strict)
-            if map_location != "cpu":
+            if map_location != 'cpu':
                 logging.warning(
                     "Loading model weights on other devices than 'cpu' is not supported natively in your version of safetensors."
                     " This means that the model is loaded on 'cpu' first and then copied to the device."
-                    " This leads to a slower loading time."
-                    " Please update safetensors to version 0.4.3 or above for improved performance."
+                    ' This leads to a slower loading time.'
+                    ' Please update safetensors to version 0.4.3 or above for improved performance.'
                 )
                 model.to(map_location)
         else:

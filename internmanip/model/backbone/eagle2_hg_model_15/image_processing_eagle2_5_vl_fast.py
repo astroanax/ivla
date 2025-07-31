@@ -64,18 +64,18 @@ def crop(img: torch.Tensor, left: int, top: int, right: int, bottom: int) -> tor
         torch.Tensor: Cropped image.
     """
     if not isinstance(img, torch.Tensor):
-        raise TypeError("img should be torch.Tensor. Got {}".format(type(img)))
+        raise TypeError('img should be torch.Tensor. Got {}'.format(type(img)))
 
     if img.ndim not in [2, 3]:
-        raise ValueError("Image should have 2 or 3 dimensions. Got {}".format(img.ndim))
+        raise ValueError('Image should have 2 or 3 dimensions. Got {}'.format(img.ndim))
 
     img_height = img.shape[1]
     img_width = img.shape[2]
     if top < 0 or left < 0 or bottom > img_height or right > img_width:
-        raise ValueError("Crop coordinates out of bounds")
+        raise ValueError('Crop coordinates out of bounds')
 
     if top >= bottom or left >= right:
-        raise ValueError("Invalid crop coordinates")
+        raise ValueError('Invalid crop coordinates')
 
     return img[:, top:bottom, left:right]
 
@@ -89,7 +89,7 @@ class Eagle2_5_VLFastImageProcessorKwargs(DefaultFastImageProcessorKwargs):
 
 
 @add_start_docstrings(
-    "Constructs a fast ConvNeXT image processor. Based on [`SiglipImageProcessor`] with incorporation of processing each video frame.",
+    'Constructs a fast ConvNeXT image processor. Based on [`SiglipImageProcessor`] with incorporation of processing each video frame.',
     BASE_IMAGE_PROCESSOR_FAST_DOCSTRING,
     """
         image_grid_pinpoints (`List[List[int]]`, *optional*):
@@ -105,7 +105,7 @@ class Eagle2_5_VLImageProcessorFast(BaseImageProcessorFast):
     resample = PILImageResampling.BICUBIC
     image_mean = IMAGENET_STANDARD_MEAN
     image_std = IMAGENET_STANDARD_STD
-    size = {"height": 448, "width": 448}
+    size = {'height': 448, 'width': 448}
     default_to_square = False
     crop_size = None
     do_resize = True
@@ -119,7 +119,7 @@ class Eagle2_5_VLImageProcessorFast(BaseImageProcessorFast):
     use_thumbnail = True
     pad_during_tiling = False
     valid_kwargs = Eagle2_5_VLFastImageProcessorKwargs
-    model_input_names = ["pixel_values_videos"]
+    model_input_names = ['pixel_values_videos']
 
     def __init__(self, **kwargs: Unpack[Eagle2_5_VLFastImageProcessorKwargs]):
         super().__init__(**kwargs)
@@ -171,8 +171,8 @@ class Eagle2_5_VLImageProcessorFast(BaseImageProcessorFast):
         videos: VideoInput,
         do_convert_rgb: Optional[bool] = None,
         input_data_format: Optional[Union[str, ChannelDimension]] = None,
-        device: Optional["torch.device"] = None,
-    ) -> list["torch.Tensor"]:
+        device: Optional['torch.device'] = None,
+    ) -> list['torch.Tensor']:
         """
         Prepare the input images for processing.
         """
@@ -192,11 +192,11 @@ class Eagle2_5_VLImageProcessorFast(BaseImageProcessorFast):
 
     def _resize_for_patching(
         self,
-        image: "torch.Tensor",
+        image: 'torch.Tensor',
         target_resolution: tuple,
-        interpolation: "F.InterpolationMode",
+        interpolation: 'F.InterpolationMode',
         input_data_format: ChannelDimension,
-    ) -> "torch.Tensor":
+    ) -> 'torch.Tensor':
         """
         Resizes an image to a target resolution while maintaining aspect ratio.
 
@@ -225,7 +225,7 @@ class Eagle2_5_VLImageProcessorFast(BaseImageProcessorFast):
         previous version mainly foucs on ratio.
         We also consider area ratio here.
         """
-        best_factor = float("-inf")
+        best_factor = float('-inf')
         best_ratio = (1, 1)
         area = width * height
         for ratio in target_ratios:
@@ -246,8 +246,8 @@ class Eagle2_5_VLImageProcessorFast(BaseImageProcessorFast):
         return best_ratio
 
     def _pad_for_patching(
-        self, image: "torch.Tensor", target_resolution: tuple, input_data_format: ChannelDimension
-    ) -> "torch.Tensor":
+        self, image: 'torch.Tensor', target_resolution: tuple, input_data_format: ChannelDimension
+    ) -> 'torch.Tensor':
         """
         Pad an image to a target resolution while maintaining aspect ratio.
         """
@@ -263,15 +263,15 @@ class Eagle2_5_VLImageProcessorFast(BaseImageProcessorFast):
 
     def _get_image_patches(
         self,
-        image: "torch.Tensor",
+        image: 'torch.Tensor',
         min_num: int,
         max_num: int,
         size: tuple,
         tile_size: int,
         use_thumbnail: bool,
-        interpolation: "F.InterpolationMode",
+        interpolation: 'F.InterpolationMode',
         pad_during_tiling: bool,
-    ) -> List["torch.Tensor"]:
+    ) -> List['torch.Tensor']:
         image_size = get_image_size(image, channel_dim=ChannelDimension.FIRST)
         orig_height, orig_width = image_size
         aspect_ratio = orig_width / orig_height
@@ -334,8 +334,8 @@ class Eagle2_5_VLImageProcessorFast(BaseImageProcessorFast):
 
     def _pad_for_batching(
         self,
-        pixel_values: List["torch.Tensor"],
-    ) -> List["torch.Tensor"]:
+        pixel_values: List['torch.Tensor'],
+    ) -> List['torch.Tensor']:
         """
         Pads images on the `num_of_patches` dimension with zeros to form a batch of same number of patches.
 
@@ -356,14 +356,14 @@ class Eagle2_5_VLImageProcessorFast(BaseImageProcessorFast):
 
     def _preprocess(
         self,
-        images: List["torch.Tensor"],
+        images: List['torch.Tensor'],
         do_resize: bool,
         size: SizeDict,
         max_dynamic_tiles: int,
         min_dynamic_tiles: int,
         use_thumbnail: bool,
         pad_during_tiling: bool,
-        interpolation: Optional["F.InterpolationMode"],
+        interpolation: Optional['F.InterpolationMode'],
         do_center_crop: bool,
         crop_size: SizeDict,
         do_rescale: bool,
@@ -446,7 +446,7 @@ class Eagle2_5_VLImageProcessorFast(BaseImageProcessorFast):
             torch.cat(processed_images, dim=0) if return_tensors else processed_images
         )
         return BatchFeature(
-            data={"pixel_values": processed_images, "image_sizes": image_sizes},
+            data={'pixel_values': processed_images, 'image_sizes': image_sizes},
             tensor_type=return_tensors,
         )
 
@@ -466,9 +466,9 @@ class Eagle2_5_VLImageProcessorFast(BaseImageProcessorFast):
             kwargs.setdefault(kwarg_name, getattr(self, kwarg_name, None))
 
         # Extract parameters that are only used for preparing the input images
-        do_convert_rgb = kwargs.pop("do_convert_rgb")
-        input_data_format = kwargs.pop("input_data_format")
-        device = kwargs.pop("device")
+        do_convert_rgb = kwargs.pop('do_convert_rgb')
+        input_data_format = kwargs.pop('input_data_format')
+        device = kwargs.pop('device')
         # Prepare input images
         if images is not None:
             images = self._prepare_input_images(
@@ -493,20 +493,20 @@ class Eagle2_5_VLImageProcessorFast(BaseImageProcessorFast):
         self._validate_preprocess_kwargs(**kwargs)
 
         # torch resize uses interpolation instead of resample
-        resample = kwargs.pop("resample")
-        kwargs["interpolation"] = (
+        resample = kwargs.pop('resample')
+        kwargs['interpolation'] = (
             pil_torch_interpolation_mapping[resample]
             if isinstance(resample, (PILImageResampling, int))
             else resample
         )
 
         # Pop kwargs that are not needed in _preprocess
-        kwargs.pop("default_to_square")
-        kwargs.pop("data_format")
+        kwargs.pop('default_to_square')
+        kwargs.pop('data_format')
         if images is not None:
             return self._preprocess(images, **kwargs)
         elif videos is not None:
             return self._preprocess(videos, **kwargs)
 
 
-__all__ = ["Eagle2_5_VLImageProcessorFast"]
+__all__ = ['Eagle2_5_VLImageProcessorFast']

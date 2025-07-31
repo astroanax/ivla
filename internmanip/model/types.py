@@ -19,17 +19,17 @@ from typing import Any, Protocol
 
 
 class FeatureType(str, Enum):
-    STATE = "STATE"
-    VISUAL = "VISUAL"
-    ENV = "ENV"
-    ACTION = "ACTION"
-    REWARD = "REWARD"
+    STATE = 'STATE'
+    VISUAL = 'VISUAL'
+    ENV = 'ENV'
+    ACTION = 'ACTION'
+    REWARD = 'REWARD'
 
 
 class NormalizationMode(str, Enum):
-    MIN_MAX = "MIN_MAX"
-    MEAN_STD = "MEAN_STD"
-    IDENTITY = "IDENTITY"
+    MIN_MAX = 'MIN_MAX'
+    MEAN_STD = 'MEAN_STD'
+    IDENTITY = 'IDENTITY'
 
 
 class DictLike(Protocol):
@@ -40,18 +40,18 @@ class DictLike(Protocol):
 class PolicyFeature:
     type: FeatureType
     shape: tuple
-    
+
     def to_dict(self) -> dict:
         """Convert PolicyFeature to a dictionary for JSON serialization."""
         return {
-            "type": self.type.value,  # Use .value to get the string value
-            "shape": list(self.shape)  # Convert tuple to list for JSON serialization
+            'type': self.type.value,  # Use .value to get the string value
+            'shape': list(self.shape)  # Convert tuple to list for JSON serialization
         }
-    
+
     @classmethod
-    def from_dict(cls, data: dict) -> "PolicyFeature":
+    def from_dict(cls, data: dict) -> 'PolicyFeature':
         """Create PolicyFeature from a dictionary."""
         return cls(
-            type=FeatureType(data["type"]),
-            shape=tuple(data["shape"])  # Convert list back to tuple
+            type=FeatureType(data['type']),
+            shape=tuple(data['shape'])  # Convert list back to tuple
         )

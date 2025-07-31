@@ -24,21 +24,21 @@ import os
 def get_frames_by_indices(
     video_path: str,
     indices: list[int] | np.ndarray,
-    video_backend: str = "decord",
+    video_backend: str = 'decord',
     video_backend_kwargs: dict = {},
 ) -> np.ndarray:
-    if video_backend == "decord":
+    if video_backend == 'decord':
         vr = decord.VideoReader(video_path, **video_backend_kwargs)
         frames = vr.get_batch(indices)
         return frames.asnumpy()
-    elif video_backend == "opencv":
+    elif video_backend == 'opencv':
         frames = []
         cap = cv2.VideoCapture(video_path, **video_backend_kwargs)
         for idx in indices:
             cap.set(cv2.CAP_PROP_POS_FRAMES, idx)
             ret, frame = cap.read()
             if not ret:
-                raise ValueError(f"Unable to read frame at index {idx}")
+                raise ValueError(f'Unable to read frame at index {idx}')
             frames.append(frame)
         cap.release()
         frames = np.array(frames)
@@ -51,7 +51,7 @@ def get_frames_by_timestamps(
     video_path: str,
     timestamps: list[float] | np.ndarray,
     tolerance_s: float,
-    video_backend: str = "decord",
+    video_backend: str = 'decord',
     video_backend_kwargs: dict = {},
 ) -> np.ndarray:
     """Get frames from a video at specified timestamps.
@@ -62,8 +62,8 @@ def get_frames_by_timestamps(
     Returns:
         np.ndarray: Frames at the specified timestamps.
     """
-    if video_backend == "decord":
-        assert os.path.exists(video_path), f"{video_path} not found!"
+    if video_backend == 'decord':
+        assert os.path.exists(video_path), f'{video_path} not found!'
         vr = decord.VideoReader(video_path, **video_backend_kwargs)
         num_frames = len(vr)
         # Retrieve the timestamps for each frame in the video
@@ -73,11 +73,11 @@ def get_frames_by_timestamps(
         indices = np.abs(frame_ts[:, :1] - timestamps).argmin(axis=0)
         frames = vr.get_batch(indices)
         return frames.asnumpy()
-    elif video_backend == "opencv":
+    elif video_backend == 'opencv':
         # Open the video file
         cap = cv2.VideoCapture(video_path, **video_backend_kwargs)
         if not cap.isOpened():
-            raise ValueError(f"Unable to open video file: {video_path}")
+            raise ValueError(f'Unable to open video file: {video_path}')
         # Retrieve the total number of frames
         num_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
         # Calculate timestamps for each frame
@@ -91,16 +91,16 @@ def get_frames_by_timestamps(
             cap.set(cv2.CAP_PROP_POS_FRAMES, idx)
             ret, frame = cap.read()
             if not ret:
-                raise ValueError(f"Unable to read frame at index {idx}")
+                raise ValueError(f'Unable to read frame at index {idx}')
             frames.append(frame)
         cap.release()
         frames = np.array(frames)
         return frames
-    elif video_backend == "torchvision_av":
+    elif video_backend == 'torchvision_av':
         # set backend
-        torchvision.set_video_backend("pyav") # pyav doesnt support accuracte seek
+        torchvision.set_video_backend('pyav') # pyav doesnt support accuracte seek
         # set a video stream reader
-        reader = torchvision.io.VideoReader(video_path, "video")
+        reader = torchvision.io.VideoReader(video_path, 'video')
         # set the first and last requested timestamps
         # Note: previous timestamps are usually loaded, since we need to access the previous key frame
         first_ts = timestamps[0]
@@ -113,8 +113,8 @@ def get_frames_by_timestamps(
         loaded_frames = []
         loaded_ts = []
         for frame in reader:
-            current_ts = frame["pts"]
-            loaded_frames.append(frame["data"])
+            current_ts = frame['pts']
+            loaded_frames.append(frame['data'])
             loaded_ts.append(current_ts)
             if current_ts >= last_ts:
                 break
@@ -130,14 +130,14 @@ def get_frames_by_timestamps(
 
         is_within_tol = min_ < tolerance_s
         assert is_within_tol.all(), (
-            f"One or several query timestamps unexpectedly violate the tolerance ({min_[~is_within_tol]} > {tolerance_s=})."
-            "It means that the closest frame that can be loaded from the video is too far away in time."
-            "This might be due to synchronization issues with timestamps during data collection."
-            "To be safe, we advise to ignore this item during training."
-            f"\nqueried timestamps: {query_ts}"
-            f"\nloaded timestamps: {loaded_ts}"
-            f"\nvideo: {video_path}"
-            f"\nbackend: {video_backend}"
+            f'One or several query timestamps unexpectedly violate the tolerance ({min_[~is_within_tol]} > {tolerance_s=}).'
+            'It means that the closest frame that can be loaded from the video is too far away in time.'
+            'This might be due to synchronization issues with timestamps during data collection.'
+            'To be safe, we advise to ignore this item during training.'
+            f'\nqueried timestamps: {query_ts}'
+            f'\nloaded timestamps: {loaded_ts}'
+            f'\nvideo: {video_path}'
+            f'\nbackend: {video_backend}'
         )
 
         # get closest frames to the query timestamps
@@ -146,9 +146,9 @@ def get_frames_by_timestamps(
         frames = np.array(closest_frames)
         assert len(timestamps) == len(closest_frames)
         return frames.transpose(0, 2, 3, 1)
-    elif video_backend == "torchcodec":
+    elif video_backend == 'torchcodec':
         # initialize video decoder
-        decoder = VideoDecoder(video_path, device="cpu", seek_mode="approximate")
+        decoder = VideoDecoder(video_path, device='cpu', seek_mode='approximate')
         loaded_frames = []
         loaded_ts = []
         # get metadata for frame information
@@ -186,7 +186,7 @@ def get_frames_by_timestamps(
 
 def get_all_frames(
     video_path: str,
-    video_backend: str = "decord",
+    video_backend: str = 'decord',
     video_backend_kwargs: dict = {},
     resize_size: tuple[int, int] | None = None,
 ) -> np.ndarray:
@@ -197,27 +197,27 @@ def get_all_frames(
         video_backend_kwargs (dict, optional): Keyword arguments for the video backend.
         resize_size (tuple[int, int], optional): Resize size for the frames. Defaults to None.
     """
-    if video_backend == "decord":
+    if video_backend == 'decord':
         vr = decord.VideoReader(video_path, **video_backend_kwargs)
         frames = vr.get_batch(range(len(vr))).asnumpy()
-    elif video_backend == "pyav":
+    elif video_backend == 'pyav':
         container = av.open(video_path)
         frames = []
         for frame in container.decode(video=0):
-            frame = frame.to_ndarray(format="rgb24")
+            frame = frame.to_ndarray(format='rgb24')
             frames.append(frame)
         frames = np.array(frames)
-    elif video_backend == "torchvision_av":
+    elif video_backend == 'torchvision_av':
         # set backend and reader
-        torchvision.set_video_backend("pyav")
-        reader = torchvision.io.VideoReader(video_path, "video")
+        torchvision.set_video_backend('pyav')
+        reader = torchvision.io.VideoReader(video_path, 'video')
         frames = []
         for frame in reader:
-            frames.append(frame["data"])
+            frames.append(frame['data'])
         frames = np.array(frames)
         frames = frames.transpose(0, 2, 3, 1)
     else:
-        raise NotImplementedError(f"Video backend {video_backend} not implemented")
+        raise NotImplementedError(f'Video backend {video_backend} not implemented')
     # resize frames if specified
     if resize_size is not None:
         frames = [cv2.resize(frame, resize_size) for frame in frames]

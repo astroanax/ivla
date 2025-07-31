@@ -121,11 +121,11 @@ def _replace_submodules(
     if predicate(root_module):
         return func(root_module)
 
-    replace_list = [k.split(".") for k, m in root_module.named_modules(remove_duplicate=True) if predicate(m)]
+    replace_list = [k.split('.') for k, m in root_module.named_modules(remove_duplicate=True) if predicate(m)]
     for *parents, k in replace_list:
         parent_module = root_module
         if len(parents) > 0:
-            parent_module = root_module.get_submodule(".".join(parents))
+            parent_module = root_module.get_submodule('.'.join(parents))
         if isinstance(parent_module, nn.Sequential):
             src_module = parent_module[int(k)]
         else:
@@ -186,7 +186,7 @@ class SpatialSoftmax(nn.Module):
         pos_x = torch.from_numpy(pos_x.reshape(self._in_h * self._in_w, 1)).float()
         pos_y = torch.from_numpy(pos_y.reshape(self._in_h * self._in_w, 1)).float()
         # register as buffer so it's moved to the correct device.
-        self.register_buffer("pos_grid", torch.cat([pos_x, pos_y], dim=1))
+        self.register_buffer('pos_grid', torch.cat([pos_x, pos_y], dim=1))
 
     def forward(self, features: Tensor) -> Tensor:
         """

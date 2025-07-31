@@ -1,7 +1,7 @@
-pydantic>=2
-requests
-uvicorn
 fastapi
-ray[default]
-transformers==4.51.3
 pillow
+pydantic>=2
+ray[default]
+requests
+transformers==4.51.3
+uvicorn

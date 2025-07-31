@@ -30,7 +30,7 @@ from huggingface_hub.errors import HfHubHTTPError
 
 
 # Generic variable that is either PreTrainedConfig or a subclass thereof
-T = TypeVar("T", bound="PreTrainedConfig")
+T = TypeVar('T', bound='PreTrainedConfig')
 
 
 @dataclass
@@ -133,34 +133,34 @@ class PreTrainedConfig(draccus.ChoiceRegistry, HubMixin, abc.ABC):
     def _save_pretrained(self, save_directory: Path) -> None:
         # Create a copy of the config for serialization
         config_dict = self.__dict__.copy()
-        
+
         # Convert PolicyFeature objects to dictionaries for JSON serialization
         if hasattr(self, 'input_features'):
             config_dict['input_features'] = {
                 key: feature.to_dict() if hasattr(feature, 'to_dict') else feature
                 for key, feature in self.input_features.items()
             }
-        
+
         if hasattr(self, 'output_features'):
             config_dict['output_features'] = {
                 key: feature.to_dict() if hasattr(feature, 'to_dict') else feature
                 for key, feature in self.output_features.items()
             }
-        
+
         # Convert NormalizationMode enums to strings
         if hasattr(self, 'normalization_mapping'):
             config_dict['normalization_mapping'] = {
                 key: value.value if hasattr(value, 'value') else value
                 for key, value in self.normalization_mapping.items()
             }
-        
-        with open(save_directory / CONFIG_NAME, "w") as f:
+
+        with open(save_directory / CONFIG_NAME, 'w') as f:
             import json
             json.dump(config_dict, f, indent=4)
 
     def to_json_string(self,):
         return ''
-    
+
     @classmethod
     def from_pretrained(
         cls: Type[T],
@@ -181,7 +181,7 @@ class PreTrainedConfig(draccus.ChoiceRegistry, HubMixin, abc.ABC):
             if CONFIG_NAME in os.listdir(model_id):
                 config_file = os.path.join(model_id, CONFIG_NAME)
             else:
-                print(f"{CONFIG_NAME} not found in {Path(model_id).resolve()}")
+                print(f'{CONFIG_NAME} not found in {Path(model_id).resolve()}')
         else:
             try:
                 config_file = hf_hub_download(
@@ -197,14 +197,14 @@ class PreTrainedConfig(draccus.ChoiceRegistry, HubMixin, abc.ABC):
                 )
             except HfHubHTTPError as e:
                 raise FileNotFoundError(
-                    f"{CONFIG_NAME} not found on the HuggingFace Hub in {model_id}"
+                    f'{CONFIG_NAME} not found on the HuggingFace Hub in {model_id}'
                 ) from e
 
         # Load the config file
         with open(config_file, 'r') as f:
             import json
             config_data = json.load(f)
-        
+
         # Convert PolicyFeature dictionaries back to PolicyFeature objects
         if 'input_features' in config_data:
             from internmanip.model.types import PolicyFeature
@@ -212,14 +212,14 @@ class PreTrainedConfig(draccus.ChoiceRegistry, HubMixin, abc.ABC):
                 key: PolicyFeature.from_dict(feature_data) if isinstance(feature_data, dict) else feature_data
                 for key, feature_data in config_data['input_features'].items()
             }
-        
+
         if 'output_features' in config_data:
             from internmanip.model.types import PolicyFeature
             config_data['output_features'] = {
                 key: PolicyFeature.from_dict(feature_data) if isinstance(feature_data, dict) else feature_data
                 for key, feature_data in config_data['output_features'].items()
             }
-        
+
         # Convert NormalizationMode strings back to enums
         if 'normalization_mapping' in config_data:
             from internmanip.model.types import NormalizationMode
@@ -227,7 +227,7 @@ class PreTrainedConfig(draccus.ChoiceRegistry, HubMixin, abc.ABC):
                 key: NormalizationMode(value) if isinstance(value, str) else value
                 for key, value in config_data['normalization_mapping'].items()
             }
-        
+
         # Create the config instance
         instance = cls(**config_data)
         return instance

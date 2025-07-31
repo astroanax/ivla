@@ -84,15 +84,15 @@ class DiffusionActionHead(nn.Module):
             try:
                 self.language_encoder = CLIPModel.from_pretrained(self.config.language_model_name)
                 self.language_processor = CLIPProcessor.from_pretrained(self.config.language_model_name)
-                print(f"Successfully loaded CLIP model from: {self.config.language_model_name}")
+                print(f'Successfully loaded CLIP model from: {self.config.language_model_name}')
             except Exception as e:
-                print(f"Failed to load CLIP model from {self.config.language_model_name}: {e}")
-                print("Please ensure:")
-                print("1. Internet connection is stable")
-                print("2. Or use a local model path instead of HuggingFace identifier")
-                print("3. Or download the model manually to local cache")
-                raise RuntimeError(f"CLIP model loading failed: {e}")
-            
+                print(f'Failed to load CLIP model from {self.config.language_model_name}: {e}')
+                print('Please ensure:')
+                print('1. Internet connection is stable')
+                print('2. Or use a local model path instead of HuggingFace identifier')
+                print('3. Or download the model manually to local cache')
+                raise RuntimeError(f'CLIP model loading failed: {e}')
+
             # Freeze the language model parameters
             for param in self.language_encoder.parameters():
                 param.requires_grad = False
@@ -129,20 +129,20 @@ class DiffusionActionHead(nn.Module):
     def to(self, *args, **kwargs):
         """Override to() method to ensure noise_scheduler parameters are moved to the correct device."""
         super().to(*args, **kwargs)
-        
+
         # Move noise scheduler parameters to the same device
         device = next(self.parameters()).device
-        
+
         # Move scheduler's internal tensors to the correct device
         for attr_name in dir(self.noise_scheduler):
             attr = getattr(self.noise_scheduler, attr_name)
             if isinstance(attr, torch.Tensor):
                 setattr(self.noise_scheduler, attr_name, attr.to(device))
-        
+
         # Move language encoder to the same device if it exists
         if self.language_encoder is not None:
             self.language_encoder = self.language_encoder.to(device) # type: ignore
-        
+
         return self
 
     # ========= inference  ============
@@ -182,7 +182,7 @@ class DiffusionActionHead(nn.Module):
         if self.config.image_features:
             if self.config.use_separate_rgb_encoder_per_camera:
                 # Combine batch and sequence dims while rearranging to make the camera index dimension first.
-                images_per_camera = einops.rearrange(batch["observation.images"], "b s n ... -> n (b s) ...")
+                images_per_camera = einops.rearrange(batch['observation.images'], 'b s n ... -> n (b s) ...')
                 img_features_list = torch.cat(
                     [
                         encoder(images)
@@ -192,17 +192,17 @@ class DiffusionActionHead(nn.Module):
                 # Separate batch and sequence dims back out. The camera index dim gets absorbed into the
                 # feature dim (effectively concatenating the camera features).
                 img_features = einops.rearrange(
-                    img_features_list, "(n b s) ... -> b s (n ...)", b=batch_size, s=n_obs_steps
+                    img_features_list, '(n b s) ... -> b s (n ...)', b=batch_size, s=n_obs_steps
                 )
             else:
                 # Combine batch, sequence, and "which camera" dims before passing to shared encoder.
                 img_features = self.rgb_encoder(
-                    einops.rearrange(batch["observation.images"], "b s n ... -> (b s n) ...")
+                    einops.rearrange(batch['observation.images'], 'b s n ... -> (b s n) ...')
                 )
                 # Separate batch dim and sequence dim back out. The camera index dim gets absorbed into the
                 # feature dim (effectively concatenating the camera features).
                 img_features = einops.rearrange(
-                    img_features, "(b s n) ... -> b s (n ...)", b=batch_size, s=n_obs_steps
+                    img_features, '(b s n) ... -> b s (n ...)', b=batch_size, s=n_obs_steps
                 )
             global_cond_feats.append(img_features)
 
@@ -210,25 +210,25 @@ class DiffusionActionHead(nn.Module):
         #     global_cond_feats.append(batch[OBS_ENV_STATE])
 
         # Add language conditioning if enabled
-        if self.config.use_language_conditioning and "language" in batch:
-            language_texts = batch["language"]
-            
+        if self.config.use_language_conditioning and 'language' in batch:
+            language_texts = batch['language']
+
             # Handle different input formats
             if isinstance(language_texts, list):
                 # For list format, each batch item has its own instruction
                 # We need to process each instruction separately and then stack
                 text_embeddings_list = []
-                
+
                 # Ensure we have exactly batch_size instructions
                 for i in range(batch_size):
                     instruction = language_texts[i]
                     if not isinstance(instruction, str):
                         instruction = str(instruction)
-                    
+
                     # Process single instruction with CLIP
                     inputs = self.language_processor(
                         text=instruction,
-                        return_tensors="pt",
+                        return_tensors='pt',
                         padding=True,
                         truncation=True,
                         max_length=77
@@ -236,24 +236,24 @@ class DiffusionActionHead(nn.Module):
                     # Move inputs to the same device as the model
                     device = next(self.parameters()).device
                     inputs = {k: v.to(device) for k, v in inputs.items()}
-                    
+
                     # Get text embeddings for this instruction (language encoder is frozen)
                     with torch.no_grad():
                         text_emb = self.language_encoder.get_text_features(**inputs)
-                    
+
                     # Project to lower dimension using trainable layer
                     text_emb = self.language_projection(text_emb)
-                    
+
                     # Apply dropout if in training mode
                     if self.training:
                         text_emb = self.language_dropout(text_emb)
-                    
+
                     text_embeddings_list.append(text_emb)
-                
+
                 # Stack all embeddings and expand to sequence dimension
                 text_embeddings = torch.stack(text_embeddings_list, dim=0)  # (B, embed_dim)
                 text_embeddings = text_embeddings.expand(-1, n_obs_steps, -1)  # (B, n_obs_steps, embed_dim)
-            
+
             global_cond_feats.append(text_embeddings)
 
         # Concatenate all features along the feature dimension (dim=-1)
@@ -279,7 +279,7 @@ class DiffusionActionHead(nn.Module):
         Returns:
             (B, horizon, action_dim) Including the actions before the current observation and after the current observation
         """
-        batch_size, n_obs_steps = batch["observation.state"].shape[:2]
+        batch_size, n_obs_steps = batch['observation.state'].shape[:2]
         assert n_obs_steps == self.config.n_obs_steps
 
         # Encode image features and concatenate them all together along with the state vector.
@@ -305,7 +305,7 @@ class DiffusionActionHead(nn.Module):
                 - str: Single instruction applied to all batch items
         }
         """
-        batch_size, n_obs_steps = batch["observation.state"].shape[:2]
+        batch_size, n_obs_steps = batch['observation.state'].shape[:2]
         assert n_obs_steps == self.config.n_obs_steps
 
         # Encode image features and concatenate them all together along with the state vector.
@@ -342,8 +342,8 @@ class DiffusionActionHead(nn.Module):
         # Input validation.
         # assert set(batch).issuperset({"state", "action", "action_is_pad"})
         # assert "observation.images" in batch or "observation.environment_state" in batch
-        n_obs_steps = batch["observation.state"].shape[1]
-        horizon = batch["action"].shape[1]
+        n_obs_steps = batch['observation.state'].shape[1]
+        horizon = batch['action'].shape[1]
         assert horizon == self.config.horizon
         assert n_obs_steps == self.config.n_obs_steps
 
@@ -351,7 +351,7 @@ class DiffusionActionHead(nn.Module):
         global_cond = self._prepare_global_conditioning(batch)  # (B, global_cond_dim)
 
         # Forward diffusion.
-        trajectory = batch["action"]
+        trajectory = batch['action']
         # Sample noise to add to the trajectory.
         eps = torch.randn(trajectory.shape, device=trajectory.device)
         # Sample a random noising timestep for each item in the batch.
@@ -369,27 +369,27 @@ class DiffusionActionHead(nn.Module):
 
         # Compute the loss.
         # The target is either the original trajectory, or the noise.
-        if self.config.prediction_type == "epsilon":
+        if self.config.prediction_type == 'epsilon':
             target = eps
-        elif self.config.prediction_type == "sample":
-            target = batch["action"]
+        elif self.config.prediction_type == 'sample':
+            target = batch['action']
         else:
-            raise ValueError(f"Unsupported prediction type {self.config.prediction_type}")
+            raise ValueError(f'Unsupported prediction type {self.config.prediction_type}')
 
-        loss = F.mse_loss(pred, target, reduction="none")
+        loss = F.mse_loss(pred, target, reduction='none')
 
         # Mask loss wherever the action is padded with copies (edges of the dataset trajectory).
         if self.config.do_mask_loss_for_padding:
-            if "action_is_pad" not in batch:
+            if 'action_is_pad' not in batch:
                 raise ValueError(
                     "You need to provide 'action_is_pad' in the batch when "
-                    f"{self.config.do_mask_loss_for_padding=}."
+                    f'{self.config.do_mask_loss_for_padding=}.'
                 )
-            in_episode_bound = ~batch["action_is_pad"]
+            in_episode_bound = ~batch['action_is_pad']
             loss = loss * in_episode_bound.unsqueeze(-1)
-        
+
         loss_dict= {}
-        loss_dict["loss"] = loss.mean()
+        loss_dict['loss'] = loss.mean()
         return loss_dict
 
 
@@ -441,10 +441,10 @@ class DiffusionConditionalUnet1d(nn.Module):
 
         # Unet encoder.
         common_res_block_kwargs = {
-            "cond_dim": cond_dim,
-            "kernel_size": config.kernel_size,
-            "n_groups": config.n_groups,
-            "use_film_scale_modulation": config.use_film_scale_modulation,
+            'cond_dim': cond_dim,
+            'kernel_size': config.kernel_size,
+            'n_groups': config.n_groups,
+            'use_film_scale_modulation': config.use_film_scale_modulation,
         }
         self.down_modules = nn.ModuleList([])
         for ind, (dim_in, dim_out) in enumerate(in_out):
@@ -504,7 +504,7 @@ class DiffusionConditionalUnet1d(nn.Module):
             (B, T, input_dim) diffusion model prediction.
         """
         # For 1D convolutions we'll need feature dimension first.
-        x = einops.rearrange(x, "b t d -> b d t")
+        x = einops.rearrange(x, 'b t d -> b d t')
 
         timesteps_embed = self.diffusion_step_encoder(timestep)
 
@@ -534,7 +534,7 @@ class DiffusionConditionalUnet1d(nn.Module):
 
         x = self.final_conv(x)
 
-        x = einops.rearrange(x, "b d t -> b t d")
+        x = einops.rearrange(x, 'b d t -> b t d')
         return x
 
 
@@ -600,10 +600,9 @@ def _make_noise_scheduler(name: str, **kwargs: dict) -> DDPMScheduler | DDIMSche
     Factory for noise scheduler instances of the requested type. All kwargs are passed
     to the scheduler.
     """
-    if name == "DDPM":
+    if name == 'DDPM':
         return DDPMScheduler(**kwargs)  # type: ignore
-    elif name == "DDIM":
+    elif name == 'DDIM':
         return DDIMScheduler(**kwargs)  # type: ignore
     else:
-        raise ValueError(f"Unsupported noise scheduler type {name}")
-
+        raise ValueError(f'Unsupported noise scheduler type {name}')

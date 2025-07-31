@@ -73,14 +73,14 @@ from internmanip.model.data_collator_registry import DataCollatorRegistry
 
 
 def create_sinusoidal_pos_embedding(
-    time: torch.tensor, dimension: int, min_period: float, max_period: float, device="cpu"
+    time: torch.tensor, dimension: int, min_period: float, max_period: float, device='cpu'
 ) -> Tensor:
     """Computes sine-cosine positional embedding vectors for scalar positions."""
     if dimension % 2 != 0:
-        raise ValueError(f"dimension ({dimension}) must be divisible by 2")
+        raise ValueError(f'dimension ({dimension}) must be divisible by 2')
 
     if time.ndim != 1:
-        raise ValueError("The time tensor is expected to be of shape `(batch_size, )`.")
+        raise ValueError('The time tensor is expected to be of shape `(batch_size, )`.')
 
     dtype = get_safe_dtype(torch.float64, device.type)
     fraction = torch.linspace(0.0, 1.0, dimension // 2, dtype=dtype, device=device)
@@ -135,7 +135,7 @@ def make_att_2d_masks(pad_masks, att_masks):
 def resize_with_pad(img, width, height, pad_value=-1):
     # assume no-op when width height fits already
     if img.ndim != 4:
-        raise ValueError(f"(b,c,h,w) expected, but {img.shape}")
+        raise ValueError(f'(b,c,h,w) expected, but {img.shape}')
 
     cur_height, cur_width = img.shape[2:]
 
@@ -143,7 +143,7 @@ def resize_with_pad(img, width, height, pad_value=-1):
     resized_height = int(cur_height / ratio)
     resized_width = int(cur_width / ratio)
     resized_img = F.interpolate(
-        img, size=(resized_height, resized_width), mode="bilinear", align_corners=False
+        img, size=(resized_height, resized_width), mode='bilinear', align_corners=False
     )
 
     pad_height = max(0, int(height - resized_height))
@@ -176,7 +176,7 @@ class PI0Policy(BasePolicyModel):
     """Wrapper class around PI0FlowMatching model to train and run inference within LeRobot."""
 
     config_class = PI0Config
-    name = "pi0"
+    name = 'pi0'
 
     def __init__(
         self,
@@ -200,7 +200,7 @@ class PI0Policy(BasePolicyModel):
         config.validate_features()
         self.config = config
 
-        self.language_tokenizer = AutoTokenizer.from_pretrained("google/paligemma-3b-pt-224")
+        self.language_tokenizer = AutoTokenizer.from_pretrained('google/paligemma-3b-pt-224')
         self.model = PI0FlowMatching(config)
 
         self.reset()
@@ -231,15 +231,15 @@ class PI0Policy(BasePolicyModel):
         # inputs['task'] : N * 1 str
 
         actions = self.select_action(batch, noise=None)
-        return BatchFeature(data={"action_pred": actions})
+        return BatchFeature(data={'action_pred': actions})
 
-    
+
     def calc_loss(self, *args, **kwargs):
         """
         Calculate the loss.
         """
         pass
-    
+
 
     @torch.no_grad
     def select_action(self, batch: dict[str, Tensor], noise: Tensor | None = None) -> Tensor:
@@ -266,7 +266,7 @@ class PI0Policy(BasePolicyModel):
             images = [batch['video'][:,0,0], torch.zeros_like(batch['video'][:,0,0])]
         else:
             device = batch['video'].device
-            bsize = batch['video'].shape[0]            
+            bsize = batch['video'].shape[0]
             mask_true = torch.ones(bsize, dtype=torch.bool, device=device)
             img_masks = [mask_true, mask_true]
             images = [batch['video'][:,0,0], batch['video'][:,0,1]]
@@ -293,8 +293,8 @@ class PI0Policy(BasePolicyModel):
 
         # pi0 specific transform
         batch['video'] = (batch['video'] - 1) * 2
-        if "annotation.human.action.task_description" not in batch:
-            batch["annotation.human.action.task_description"] = [[''] * len(batch['video'])]
+        if 'annotation.human.action.task_description' not in batch:
+            batch['annotation.human.action.task_description'] = [[''] * len(batch['video'])]
 
         if batch['video'].shape[2] == 1:
             device = batch['video'].device
@@ -305,7 +305,7 @@ class PI0Policy(BasePolicyModel):
             images = [batch['video'][:,0,0], torch.zeros_like(batch['video'][:,0,0])]
         else:
             device = batch['video'].device
-            bsize = batch['video'].shape[0]            
+            bsize = batch['video'].shape[0]
             mask_true = torch.ones(bsize, dtype=torch.bool, device=device)
             img_masks = [mask_true, mask_true]
             images = [batch['video'][:,0,0], batch['video'][:,0,1]]
@@ -316,7 +316,7 @@ class PI0Policy(BasePolicyModel):
         # batch.pop('state.joints')
         # batch.pop('state.gripper')
 
-        
+
         # batch['action'] = torch.cat([batch['action.joints'], batch['action.gripper']], dim=-1).to(torch.float32)
         # batch.pop('action.joints')
         # batch.pop('action.gripper')
@@ -324,24 +324,24 @@ class PI0Policy(BasePolicyModel):
         state = self.prepare_state(batch)
         lang_tokens, lang_masks = self.prepare_language(batch)
         actions = self.prepare_action(batch)
- 
+
         loss_dict = {}
         state = state.to(torch.bfloat16)
         actions = actions.to(torch.bfloat16)
         batch['action_pad'] = torch.from_numpy(batch['action_pad']).to(state.device)
-        with torch.autocast("cuda", dtype=torch.bfloat16, enabled=True):
+        with torch.autocast('cuda', dtype=torch.bfloat16, enabled=True):
             losses = self.model.forward(images, img_masks, lang_tokens, lang_masks, state, actions, noise, time)
-        loss_dict["losses_after_forward"] = losses.clone()
+        loss_dict['losses_after_forward'] = losses.clone()
 
 
         # Remove padding
         losses = losses[:, :, : self.config.max_action_dim]
-        loss_dict["losses_after_rm_padding"] = losses.clone()
+        loss_dict['losses_after_rm_padding'] = losses.clone()
 
         loss = losses.mean()
 
-        loss_dict["l2_loss"] = loss.item()
-        loss_dict["loss"] = (losses[:, :, :batch['action'].shape[-1]] * ~batch['action_pad'][...,None]).mean()
+        loss_dict['l2_loss'] = loss.item()
+        loss_dict['loss'] = (losses[:, :, :batch['action'].shape[-1]] * ~batch['action_pad'][...,None]).mean()
 
         return loss_dict
 
@@ -351,9 +351,9 @@ class PI0Policy(BasePolicyModel):
         """
         images = []
         img_masks = []
-        # # model.config.input_features = {'video.base_view': 
+        # # model.config.input_features = {'video.base_view':
     #                                'video.ego_view': }
-        
+
         present_img_keys = [key for key in ['video.base_view', 'video.ego_view'] if key in batch]
         # missing_img_keys = [key for key in self.config.image_features if key not in batch]
 
@@ -384,23 +384,23 @@ class PI0Policy(BasePolicyModel):
     def prepare_language(self, batch) -> tuple[Tensor, Tensor]:
         """Tokenize the text input"""
         device = batch['state'].device
-        tasks = batch["annotation.human.action.task_description"]
+        tasks = batch['annotation.human.action.task_description']
 
         # PaliGemma prompt has to end with a new line
         tasks = [task if type(task) == list else [task] for task in tasks] #convert to a list
-        tasks = [task[0] if task[0].endswith("\n") else f"{task[0]}\n" for task in tasks]
+        tasks = [task[0] if task[0].endswith('\n') else f'{task[0]}\n' for task in tasks]
 
         max_length = 64
         # import ipdb;ipdb.set_trace()
         tokenized_prompt = self.language_tokenizer.__call__(
             tasks,
-            padding="max_length",
-            padding_side="right",
+            padding='max_length',
+            padding_side='right',
             max_length=max_length,
-            return_tensors="pt",
+            return_tensors='pt',
         )
-        lang_tokens = tokenized_prompt["input_ids"].to(device=device)
-        lang_masks = tokenized_prompt["attention_mask"].to(device=device, dtype=torch.bool)
+        lang_tokens = tokenized_prompt['input_ids'].to(device=device)
+        lang_masks = tokenized_prompt['attention_mask'].to(device=device, dtype=torch.bool)
 
         return lang_tokens, lang_masks
 
@@ -424,26 +424,26 @@ class PI0Policy(BasePolicyModel):
         The policy is set in evaluation mode by default using `policy.eval()` (dropout modules are
         deactivated). To train it, you should first set it back in training mode with `policy.train()`.
         """
-        
-        tune_visual = kwargs.pop("tune_visual", True)
-        tune_llm = kwargs.pop("tune_llm", False)
-        tune_projector = kwargs.pop("tune_projector", True)
-        tune_diffusion_model = kwargs.pop("tune_diffusion_model", True)
-        tokenizer_max_length = kwargs.pop("tokenizer_max_length", 48)
+
+        tune_visual = kwargs.pop('tune_visual', True)
+        tune_llm = kwargs.pop('tune_llm', False)
+        tune_projector = kwargs.pop('tune_projector', True)
+        tune_diffusion_model = kwargs.pop('tune_diffusion_model', True)
+        tokenizer_max_length = kwargs.pop('tokenizer_max_length', 48)
         policy = super().from_pretrained(
             pretrained_model_name_or_path, **kwargs
         )
         policy.config.tokenizer_max_length = tokenizer_max_length
         policy.model.paligemma_with_expert.paligemma.language_model.lm_head.weight.requires_grad = False
         policy.model.paligemma_with_expert.gemma_expert.lm_head.weight.requires_grad = False
-    
+
         policy.model.paligemma_with_expert.paligemma.language_model.model.norm.weight.requires_grad = False
         policy.model.paligemma_with_expert.paligemma.language_model.model.layers[17].post_attention_layernorm.weight.requires_grad = False
         policy.model.paligemma_with_expert.paligemma.language_model.model.layers[17].mlp.down_proj.weight.requires_grad = False
         policy.model.paligemma_with_expert.paligemma.language_model.model.layers[17].mlp.up_proj.weight.requires_grad = False
         policy.model.paligemma_with_expert.paligemma.language_model.model.layers[17].mlp.gate_proj.weight.requires_grad = False
         policy.model.paligemma_with_expert.paligemma.language_model.model.layers[17].self_attn.o_proj.weight.requires_grad = False
-        # policy.model.paligemma_with_expert.paligemma.language_model.model.embed_tokens.weight.requires_grad = False        
+        # policy.model.paligemma_with_expert.paligemma.language_model.model.embed_tokens.weight.requires_grad = False
         # policy.to(config.device)
         # policy.eval()
         return policy
@@ -452,7 +452,7 @@ class PI0Policy(BasePolicyModel):
 
 
 # register
-AutoConfig.register("pi0", PI0Config)
+AutoConfig.register('pi0', PI0Config)
 AutoModel.register(PI0Config, PI0Policy)
 class PI0FlowMatching(nn.Module):
     """
@@ -668,7 +668,7 @@ class PI0FlowMatching(nn.Module):
         suffix_out = suffix_out.to(dtype=torch.float32)
         v_t = self.action_out_proj(suffix_out)
 
-        losses = F.mse_loss( v_t, u_t, reduction="none")
+        losses = F.mse_loss( v_t, u_t, reduction='none')
         return losses
 
     def sample_actions(self, images, img_masks, lang_tokens, lang_masks, state, noise=None) -> Tensor:
@@ -686,7 +686,7 @@ class PI0FlowMatching(nn.Module):
         prefix_att_2d_masks = make_att_2d_masks(prefix_pad_masks, prefix_att_masks)
         prefix_position_ids = torch.cumsum(prefix_pad_masks, dim=1) - 1
 
-        
+
         # Compute image and language key value cache
         _, past_key_values = self.paligemma_with_expert.forward(
             attention_mask=prefix_att_2d_masks,
@@ -706,7 +706,7 @@ class PI0FlowMatching(nn.Module):
         self.action_in_proj = self.action_in_proj.to(torch.float32)
         self.action_time_mlp_in = self.action_time_mlp_in.to(torch.float32)
         self.action_time_mlp_out= self.action_time_mlp_out.to(torch.float32)
-        with torch.autocast("cuda", dtype=torch.float32, enabled=True):
+        with torch.autocast('cuda', dtype=torch.float32, enabled=True):
             while time >= -dt / 2:
                 expanded_time = time.expand(bsize)
                 v_t = self.denoise_step(
@@ -746,7 +746,7 @@ class PI0FlowMatching(nn.Module):
         prefix_offsets = torch.sum(prefix_pad_masks, dim=-1)[:, None]
         position_ids = prefix_offsets + torch.cumsum(suffix_pad_masks, dim=1) - 1
 
-        
+
         outputs_embeds, _ = self.paligemma_with_expert.forward(
             attention_mask=full_att_2d_masks,
             position_ids=position_ids,

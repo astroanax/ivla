@@ -14,30 +14,30 @@ _NEXT_AXIS = [1, 2, 0, 1]
 
 # map axes strings to/from tuples of inner axis, parity, repetition, frame
 _AXES2TUPLE = {
-    "sxyz": (0, 0, 0, 0),
-    "sxyx": (0, 0, 1, 0),
-    "sxzy": (0, 1, 0, 0),
-    "sxzx": (0, 1, 1, 0),
-    "syzx": (1, 0, 0, 0),
-    "syzy": (1, 0, 1, 0),
-    "syxz": (1, 1, 0, 0),
-    "syxy": (1, 1, 1, 0),
-    "szxy": (2, 0, 0, 0),
-    "szxz": (2, 0, 1, 0),
-    "szyx": (2, 1, 0, 0),
-    "szyz": (2, 1, 1, 0),
-    "rzyx": (0, 0, 0, 1),
-    "rxyx": (0, 0, 1, 1),
-    "ryzx": (0, 1, 0, 1),
-    "rxzx": (0, 1, 1, 1),
-    "rxzy": (1, 0, 0, 1),
-    "ryzy": (1, 0, 1, 1),
-    "rzxy": (1, 1, 0, 1),
-    "ryxy": (1, 1, 1, 1),
-    "ryxz": (2, 0, 0, 1),
-    "rzxz": (2, 0, 1, 1),
-    "rxyz": (2, 1, 0, 1),
-    "rzyz": (2, 1, 1, 1),
+    'sxyz': (0, 0, 0, 0),
+    'sxyx': (0, 0, 1, 0),
+    'sxzy': (0, 1, 0, 0),
+    'sxzx': (0, 1, 1, 0),
+    'syzx': (1, 0, 0, 0),
+    'syzy': (1, 0, 1, 0),
+    'syxz': (1, 1, 0, 0),
+    'syxy': (1, 1, 1, 0),
+    'szxy': (2, 0, 0, 0),
+    'szxz': (2, 0, 1, 0),
+    'szyx': (2, 1, 0, 0),
+    'szyz': (2, 1, 1, 0),
+    'rzyx': (0, 0, 0, 1),
+    'rxyx': (0, 0, 1, 1),
+    'ryzx': (0, 1, 0, 1),
+    'rxzx': (0, 1, 1, 1),
+    'rxzy': (1, 0, 0, 1),
+    'ryzy': (1, 0, 1, 1),
+    'rzxy': (1, 1, 0, 1),
+    'ryxy': (1, 1, 1, 1),
+    'ryxz': (2, 0, 0, 1),
+    'rzxz': (2, 0, 1, 1),
+    'rxyz': (2, 1, 0, 1),
+    'rzyz': (2, 1, 1, 1),
 }
 
 _TUPLE2AXES = dict((v, k) for k, v in _AXES2TUPLE.items())
@@ -46,7 +46,7 @@ _TUPLE2AXES = dict((v, k) for k, v in _AXES2TUPLE.items())
 _EPS4 = np.finfo(float).eps * 4.0
 
 
-def mat2euler(mat, axes="sxyz"):
+def mat2euler(mat, axes='sxyz'):
     """Return Euler angles from rotation matrix for specified axis sequence.
 
     Note that many Euler angle triplets can describe one matrix.
@@ -185,7 +185,7 @@ def isrotation(
     return n < thresh
 
 
-def euler2mat(ai, aj, ak, axes="sxyz"):
+def euler2mat(ai, aj, ak, axes='sxyz'):
     """Return rotation matrix from Euler angles and axis sequence.
 
     Parameters
@@ -258,7 +258,7 @@ def euler2mat(ai, aj, ak, axes="sxyz"):
     return M
 
 
-def euler2axangle(ai, aj, ak, axes="sxyz"):
+def euler2axangle(ai, aj, ak, axes='sxyz'):
     """Return angle, axis corresponding to Euler angles, axis specification
 
     Parameters
@@ -291,7 +291,7 @@ def euler2axangle(ai, aj, ak, axes="sxyz"):
     return quat2axangle(euler2quat(ai, aj, ak, axes))
 
 
-def euler2quat(ai, aj, ak, axes="sxyz"):
+def euler2quat(ai, aj, ak, axes='sxyz'):
     """Return `quaternion` from Euler angles and axis sequence `axes`
 
     Parameters
@@ -413,7 +413,7 @@ def quat2axangle(quat, identity_thresh=None):
     quat = np.asarray(quat)
     Nq = np.sum(quat**2)
     if not np.isfinite(Nq):
-        return np.array([1.0, 0, 0]), float("nan")
+        return np.array([1.0, 0, 0]), float('nan')
     if identity_thresh is None:
         try:
             identity_thresh = np.finfo(Nq.type).eps * 3
@@ -434,7 +434,7 @@ def quat2axangle(quat, identity_thresh=None):
     return xyz / math.sqrt(len2), theta
 
 
-def quat2euler(quaternion, axes="sxyz"):
+def quat2euler(quaternion, axes='sxyz'):
     """Euler angles from `quaternion` for specified axis sequence `axes`
 
     Parameters

@@ -41,7 +41,7 @@ SIGLIP_STD = (0.5, 0.5, 0.5)
 
 
 DEFAULT_EAGLE_MODEL_NAME = os.path.join(
-    os.path.dirname(internmanip.__file__), "model", "backbone", "eagle2_hg_model"
+    os.path.dirname(internmanip.__file__), 'model', 'backbone', 'eagle2_hg_model'
 )
 
 
@@ -80,13 +80,13 @@ def get_seq_frames(total_num_frames, desired_num_frames=-1, stride=-1):
 def build_video_prompt(meta_list, num_frames, time_position=False):
     # if time_position is True, the frame_timestamp is used.
     # 1. pass time_position, 2. use env TIME_POSITION
-    time_position = os.environ.get("TIME_POSITION", time_position)
-    prefix = "This is a video:\n"
+    time_position = os.environ.get('TIME_POSITION', time_position)
+    prefix = 'This is a video:\n'
     for i in range(num_frames):
         if time_position:
-            frame_txt = f"Frame {i+1} sampled at {meta_list[i]:.2f} seconds: <image>\n"
+            frame_txt = f'Frame {i+1} sampled at {meta_list[i]:.2f} seconds: <image>\n'
         else:
-            frame_txt = f"Frame {i+1}: <image>\n"
+            frame_txt = f'Frame {i+1}: <image>\n'
         prefix += frame_txt
     return prefix
 
@@ -110,32 +110,32 @@ def load_image(image):
     if isinstance(image, str) and os.path.exists(image):
         return Image.open(image)
     elif isinstance(image, dict):
-        if "disk_path" in image:
-            return Image.open(image["disk_path"])
-        elif "base64" in image:
-            return Image.open(BytesIO(base64.b64decode(image["base64"])))
-        elif "url" in image:
-            response = requests.get(image["url"])
+        if 'disk_path' in image:
+            return Image.open(image['disk_path'])
+        elif 'base64' in image:
+            return Image.open(BytesIO(base64.b64decode(image['base64'])))
+        elif 'url' in image:
+            response = requests.get(image['url'])
             return Image.open(BytesIO(response.content))
-        elif "bytes" in image:
-            return Image.open(BytesIO(image["bytes"]))
-        elif "np_array" in image:
-            return Image.fromarray(image["np_array"])
+        elif 'bytes' in image:
+            return Image.open(BytesIO(image['bytes']))
+        elif 'np_array' in image:
+            return Image.fromarray(image['np_array'])
         else:
-            raise ValueError(f"Invalid image: {image}")
+            raise ValueError(f'Invalid image: {image}')
     else:
-        raise ValueError(f"Invalid image: {image}")
+        raise ValueError(f'Invalid image: {image}')
 
 
-def build_transform(input_size, norm_type="imagenet"):
-    if norm_type == "imagenet":
+def build_transform(input_size, norm_type='imagenet'):
+    if norm_type == 'imagenet':
         MEAN, STD = IMAGENET_MEAN, IMAGENET_STD
-    elif norm_type == "siglip":
+    elif norm_type == 'siglip':
         MEAN, STD = SIGLIP_MEAN, SIGLIP_STD
 
     transform = T.Compose(
         [
-            T.Lambda(lambda img: img.convert("RGB") if img.mode != "RGB" else img),
+            T.Lambda(lambda img: img.convert('RGB') if img.mode != 'RGB' else img),
             T.Resize((input_size, input_size), interpolation=InterpolationMode.BICUBIC),
             T.ToTensor(),
             T.Normalize(mean=MEAN, std=STD),
@@ -149,7 +149,7 @@ def find_closest_aspect_ratio_v2(aspect_ratio, target_ratios, width, height, ima
     previous version mainly foucs on ratio.
     We also consider area ratio here.
     """
-    best_factor = float("-inf")
+    best_factor = float('-inf')
     best_ratio = (1, 1)
     area = width * height
     for ratio in target_ratios:
@@ -228,13 +228,13 @@ def prepare(
     question,
     history=None,
     num_patches_list=None,
-    IMG_START_TOKEN="<img>",
-    IMG_END_TOKEN="</img>",
-    IMG_CONTEXT_TOKEN="<IMG_CONTEXT>",
+    IMG_START_TOKEN='<img>',
+    IMG_END_TOKEN='</img>',
+    IMG_CONTEXT_TOKEN='<IMG_CONTEXT>',
     llm_only=False,
 ):
-    if history is None and pixel_values is not None and "<image>" not in question:
-        question = "<image>\n" + question
+    if history is None and pixel_values is not None and '<image>' not in question:
+        question = '<image>\n' + question
 
     if num_patches_list is None:
         num_patches_list = [1] * pixel_values.shape[0] if pixel_values is not None else []
@@ -258,16 +258,16 @@ def prepare(
             + IMG_END_TOKEN
         )
         if llm_only:
-            query = query.replace("<image>", "", 1)
+            query = query.replace('<image>', '', 1)
         else:
-            query = query.replace("<image>", image_tokens, 1)
+            query = query.replace('<image>', image_tokens, 1)
 
-    model_inputs = tokenizer(query, return_tensors="pt")
+    model_inputs = tokenizer(query, return_tensors='pt')
 
     return (
         pixel_values,
-        model_inputs["input_ids"],
-        model_inputs["attention_mask"],
+        model_inputs['input_ids'],
+        model_inputs['attention_mask'],
     )
 
 
@@ -283,55 +283,55 @@ class EagleProcessor:
         if model_path is None or use_local_eagle_hg_model:
             model_path = DEFAULT_EAGLE_MODEL_NAME
 
-        if model_path.endswith("/"):
+        if model_path.endswith('/'):
             model_path = model_path[:-1]
 
         # This is to allow an huggingface model to be loaded from a local path with
         # e.g. $GR00T_BACKBONE_PATH/eagle_1_7b/
-        if "$GR00T_BACKBONE_PATH" in model_path:
+        if '$GR00T_BACKBONE_PATH' in model_path:
             import gr00t
 
             pkg_path = os.path.dirname(gr00t.__file__)
-            pkg_path = os.path.join(pkg_path, "model", "backbone")
-            model_path = model_path.replace("$GR00T_BACKBONE_PATH", pkg_path)
+            pkg_path = os.path.join(pkg_path, 'model', 'backbone')
+            model_path = model_path.replace('$GR00T_BACKBONE_PATH', pkg_path)
         if model_spec is None:
             model_spec = ModelSpecificValues(
-                template="qwen2-chat",
+                template='qwen2-chat',
                 num_image_token=64,
             )
 
         tokenizer = AutoTokenizer.from_pretrained(
             model_path, trust_remote_code=True, use_fast=False
         )
-        tokens_to_keep = ["<box>", "</box>", "<ref>", "</ref>"]
+        tokens_to_keep = ['<box>', '</box>', '<ref>', '</ref>']
         tokenizer.additional_special_tokens = [
             item for item in tokenizer.additional_special_tokens if item not in tokens_to_keep
         ]
         self.tokenizer = tokenizer
         config = AutoConfig.from_pretrained(model_path, trust_remote_code=True)
         model_type = config.vision_config.model_type
-        if model_type == "siglip_vision_model":
-            self.norm_type = "siglip"
-        elif model_type == "MOB":
-            self.norm_type = "siglip"
+        if model_type == 'siglip_vision_model':
+            self.norm_type = 'siglip'
+        elif model_type == 'MOB':
+            self.norm_type = 'siglip'
         else:
-            self.norm_type = "imagenet"
+            self.norm_type = 'imagenet'
         self.config = config
         self.image_size = config.force_image_size
         self.context_len = tokenizer.model_max_length
         self.per_tile_len = 256
         self.model_spec = model_spec
         self.max_input_tiles = max_input_tiles
-        self.tokenizer.padding_side = "left"
+        self.tokenizer.padding_side = 'left'
 
     def scale_image_size_by(self, factor):
         self.image_size = int(self.image_size * factor)
         self.model_spec.num_image_token = int(self.model_spec.num_image_token * factor**2)
         print(
-            f"New image size: {self.image_size}, New num_image_token: {self.model_spec.num_image_token}"
+            f'New image size: {self.image_size}, New num_image_token: {self.model_spec.num_image_token}'
         )
 
-    def get_img_context_token(self, IMG_CONTEXT_TOKEN="<IMG_CONTEXT>"):
+    def get_img_context_token(self, IMG_CONTEXT_TOKEN='<IMG_CONTEXT>'):
         img_context_token_id = self.tokenizer.convert_tokens_to_ids(IMG_CONTEXT_TOKEN)
         return img_context_token_id
 
@@ -341,25 +341,25 @@ class EagleProcessor:
         return eos_token_id
 
     def prepare_input(self, params):
-        system_message = params["prompt"][0]["content"]
-        send_messages = params["prompt"][1:]
+        system_message = params['prompt'][0]['content']
+        send_messages = params['prompt'][1:]
         max_input_tiles = self.max_input_tiles
-        video_frame_num = params.get("video_frame_num", 64)
+        video_frame_num = params.get('video_frame_num', 64)
 
         global_image_cnt = 0
         history, pil_images, max_input_tile_list = [], [], []
         for message in send_messages:
-            if message["role"] == "user":
-                prefix = ""
-                if "image" in message:
-                    for image_data in message["image"]:
+            if message['role'] == 'user':
+                prefix = ''
+                if 'image' in message:
+                    for image_data in message['image']:
                         pil_images.append(load_image(image_data))
-                        prefix = prefix + f"<image {global_image_cnt + 1}><image>\n"
+                        prefix = prefix + f'<image {global_image_cnt + 1}><image>\n'
                         global_image_cnt += 1
                         max_input_tile_list.append(max_input_tiles)
-                if "video" in message:
-                    raise Exception("Not support video now, decord causes issues.")
-                    for video_data in message["video"]:
+                if 'video' in message:
+                    raise Exception('Not support video now, decord causes issues.')
+                    for video_data in message['video']:
                         video_frames, tmp_prefix = load_video(
                             video_data, num_frames=video_frame_num
                         )
@@ -367,25 +367,25 @@ class EagleProcessor:
                         prefix = prefix + tmp_prefix
                         global_image_cnt += len(video_frames)
                         max_input_tile_list.extend([1] * len(video_frames))
-                content = prefix + message["content"]
+                content = prefix + message['content']
                 history.append(
                     [
                         content,
                     ]
                 )
             else:
-                history[-1].append(message["content"])
+                history[-1].append(message['content'])
         question, history = history[-1][0], history[:-1]
 
         if global_image_cnt == 1:
-            question = question.replace("<image 1><image>\n", "<image>\n")
+            question = question.replace('<image 1><image>\n', '<image>\n')
             history = [
-                [item[0].replace("<image 1><image>\n", "<image>\n"), item[1]] for item in history
+                [item[0].replace('<image 1><image>\n', '<image>\n'), item[1]] for item in history
             ]
 
         assert len(max_input_tile_list) == len(
             pil_images
-        ), "The number of max_input_tile_list and pil_images should be the same."
+        ), 'The number of max_input_tile_list and pil_images should be the same.'
 
         transform = build_transform(input_size=self.image_size, norm_type=self.norm_type)
         if len(pil_images) > 0:
@@ -431,9 +431,9 @@ class EagleProcessor:
             history=history,
         )
         data = {
-            "pixel_values": pixel_values,
-            "input_ids": input_ids,
-            "attention_mask": attention_mask,
+            'pixel_values': pixel_values,
+            'input_ids': input_ids,
+            'attention_mask': attention_mask,
         }
         return data
 
@@ -442,9 +442,9 @@ class EagleProcessor:
         return all_responses
 
     def collate_fn(self, all_examples):
-        pixel_values_list = [ex["pixel_values"] for ex in all_examples]
-        input_ids_list = [ex["input_ids"] for ex in all_examples]
-        attention_mask_list = [ex["attention_mask"] for ex in all_examples]
+        pixel_values_list = [ex['pixel_values'] for ex in all_examples]
+        input_ids_list = [ex['input_ids'] for ex in all_examples]
+        attention_mask_list = [ex['attention_mask'] for ex in all_examples]
 
         assert isinstance(pixel_values_list, List)
         assert isinstance(input_ids_list, List)
@@ -453,23 +453,23 @@ class EagleProcessor:
         pixel_values = torch.cat(pixel_values_list, dim=0)
 
         tokenized_batch = {
-            "input_ids": [ip[0] for ip in input_ids_list],
-            "attention_mask": [am[0] for am in attention_mask_list],
+            'input_ids': [ip[0] for ip in input_ids_list],
+            'attention_mask': [am[0] for am in attention_mask_list],
         }
 
         # Apply left padding
         padded_batch = self.tokenizer.pad(
             tokenized_batch,
             padding=True,  # Ensures padding to max sequence length
-            return_tensors="pt",  # Convert to PyTorch tensors
+            return_tensors='pt',  # Convert to PyTorch tensors
         )
 
         input_ids = padded_batch.input_ids
         attention_mask = padded_batch.attention_mask
         data = {
-            "pixel_values": pixel_values,
-            "input_ids": input_ids,
-            "attention_mask": attention_mask,
+            'pixel_values': pixel_values,
+            'input_ids': input_ids,
+            'attention_mask': attention_mask,
         }
         return BatchFeature(data)
 
@@ -481,12 +481,12 @@ def reshape_model_embeddings(model, factor):
     curr_device = module.position_ids.device
     values = torch.arange(num_pos, dtype=curr_dtype, device=curr_device).expand((1, -1))
 
-    module.register_buffer("position_ids", values, persistent=False)
+    module.register_buffer('position_ids', values, persistent=False)
 
     # curr_len = module.position_ids.shape[1]
     # new_len = int(curr_len * factor ** 2)
     # module.position_ids = module.position_ids[:, :new_len]
-    print(f"Reshaped position_ids to {num_pos}")
+    print(f'Reshaped position_ids to {num_pos}')
 
 
 def get_embeddings(

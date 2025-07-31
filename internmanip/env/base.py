@@ -8,23 +8,23 @@ class EnvWrapperRegistry(Enum):
     The key is the env wrapper type.
     The value is the env wrapper subclass.
     """
-    SIMPLER = "SimplerEnv"
-    CALVIN = "CalvinEnv"
-    GENMANIP = "GenmanipEnv"
+    SIMPLER = 'SimplerEnv'
+    CALVIN = 'CalvinEnv'
+    GENMANIP = 'GenmanipEnv'
 
     @property
     def value(self):
-        if self.name == "SIMPLER":
+        if self.name == 'SIMPLER':
             from internmanip.env.simpler_env import SimplerEnv
             return SimplerEnv
-        elif self.name == "CALVIN":
+        elif self.name == 'CALVIN':
             from internmanip.env.calvin_env import CalvinEnv
             return CalvinEnv
-        elif self.name == "GENMANIP":
+        elif self.name == 'GENMANIP':
             from internmanip.env.genmanip_env import GenmanipEnv
             return GenmanipEnv
         else:
-            raise ValueError(f"Invalid env wrapper type: {self.name}. Only {[env_type.name for env_type in EnvWrapperRegistry]} are registered.")
+            raise ValueError(f'Invalid env wrapper type: {self.name}. Only {[env_type.name for env_type in EnvWrapperRegistry]} are registered.')
 
 
 class EnvWrapper:

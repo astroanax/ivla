@@ -64,7 +64,7 @@ class DiffusionModel(BasePolicyModel):
     """
 
     config_class = DiffusionConfig
-    name: str = "dp_clip"
+    name: str = 'dp_clip'
 
     def __init__(
         self,
@@ -93,29 +93,29 @@ class DiffusionModel(BasePolicyModel):
         #     batch[OBS_IMAGES] = torch.stack([batch[key] for key in self.config.image_features], dim=-4)
             # batch[]
             # batch['observation.images'] = batch[OBS_IMAGES]
-        
+
         # Handle language input if language conditioning is enabled
-        if self.config.use_language_conditioning and "language" in batch:
+        if self.config.use_language_conditioning and 'language' in batch:
             # Ensure language is properly formatted
-            if isinstance(batch["language"], list):
+            if isinstance(batch['language'], list):
                 # For list format, ensure each item is a string
-                batch["language"] = [instructions[0] for instructions in batch["language"]]  # type: ignore
-            elif isinstance(batch["language"], torch.Tensor):
+                batch['language'] = [instructions[0] for instructions in batch['language']]  # type: ignore
+            elif isinstance(batch['language'], torch.Tensor):
                 # For tensor format, convert to list of strings for processing
-                batch["language"] = [str(desc.item()) for desc in batch["language"]]  # type: ignore
-        
+                batch['language'] = [str(desc.item()) for desc in batch['language']]  # type: ignore
+
         # batch = self.normalize_targets(batch)
         loss_dict = self.action_head.compute_loss(batch)
         # Return the loss dictionary containing both main loss and action loss
         return loss_dict
-    
+
     @classmethod
     def from_pretrained(cls, pretrained_model_name_or_path: str, **kwargs):
         pretrained_model = super().from_pretrained(
             pretrained_model_name_or_path, **kwargs
         )
         return pretrained_model
-    
 
-AutoConfig.register("dp_clip", DiffusionConfig)
+
+AutoConfig.register('dp_clip', DiffusionConfig)
 AutoModel.register(DiffusionConfig, DiffusionModel)

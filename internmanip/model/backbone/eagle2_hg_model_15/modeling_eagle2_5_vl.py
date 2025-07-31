@@ -47,21 +47,21 @@ EAGLE2_5_VL_START_DOCSTRING = r"""
 
 
 @add_start_docstrings(
-    "The bare Eagle2_5_VL Model outputting raw hidden-states without any specific head on top.",
+    'The bare Eagle2_5_VL Model outputting raw hidden-states without any specific head on top.',
     EAGLE2_5_VL_START_DOCSTRING,
 )
 class Eagle2_5_VLPreTrainedModel(PreTrainedModel):
     config_class = Eagle2_5_VLConfig
-    base_model_prefix = "model"
-    main_input_name = "input_ids"
+    base_model_prefix = 'model'
+    main_input_name = 'input_ids'
     supports_gradient_checkpointing = True
     _no_split_modules = [
-        "Qwen2DecoderLayer",
-        "LlamaDecoderLayer",
-        "Siglip2EncoderLayer",
-        "SiglipEncoderLayer",
+        'Qwen2DecoderLayer',
+        'LlamaDecoderLayer',
+        'Siglip2EncoderLayer',
+        'SiglipEncoderLayer',
     ]
-    _skip_keys_device_placement = "past_key_values"
+    _skip_keys_device_placement = 'past_key_values'
     _supports_flash_attn_2 = True
     _supports_cache_class = True
     _supports_static_cache = True
@@ -102,37 +102,37 @@ class Eagle2_5_VLForConditionalGeneration(Eagle2_5_VLPreTrainedModel, Generation
         self.mlp_checkpoint = config.mlp_checkpoint
         self.use_pixel_shuffle = config.use_pixel_shuffle
         self.mlp_connector_layers = config.mlp_connector_layers
-        logger.info(f"num_image_token: {self.num_image_token}")
-        logger.info(f"mlp_checkpoint: {self.mlp_checkpoint}")
+        logger.info(f'num_image_token: {self.num_image_token}')
+        logger.info(f'mlp_checkpoint: {self.mlp_checkpoint}')
         if vision_model is not None:
             self.vision_model = vision_model
         else:
-            if config.vision_config.model_type == "siglip_vision_model":
-                config.vision_config._attn_implementation = "flash_attention_2"
+            if config.vision_config.model_type == 'siglip_vision_model':
+                config.vision_config._attn_implementation = 'flash_attention_2'
                 self.vision_model = SiglipVisionModel(config.vision_config)
-            elif config.vision_config.model_type == "radio":
+            elif config.vision_config.model_type == 'radio':
                 self.vision_model = RADIOModel(config.vision_config)
             else:
-                raise NotImplementedError(f"{config.vision_config.model_type} is not implemented.")
+                raise NotImplementedError(f'{config.vision_config.model_type} is not implemented.')
 
         if language_model is not None:
             self.language_model = language_model
         else:
-            if config.text_config.architectures[0] == "LlamaForCausalLM":
+            if config.text_config.architectures[0] == 'LlamaForCausalLM':
                 self.language_model = LlamaForCausalLM(config.text_config)
-            elif config.text_config.architectures[0] == "Phi3ForCausalLM":
-                raise NotImplementedError("Phi3 is not implemented.")
+            elif config.text_config.architectures[0] == 'Phi3ForCausalLM':
+                raise NotImplementedError('Phi3 is not implemented.')
                 # self.language_model = Phi3ForCausalLM(config.text_config)
-            elif config.text_config.architectures[0] == "Qwen2ForCausalLM":
+            elif config.text_config.architectures[0] == 'Qwen2ForCausalLM':
                 assert (
-                    config.text_config._attn_implementation == "flash_attention_2"
-                ), f"Qwen2 must use flash_attention_2 but got {config.text_config._attn_implementation}"
+                    config.text_config._attn_implementation == 'flash_attention_2'
+                ), f'Qwen2 must use flash_attention_2 but got {config.text_config._attn_implementation}'
                 self.language_model = Qwen2ForCausalLM(config.text_config)
-            elif config.text_config.architectures[0] == "Qwen3ForCausalLM":
+            elif config.text_config.architectures[0] == 'Qwen3ForCausalLM':
                 self.language_model = Qwen3ForCausalLM(config.text_config)
             else:
                 raise NotImplementedError(
-                    f"{config.text_config.architectures[0]} is not implemented."
+                    f'{config.text_config.architectures[0]} is not implemented.'
                 )
 
         vit_hidden_size = config.vision_config.hidden_size
@@ -154,7 +154,7 @@ class Eagle2_5_VLForConditionalGeneration(Eagle2_5_VLPreTrainedModel, Generation
                 nn.Linear(vit_hidden_size, llm_hidden_size),
             )
         else:
-            raise NotImplementedError(f"{config.mlp_connector_layers} is not implemented.")
+            raise NotImplementedError(f'{config.mlp_connector_layers} is not implemented.')
 
         self.image_token_index = config.image_token_index
         self.neftune_alpha = None
@@ -181,12 +181,12 @@ class Eagle2_5_VLForConditionalGeneration(Eagle2_5_VLPreTrainedModel, Generation
         lora_config = LoraConfig(
             r=r,
             target_modules=[
-                "self_attn.q_proj",
-                "self_attn.k_proj",
-                "self_attn.v_proj",
-                "self_attn.out_proj",
-                "mlp.fc1",
-                "mlp.fc2",
+                'self_attn.q_proj',
+                'self_attn.k_proj',
+                'self_attn.v_proj',
+                'self_attn.out_proj',
+                'mlp.fc1',
+                'mlp.fc2',
             ],
             lora_alpha=lora_alpha,
             lora_dropout=lora_dropout,
@@ -198,17 +198,17 @@ class Eagle2_5_VLForConditionalGeneration(Eagle2_5_VLPreTrainedModel, Generation
         lora_config = LoraConfig(
             r=r,
             target_modules=[
-                "self_attn.q_proj",
-                "self_attn.k_proj",
-                "self_attn.v_proj",
-                "self_attn.o_proj",
-                "mlp.gate_proj",
-                "mlp.down_proj",
-                "mlp.up_proj",
+                'self_attn.q_proj',
+                'self_attn.k_proj',
+                'self_attn.v_proj',
+                'self_attn.o_proj',
+                'mlp.gate_proj',
+                'mlp.down_proj',
+                'mlp.up_proj',
             ],
             lora_alpha=lora_alpha,
             lora_dropout=lora_dropout,
-            task_type="CAUSAL_LM",
+            task_type='CAUSAL_LM',
         )
         self.language_model = get_peft_model(self.language_model, lora_config)
         self.language_model.enable_input_require_grads()
@@ -250,8 +250,8 @@ class Eagle2_5_VLForConditionalGeneration(Eagle2_5_VLPreTrainedModel, Generation
         except Exception as e:
             vit_embeds = vit_embeds.reshape(-1, C)
             print(
-                f"warning: {e}, input_embeds[selected].shape={input_embeds[selected].shape}, "
-                f"vit_embeds.shape={vit_embeds.shape}"
+                f'warning: {e}, input_embeds[selected].shape={input_embeds[selected].shape}, '
+                f'vit_embeds.shape={vit_embeds.shape}'
             )
             n_token = selected.sum()
             input_embeds[selected] = input_embeds[selected] * 0.0 + vit_embeds[:n_token]
@@ -313,7 +313,7 @@ class Eagle2_5_VLForConditionalGeneration(Eagle2_5_VLPreTrainedModel, Generation
             vit_embeds = self.vision_model(
                 pixel_values=pixel_values, output_hidden_states=False, return_dict=True
             )
-            if hasattr(vit_embeds, "last_hidden_state"):
+            if hasattr(vit_embeds, 'last_hidden_state'):
                 vit_embeds = vit_embeds.last_hidden_state
 
         else:
@@ -370,8 +370,8 @@ class Eagle2_5_VLForConditionalGeneration(Eagle2_5_VLPreTrainedModel, Generation
         else:
             input_embeds = self.language_model.get_input_embeddings()(input_ids)
 
-        if "use_cache" not in generate_kwargs:
-            generate_kwargs["use_cache"] = True
+        if 'use_cache' not in generate_kwargs:
+            generate_kwargs['use_cache'] = True
 
         outputs = self.language_model.generate(
             inputs_embeds=input_embeds,

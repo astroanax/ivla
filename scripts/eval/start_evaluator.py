@@ -21,29 +21,29 @@ import importlib.util
 import sys
 
 def load_eval_cfg(config_path):
-    spec = importlib.util.spec_from_file_location("eval_config_module", config_path)
+    spec = importlib.util.spec_from_file_location('eval_config_module', config_path)
     config_module = importlib.util.module_from_spec(spec)
-    sys.modules["eval_config_module"] = config_module
+    sys.modules['eval_config_module'] = config_module
     spec.loader.exec_module(config_module)
-    return getattr(config_module, "eval_cfg")
+    return getattr(config_module, 'eval_cfg')
 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "--config",
+        '--config',
         type=str,
         required=True,
-        help="eval config file path, e.g. run_configs/eval/pi0_on_simpler_widowx.py"
+        help='eval config file path, e.g. run_configs/eval/pi0_on_simpler_widowx.py'
     )
     parser.add_argument(
-        "--distributed",
-        action="store_true",
-        help="whether to use distributed evaluation"
+        '--distributed',
+        action='store_true',
+        help='whether to use distributed evaluation'
     )
     parser.add_argument(
-        "--server",
-        action="store_true",
-        help="whether to use client-server evaluation mode"
+        '--server',
+        action='store_true',
+        help='whether to use client-server evaluation mode'
     )
 
     args = parser.parse_args()
@@ -57,8 +57,8 @@ def main():
         pass
 
     if args.distributed:
-        print(f"+++++ Distributed evaluation is enabled +++++")
-        
+        print(f'+++++ Distributed evaluation is enabled +++++')
+
         from internmanip.evaluator.utils.distributed import EvaluatorRayActorGroup
 
         evaluator_ray_actor_group = EvaluatorRayActorGroup(eval_cfg)
@@ -68,5 +68,5 @@ def main():
         evaluator = Evaluator.init(eval_cfg)
         evaluator.eval()
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()

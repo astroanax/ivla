@@ -32,7 +32,7 @@ class ManipulationTask(BaseTask):
         """
         if not self.work:
             return {}
-        
+
         obs = {}
         for robot_name, robot in self.robots.items():
             try:
@@ -48,7 +48,7 @@ class ManipulationTask(BaseTask):
                 traceback.print_exc()
                 self.flag_error = True
                 return {}
-            
+
         return obs
 
     def calculate_metrics(self) -> dict:
@@ -57,7 +57,7 @@ class ManipulationTask(BaseTask):
             metrics_res[name] = metric.calc()
 
         return metrics_res
-    
+
     def is_done(self) -> bool:
         self.steps = self.steps + 1
         if self.metrics['manipulation_success_metric'].get_episode_sr() == 1:
@@ -65,13 +65,13 @@ class ManipulationTask(BaseTask):
 
         flag_max_step = self.steps > self.config.max_step
         flag_success = self.success_steps > self.config.max_success_step
-        
+
         return DataHub.get_episode_finished(self.name) or flag_max_step or flag_success or self.flag_error
-    
+
     def set_light_intensity(self):
         from omni.isaac.core.utils.prims import get_prim_at_path, find_matching_prim_paths
-        
-        demolight_paths = find_matching_prim_paths("/World/*/scene/obj_defaultGroundPlane/GroundPlane/DomeLight")
+
+        demolight_paths = find_matching_prim_paths('/World/*/scene/obj_defaultGroundPlane/GroundPlane/DomeLight')
 
         for light_path in demolight_paths:
             prim = get_prim_at_path(light_path)

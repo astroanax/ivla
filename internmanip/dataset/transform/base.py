@@ -26,9 +26,9 @@ class ModalityTransform(BaseModel, ABC):
     Abstract class for transforming data modalities, e.g. video frame augmentation or action normalization.
     """
 
-    apply_to: list[str] = Field(..., description="The keys to apply the transform to.")
+    apply_to: list[str] = Field(..., description='The keys to apply the transform to.')
     training: bool = Field(
-        default=True, description="Whether to apply the transform in training mode."
+        default=True, description='Whether to apply the transform in training mode.'
     )
     _dataset_metadata: DatasetMetadata | None = PrivateAttr(default=None)
 
@@ -38,7 +38,7 @@ class ModalityTransform(BaseModel, ABC):
     def dataset_metadata(self) -> DatasetMetadata:
         assert (
             self._dataset_metadata is not None
-        ), "Dataset metadata is not set. Please call set_metadata() before calling apply()."
+        ), 'Dataset metadata is not set. Please call set_metadata() before calling apply().'
         return self._dataset_metadata
 
     @dataset_metadata.setter
@@ -93,12 +93,12 @@ class InvertibleModalityTransform(ModalityTransform):
 class ComposedModalityTransform(ModalityTransform):
     """Compose multiple modality transforms."""
 
-    transforms: list[ModalityTransform] = Field(..., description="The transforms to compose.")
+    transforms: list[ModalityTransform] = Field(..., description='The transforms to compose.')
     apply_to: list[str] = Field(
-        default_factory=list, description="Will be ignored for composed transforms."
+        default_factory=list, description='Will be ignored for composed transforms.'
     )
     training: bool = Field(
-        default=True, description="Whether to apply the transform in training mode."
+        default=True, description='Whether to apply the transform in training mode.'
     )
 
     model_config = ConfigDict(arbitrary_types_allowed=True, from_attributes=True)
@@ -112,7 +112,7 @@ class ComposedModalityTransform(ModalityTransform):
             try:
                 data = transform(data)
             except Exception as e:
-                raise ValueError(f"Error applying transform {i} to data: {e}") from e
+                raise ValueError(f'Error applying transform {i} to data: {e}') from e
         return data
 
     def unapply(self, data: dict[str, Any]) -> dict[str, Any]:
@@ -122,7 +122,7 @@ class ComposedModalityTransform(ModalityTransform):
                     data = transform.unapply(data)
                 except Exception as e:
                     step = len(self.transforms) - i - 1
-                    raise ValueError(f"Error unapplying transform {step} to data: {e}") from e
+                    raise ValueError(f'Error unapplying transform {step} to data: {e}') from e
         return data
 
     def train(self):

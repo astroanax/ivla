@@ -25,7 +25,7 @@ class FrankaPanda(BaseRobot):
             prim_path=self.prim_path,
             name=config.name,
             position=config.position,
-            end_effector_prim_name="franka/panda_hand",
+            end_effector_prim_name='franka/panda_hand',
             usd_path=config.usd_path,
             scale=self._robot_scale
         )
@@ -35,7 +35,7 @@ class FrankaPanda(BaseRobot):
 
     def get_robot_ik_base(self):
         return self._robot_ik_base
-    
+
     def post_reset(self):
         super().post_reset()
         self._robot_ik_base = self._rigid_body_map[self.prim_path + '/franka/panda_link0']
@@ -47,7 +47,7 @@ class FrankaPanda(BaseRobot):
         """
         if not action:
             return
-        
+
         action_type, action = validate_action(action)
 
         joint_controller = self.controllers['joint_controller']
@@ -81,10 +81,10 @@ class FrankaPanda(BaseRobot):
         # joints_state
         obs['joints_state']['positions'] = self.articulation.get_joint_positions()
         obs['joints_state']['velocities'] = self.articulation.get_joint_velocities()
-        
+
         # eef_pose
         panda = rtb.models.Panda()
-        hand_pose = panda.fkine(q=obs['joints_state']['positions'], end="panda_hand").A
+        hand_pose = panda.fkine(q=obs['joints_state']['positions'], end='panda_hand').A
         eef_position = hand_pose[:3, 3]
         eef_orientation = R.from_matrix(hand_pose[:3, :3]).as_quat()[[3, 0, 1, 2]]
         obs['eef_pose'] = (np.array(eef_position), np.array(eef_orientation))
@@ -92,7 +92,7 @@ class FrankaPanda(BaseRobot):
         # controllers
         # for c_obs_name, controller_obs in self.controllers.items():
         #     obs['controllers'][c_obs_name] = controller_obs.get_obs()
-        
+
         # sensors
         for sensor_name, sensor_obs in self.sensors.items():
             obs['sensors'][sensor_name] = sensor_obs.get_data()

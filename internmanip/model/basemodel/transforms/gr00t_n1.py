@@ -32,14 +32,14 @@ from internmanip.dataset.schema import DatasetMetadata, EmbodimentTag, EMBODIMEN
 from internmanip.model.backbone.eagle_backbone import DEFAULT_EAGLE_PATH
 
 
-DEFAULT_SYSTEM_MESSAGE = "You are a helpful assistant."
-EAGLE_KEYS = ["pixel_values", "input_ids", "attention_mask"]
+DEFAULT_SYSTEM_MESSAGE = 'You are a helpful assistant.'
+EAGLE_KEYS = ['pixel_values', 'input_ids', 'attention_mask']
 
 def build_eagle_processor(eagle_path: str) -> ProcessorMixin:
     eagle_processor = AutoProcessor.from_pretrained(
         eagle_path, trust_remote_code=True, use_fast=True
     )
-    eagle_processor.tokenizer.padding_side = "left"
+    eagle_processor.tokenizer.padding_side = 'left'
     return eagle_processor
 
 def collate_gr00t_n1(features: List[dict]) -> dict:
@@ -48,7 +48,7 @@ def collate_gr00t_n1(features: List[dict]) -> dict:
     keys = features[0].keys()
     assert all(
         all(key in feature for key in keys) for feature in features
-    ), "All features must have the same keys."
+    ), 'All features must have the same keys.'
 
     for key in keys:
         values = [elem[key] for elem in features]
@@ -60,36 +60,36 @@ def collate_gr00t_n1(features: List[dict]) -> dict:
     vlm_batch = processor.collate_fn(features)
     # merge vlm_batch with batch
     for key in vlm_batch.keys():
-        assert key not in batch, f"Key {key} already exists in batch."
+        assert key not in batch, f'Key {key} already exists in batch.'
         batch[key] = vlm_batch[key]
 
     return batch
 
 
 def collate_gr00t_n15(features: List[dict]) -> dict:
-    eagle_processor = build_eagle_processor(DEFAULT_EAGLE_PATH) 
+    eagle_processor = build_eagle_processor(DEFAULT_EAGLE_PATH)
     batch = {}
     keys = features[0].keys()
 
     for key in keys:
         values = [elem[key] for elem in features]
 
-        if key == "eagle_content":
+        if key == 'eagle_content':
             text_list = []
             image_inputs = []
             for v in values:
-                curr_text_list = v["text_list"]
-                curr_image_inputs = v["image_inputs"]
+                curr_text_list = v['text_list']
+                curr_image_inputs = v['image_inputs']
                 text_list += curr_text_list
                 image_inputs += curr_image_inputs
-            
+
             eagle_inputs = eagle_processor(
-                text=text_list, images=image_inputs, return_tensors="pt", padding=True
+                text=text_list, images=image_inputs, return_tensors='pt', padding=True
             )
             for k, v in eagle_inputs.items():
-                k = "eagle_" + k
+                k = 'eagle_' + k
                 batch[k] = v
-        elif key in ("pixel_values", "image_grid_thw", "attention_mask", "input_ids"):
+        elif key in ('pixel_values', 'image_grid_thw', 'attention_mask', 'input_ids'):
             # Concat in existing batch dimension.
             batch[key] = torch.cat(values)
         else:
@@ -129,31 +129,31 @@ def collate_gr00t_n15(features: List[dict]) -> dict:
 
 class GR00TTransform(InvertibleModalityTransform):
     _EMBODIMENT_TAG_MAPPING = {
-        "gr1": 24,
-        "new_embodiment": 31,  # use the last projector for new embodiment,
+        'gr1': 24,
+        'new_embodiment': 31,  # use the last projector for new embodiment,
     }
 
     # -- We inherit from ModalityTransform, so we keep apply_to as well --
     apply_to: list[str] = Field(
-        default_factory=list, description="Not used in this transform, kept for compatibility."
+        default_factory=list, description='Not used in this transform, kept for compatibility.'
     )
     training: bool = Field(
-        default=True, description="Whether to apply the transform in training mode."
+        default=True, description='Whether to apply the transform in training mode.'
     )
     embodiment_tag_mapping: dict[str, int] = Field(
-        description="The projector index of each embodiment tag.",
+        description='The projector index of each embodiment tag.',
         default=_EMBODIMENT_TAG_MAPPING,
     )
     language_dropout_prob: float = Field(
         default=0.0,
-        description="Dropout probability for language.",
+        description='Dropout probability for language.',
     )
 
     # Private attributes to keep track of shapes/dimensions across apply/unapply
     _language_key: Optional[list[str]] = PrivateAttr(default=None)
 
     # XEmbDiT arguments
-    default_instruction: str = Field(default="Perform the default behavior.")
+    default_instruction: str = Field(default='Perform the default behavior.')
     max_state_dim: int
     max_action_dim: int
     vlm_processor: EagleProcessor = Field(default=EagleProcessor())
@@ -172,38 +172,38 @@ class GR00TTransform(InvertibleModalityTransform):
         """Get the embodiment tag from the data."""
         assert (
             self.embodiment_tag is not None
-        ), "Embodiment tag not set. Please call set_metadata first."
+        ), 'Embodiment tag not set. Please call set_metadata first.'
         return self.embodiment_tag_mapping[self.embodiment_tag.value]
 
     def check_keys_and_batch_size(self, data):
         grouped_keys = {}
         for key in data.keys():
             try:
-                modality, _ = key.split(".")
+                modality, _ = key.split('.')
             except:  # noqa: E722
                 ### Handle language annotation special case
-                if "annotation" in key:
-                    modality = "language"
+                if 'annotation' in key:
+                    modality = 'language'
                 else:
-                    modality = "others"  # will contain the video, state, and action
+                    modality = 'others'  # will contain the video, state, and action
             if modality not in grouped_keys:
                 grouped_keys[modality] = []
             grouped_keys[modality].append(key)
         # Use video key to determine batch size.
-        video_ndim = data["video"].ndim
+        video_ndim = data['video'].ndim
         if video_ndim == 5:  # Interpret as [T, V, H, W, C]
             is_batched = False
             batch_size = 1
         elif video_ndim == 6:  # Interpret as [B, T, V, H, W, C]
             is_batched = True
-            batch_size = data["video"].shape[0]
+            batch_size = data['video'].shape[0]
         else:
-            raise ValueError(f"Unsupported video number of dimensions: {video_ndim}")
+            raise ValueError(f'Unsupported video number of dimensions: {video_ndim}')
 
         # Handle language
-        if "language" in grouped_keys:
-            language_keys = grouped_keys["language"]
-            assert len(language_keys) == 1, f"{language_keys=}"
+        if 'language' in grouped_keys:
+            language_keys = grouped_keys['language']
+            assert len(language_keys) == 1, f'{language_keys=}'
             self._language_key = language_keys[0]
         return is_batched, batch_size
 
@@ -213,33 +213,33 @@ class GR00TTransform(InvertibleModalityTransform):
             batch:
                 video: [T, V, H, W, C]
         """
-        images = batch["images"]
-        assert images.shape[0] == 1, "double check formatting when doing multi-time step"
+        images = batch['images']
+        assert images.shape[0] == 1, 'double check formatting when doing multi-time step'
         # Remove the singleton time dimension.
         images = images[0]
-        images = [{"np_array": images[idx]} for idx in range(len(images))]
-        if "language" in batch:
-            lang = batch["language"]
+        images = [{'np_array': images[idx]} for idx in range(len(images))]
+        if 'language' in batch:
+            lang = batch['language']
             if isinstance(lang, list):
                 lang = lang[0]
         else:
             lang = self.default_instruction
-            raise ValueError("Language not found for {self.embodiment_tag.value}")
+            raise ValueError('Language not found for {self.embodiment_tag.value}')
 
         prompt = [
-            {"role": "system", "content": DEFAULT_SYSTEM_MESSAGE},
+            {'role': 'system', 'content': DEFAULT_SYSTEM_MESSAGE},
             {
-                "role": "user",
-                "content": lang,
-                "image": images,
+                'role': 'user',
+                'content': lang,
+                'image': images,
             },
         ]
-        inputs = self.vlm_processor.prepare_input({"prompt": prompt})
+        inputs = self.vlm_processor.prepare_input({'prompt': prompt})
         return inputs
 
     def _prepare_video(self, data: dict):
         """Process, stack, and pad images from data['video']."""
-        return data["video"]  # [t v h w c]
+        return data['video']  # [t v h w c]
 
     def _prepare_language(self, data: dict):
         """Tokenize data['language'] (or default_instruction if missing)."""
@@ -262,14 +262,14 @@ class GR00TTransform(InvertibleModalityTransform):
         Gathers final state from data['state'], then pads to max_state_dim.
         Return (state, state_mask, n_state_tokens).
         """
-        if "state" not in data:
+        if 'state' not in data:
             state = np.zeros((self.state_horizon, self.max_state_dim))
             state_mask = np.zeros((self.state_horizon, self.max_state_dim), dtype=bool)
             n_state_tokens = self.state_horizon
             return state, state_mask, n_state_tokens
 
-        state = data["state"]
-        assert state.shape[0] == self.state_horizon, f"{state.shape=}, {self.state_horizon=}"
+        state = data['state']
+        assert state.shape[0] == self.state_horizon, f'{state.shape=}, {self.state_horizon=}'
 
         n_state_dims = state.shape[-1]
 
@@ -279,7 +279,7 @@ class GR00TTransform(InvertibleModalityTransform):
             n_state_dims = self.max_state_dim
         else:
             # Pad up to max_state_dim if smaller
-            state = np.pad(state, ((0, 0), (0, self.max_state_dim - n_state_dims)), "constant")
+            state = np.pad(state, ((0, 0), (0, self.max_state_dim - n_state_dims)), 'constant')
 
         # Create mask for real state dims
         state_mask = np.zeros_like(state).astype(bool)
@@ -293,24 +293,24 @@ class GR00TTransform(InvertibleModalityTransform):
         """
         Pad to max_action_dim, return masks.
         """
-        if "action" not in data:
+        if 'action' not in data:
             actions = np.zeros((self.action_horizon, self.max_action_dim))
             actions_mask = np.zeros((self.action_horizon, self.max_action_dim), dtype=bool)
             n_action_tokens = self.action_horizon
             return actions, actions_mask, n_action_tokens
 
-        actions = data["action"]
-        assert actions.shape[0] == self.action_horizon, f"{actions.shape=}, {self.action_horizon=}"
+        actions = data['action']
+        assert actions.shape[0] == self.action_horizon, f'{actions.shape=}, {self.action_horizon=}'
 
         n_action_tokens = actions.shape[0]  # T
         n_action_dims = actions.shape[1]
 
         assert (
             n_action_dims <= self.max_action_dim
-        ), f"Action dim {n_action_dims} exceeds max allowed {self.max_action_dim}."
+        ), f'Action dim {n_action_dims} exceeds max allowed {self.max_action_dim}.'
 
         # Pad the channel dimension
-        actions = np.pad(actions, ((0, 0), (0, self.max_action_dim - n_action_dims)), "constant")
+        actions = np.pad(actions, ((0, 0), (0, self.max_action_dim - n_action_dims)), 'constant')
 
         # Create mask: [T, max_action_dim]
         actions_mask = np.zeros((n_action_tokens, self.max_action_dim), dtype=bool)
@@ -327,36 +327,36 @@ class GR00TTransform(InvertibleModalityTransform):
         images = images.astype(np.uint8)
         language = self._prepare_language(data)
 
-        vlm_batch = {"images": images, "language": language}
+        vlm_batch = {'images': images, 'language': language}
         vlm_outputs = self._apply_gr00t_processing(vlm_batch)
 
         # 2) Prepare state
         state, state_mask, _ = self._prepare_state(data)
-        transformed_data["state"] = state
-        transformed_data["state_mask"] = state_mask
+        transformed_data['state'] = state
+        transformed_data['state_mask'] = state_mask
 
         if self.training:
             # 3) Prepare actions
-            transformed_data["segmentation_target"] = np.zeros((2,))
-            transformed_data["segmentation_target_mask"] = np.zeros((1,))
-            transformed_data["has_real_action"] = np.ones((), dtype=bool)
+            transformed_data['segmentation_target'] = np.zeros((2,))
+            transformed_data['segmentation_target_mask'] = np.zeros((1,))
+            transformed_data['has_real_action'] = np.ones((), dtype=bool)
             actions, actions_mask, _ = self._prepare_action(data)
-            transformed_data["action"] = actions
-            transformed_data["action_mask"] = actions_mask
+            transformed_data['action'] = actions
+            transformed_data['action_mask'] = actions_mask
 
         for k, v in vlm_outputs.items():
-            assert k not in transformed_data, f"Key {k} already exists in transformed_data."
+            assert k not in transformed_data, f'Key {k} already exists in transformed_data.'
             transformed_data[k] = v
 
         # By default, assume regular robot data with only real action.
-        transformed_data["embodiment_id"] = self.get_embodiment_tag()
+        transformed_data['embodiment_id'] = self.get_embodiment_tag()
 
         if self.training:
-            action_and_mask_keys = ["action", "action_mask"]
+            action_and_mask_keys = ['action', 'action_mask']
             assert all(
-                transformed_data[key].shape == transformed_data["action"].shape
+                transformed_data[key].shape == transformed_data['action'].shape
                 for key in action_and_mask_keys
-            ), f"Shape mismatch: {[(key, transformed_data[key].shape) for key in action_and_mask_keys]}"
+            ), f'Shape mismatch: {[(key, transformed_data[key].shape) for key in action_and_mask_keys]}'
 
         return transformed_data
 
@@ -403,19 +403,19 @@ class GR00TTransform_15(InvertibleModalityTransform):
 
     # -- We inherit from ModalityTransform, so we keep apply_to as well --
     apply_to: list[str] = Field(
-        default_factory=list, description="Not used in this transform, kept for compatibility."
+        default_factory=list, description='Not used in this transform, kept for compatibility.'
     )
     training: bool = Field(
-        default=True, description="Whether to apply the transform in training mode."
+        default=True, description='Whether to apply the transform in training mode.'
     )
-    formalize_language: bool = Field(default=False, description="Formalize language if True.")
+    formalize_language: bool = Field(default=False, description='Formalize language if True.')
     embodiment_tag_mapping: dict[str, int] = Field(
-        description="The projector index of each embodiment tag.",
+        description='The projector index of each embodiment tag.',
         default=EMBODIMENT_TAG_MAPPING,
     )
     language_dropout_prob: float = Field(
         default=0.0,
-        description="Dropout probability for language.",
+        description='Dropout probability for language.',
     )
 
     # Private attributes to keep track of shapes/dimensions across apply/unapply
@@ -424,7 +424,7 @@ class GR00TTransform_15(InvertibleModalityTransform):
     eagle_processor: ProcessorMixin = Field(default=build_eagle_processor(DEFAULT_EAGLE_PATH))
 
     # XEmbDiT arguments
-    default_instruction: str = Field(default="Perform the default behavior.")
+    default_instruction: str = Field(default='Perform the default behavior.')
     max_state_dim: int
     max_action_dim: int
     state_horizon: int
@@ -442,37 +442,37 @@ class GR00TTransform_15(InvertibleModalityTransform):
         """Get the embodiment tag from the data."""
         assert (
             self.embodiment_tag is not None
-        ), "Embodiment tag not set. Please call set_metadata first."
+        ), 'Embodiment tag not set. Please call set_metadata first.'
         return self.embodiment_tag_mapping[self.embodiment_tag.value]
 
     def check_keys_and_batch_size(self, data):
         grouped_keys = {}
         for key in data.keys():
-            if "annotation" in key:
-                modality = "language"
+            if 'annotation' in key:
+                modality = 'language'
             else:
                 try:
-                    modality, _ = key.split(".")
+                    modality, _ = key.split('.')
                 except:  # noqa: E722
-                    modality = "others"  # will contain the video, state, and action
+                    modality = 'others'  # will contain the video, state, and action
             if modality not in grouped_keys:
                 grouped_keys[modality] = []
             grouped_keys[modality].append(key)
         # Use video key to determine batch size.
-        video_ndim = data["video"].ndim
+        video_ndim = data['video'].ndim
         if video_ndim == 5:  # Interpret as [T, V, H, W, C]
             is_batched = False
             batch_size = 1
         elif video_ndim == 6:  # Interpret as [B, T, V, H, W, C]
             is_batched = True
-            batch_size = data["video"].shape[0]
+            batch_size = data['video'].shape[0]
         else:
-            raise ValueError(f"Unsupported video number of dimensions: {video_ndim}")
+            raise ValueError(f'Unsupported video number of dimensions: {video_ndim}')
 
         # Handle language
-        if "language" in grouped_keys:
-            language_keys = grouped_keys["language"]
-            assert len(language_keys) == 1, f"{language_keys=}"
+        if 'language' in grouped_keys:
+            language_keys = grouped_keys['language']
+            assert len(language_keys) == 1, f'{language_keys=}'
             self._language_key = language_keys[0]
         return is_batched, batch_size
 
@@ -484,24 +484,24 @@ class GR00TTransform_15(InvertibleModalityTransform):
         Returns: required input with the format `BatchFeature`
         """
         # TODO(YL, FH): check if this is correct
-        images = batch["images"]  # [V, T, C, H, W]
+        images = batch['images']  # [V, T, C, H, W]
         images.shape[0]
 
-        np_images = rearrange(images, "v t c h w -> (t v) c h w")
+        np_images = rearrange(images, 'v t c h w -> (t v) c h w')
         text_content = []
 
         # handle language
-        lang = batch["language"]
+        lang = batch['language']
         if isinstance(lang, list):
             lang = lang[0]
-        text_content.append({"type": "text", "text": lang})
+        text_content.append({'type': 'text', 'text': lang})
 
         eagle_images = [Image.fromarray(v) for v in np_images]
-        eagle_image = [{"type": "image", "image": img} for img in eagle_images]
+        eagle_image = [{'type': 'image', 'image': img} for img in eagle_images]
         eagle_conversation = [
             {
-                "role": "user",
-                "content": eagle_image + text_content,
+                'role': 'user',
+                'content': eagle_image + text_content,
             }
         ]
 
@@ -512,18 +512,18 @@ class GR00TTransform_15(InvertibleModalityTransform):
         ]
         image_inputs, video_inputs = self.eagle_processor.process_vision_info(eagle_conversation)
         eagle_content = {
-            "image_inputs": image_inputs,
-            "video_inputs": video_inputs,
-            "text_list": text_list,
+            'image_inputs': image_inputs,
+            'video_inputs': video_inputs,
+            'text_list': text_list,
         }
         inputs = {}
-        inputs["eagle_content"] = eagle_content
+        inputs['eagle_content'] = eagle_content
         return inputs
 
     def _prepare_video(self, data: dict):
         """Process, stack, and pad images from data['video']."""
         ## TODO(YL, FH): check if this is correct
-        return data["video"]
+        return data['video']
 
     def _prepare_language(self, data: dict):
         """Tokenize data['language'] (or default_instruction if missing)."""
@@ -545,14 +545,14 @@ class GR00TTransform_15(InvertibleModalityTransform):
         Gathers final state from data['state'], then pads to max_state_dim.
         Return (state, state_mask, n_state_tokens).
         """
-        if "state" not in data:
+        if 'state' not in data:
             state = np.zeros((self.state_horizon, self.max_state_dim))
             state_mask = np.zeros((self.state_horizon, self.max_state_dim), dtype=bool)
             n_state_tokens = self.state_horizon
             return state, state_mask, n_state_tokens
 
-        state = data["state"]
-        assert state.shape[0] == self.state_horizon, f"{state.shape=}, {self.state_horizon=}"
+        state = data['state']
+        assert state.shape[0] == self.state_horizon, f'{state.shape=}, {self.state_horizon=}'
 
         n_state_dims = state.shape[-1]
 
@@ -562,7 +562,7 @@ class GR00TTransform_15(InvertibleModalityTransform):
             n_state_dims = self.max_state_dim
         else:
             # Pad up to max_state_dim if smaller
-            state = np.pad(state, ((0, 0), (0, self.max_state_dim - n_state_dims)), "constant")
+            state = np.pad(state, ((0, 0), (0, self.max_state_dim - n_state_dims)), 'constant')
 
         # Create mask for real state dims
         state_mask = np.zeros_like(state).astype(bool)
@@ -576,24 +576,24 @@ class GR00TTransform_15(InvertibleModalityTransform):
         """
         Pad to max_action_dim, return masks.
         """
-        if "action" not in data:
+        if 'action' not in data:
             actions = np.zeros((self.action_horizon, self.max_action_dim))
             actions_mask = np.zeros((self.action_horizon, self.max_action_dim), dtype=bool)
             n_action_tokens = self.action_horizon
             return actions, actions_mask, n_action_tokens
 
-        actions = data["action"]
-        assert actions.shape[0] == self.action_horizon, f"{actions.shape=}, {self.action_horizon=}"
+        actions = data['action']
+        assert actions.shape[0] == self.action_horizon, f'{actions.shape=}, {self.action_horizon=}'
 
         n_action_tokens = actions.shape[0]  # T
         n_action_dims = actions.shape[1]
 
         assert (
             n_action_dims <= self.max_action_dim
-        ), f"Action dim {n_action_dims} exceeds max allowed {self.max_action_dim}."
+        ), f'Action dim {n_action_dims} exceeds max allowed {self.max_action_dim}.'
 
         # Pad the channel dimension
-        actions = np.pad(actions, ((0, 0), (0, self.max_action_dim - n_action_dims)), "constant")
+        actions = np.pad(actions, ((0, 0), (0, self.max_action_dim - n_action_dims)), 'constant')
 
         # Create mask: [T, max_action_dim]
         actions_mask = np.zeros((n_action_tokens, self.max_action_dim), dtype=bool)
@@ -608,38 +608,38 @@ class GR00TTransform_15(InvertibleModalityTransform):
 
         images = self._prepare_video(data)
         images = (images.permute(0, 1, 3, 4, 2) * 255).to(torch.uint8).cpu().numpy()
-        images = images.astype(np.uint8) 
+        images = images.astype(np.uint8)
 
         language = self._prepare_language(data)
-        batch_data = {"images": images, "language": language}
+        batch_data = {'images': images, 'language': language}
         vlm_outputs = self._apply_vlm_processing(batch_data)
 
         # 2) Prepare state
         state, state_mask, _ = self._prepare_state(data)
-        transformed_data["state"] = state
-        transformed_data["state_mask"] = state_mask
+        transformed_data['state'] = state
+        transformed_data['state_mask'] = state_mask
 
         if self.training:
             # 3) Prepare actions
-            transformed_data["segmentation_target"] = np.zeros((2,))
-            transformed_data["segmentation_target_mask"] = np.zeros((1,))
-            transformed_data["has_real_action"] = np.ones((), dtype=bool)
+            transformed_data['segmentation_target'] = np.zeros((2,))
+            transformed_data['segmentation_target_mask'] = np.zeros((1,))
+            transformed_data['has_real_action'] = np.ones((), dtype=bool)
             actions, actions_mask, _ = self._prepare_action(data)
-            transformed_data["action"] = actions
-            transformed_data["action_mask"] = actions_mask
+            transformed_data['action'] = actions
+            transformed_data['action_mask'] = actions_mask
 
         for k, v in vlm_outputs.items():
-            assert k not in transformed_data, f"Key {k} already exists in transformed_data."
+            assert k not in transformed_data, f'Key {k} already exists in transformed_data.'
             transformed_data[k] = v
 
-        transformed_data["embodiment_id"] = self.get_embodiment_tag()
+        transformed_data['embodiment_id'] = self.get_embodiment_tag()
 
         if self.training:
-            action_and_mask_keys = ["action", "action_mask"]
+            action_and_mask_keys = ['action', 'action_mask']
             assert all(
-                transformed_data[key].shape == transformed_data["action"].shape
+                transformed_data[key].shape == transformed_data['action'].shape
                 for key in action_and_mask_keys
-            ), f"Shape mismatch: {[(key, transformed_data[key].shape) for key in action_and_mask_keys]}"
+            ), f'Shape mismatch: {[(key, transformed_data[key].shape) for key in action_and_mask_keys]}'
 
         return transformed_data
 
@@ -662,7 +662,7 @@ class GR00TTransform_15(InvertibleModalityTransform):
         #             except (TypeError, IndexError):
         #                 # If value is not indexable or index is out of bounds, use the whole value
         #                 single_data[key] = value
-        #     data_split.append(single_data)        
+        #     data_split.append(single_data)
         # Process each element.
         data_split_processed = [self.apply_single(elem) for elem in data_split]
         return collate_gr00t_n15(data_split_processed)

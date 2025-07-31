@@ -17,24 +17,24 @@ class AgentCfg(BaseModel):
     class Config:
         arbitrary_types_allowed = True
 
-    @field_validator("agent_type", mode="before")
+    @field_validator('agent_type', mode='before')
     def validate_agent_type(cls, v):
         return v.upper() if isinstance(v, str) else v
-    
-    @field_validator("model_cfg", mode="before")
+
+    @field_validator('model_cfg', mode='before')
     def validate_model_cfg(cls, v):
         """Deserializing the `model_cfg` field using the `AutoConfig` mechanism from the Transformers library."""
         if v is None:
             return None
-        
+
         if isinstance(v, PretrainedConfig):
             return v
-        
+
         if isinstance(v, dict):
             model_type = v.get('model_type', '')
 
             # TODO: Need to refactor to use AutoConfig.for_model()
-            
+
             # Attempting to use `CONFIG_MAPPING` from the Transformers library.
 
             try:
@@ -44,14 +44,14 @@ class AgentCfg(BaseModel):
                     return config_class(**v)
             except Exception:
                 pass
-            
+
             # Reverting to manually handling known configuration types.
 
             if model_type == 'DP':
                 from internmanip.configs.model.dp_cfg import DiffusionConfig
                 return DiffusionConfig(**v)
             elif model_type == 'pi0':
-                from internmanip.configs.model.pi0_cfg import PI0Config  
+                from internmanip.configs.model.pi0_cfg import PI0Config
                 return PI0Config(**v)
             elif model_type == 'radio':
                 from internmanip.model.backbone.eagle2_hg_model_15.radio_model import RADIOConfig
@@ -62,9 +62,9 @@ class AgentCfg(BaseModel):
             else:
                 # 如果都没有匹配，尝试使用通用的PretrainedConfig
                 return PretrainedConfig(**v)
-        
+
         return v
-    
+
     @field_serializer('model_cfg')
     def serialize_model_cfg(self, v: PretrainedConfig):
         return v.to_dict() if v is not None else None

@@ -21,7 +21,7 @@ def get_lora_model(model, rank=32, lora_alpha=16, lora_dropout=0.1):
     for name, module in model.named_modules():
         # Look for linear layers in attention mechanisms
         if isinstance(module, torch.nn.Linear):
-            if any(x in name for x in ["q_proj", "v_proj", "to_q", "to_v", "k_proj", "to_k"]):
+            if any(x in name for x in ['q_proj', 'v_proj', 'to_q', 'to_v', 'k_proj', 'to_k']):
                 target_modules.append(name)
 
     lora_config = LoraConfig(
@@ -29,8 +29,8 @@ def get_lora_model(model, rank=32, lora_alpha=16, lora_dropout=0.1):
         lora_alpha=lora_alpha,
         target_modules=target_modules,
         lora_dropout=lora_dropout,
-        bias="none",
-        task_type="CAUSAL_LM",
+        bias='none',
+        task_type='CAUSAL_LM',
     )
 
     model = get_peft_model(model, lora_config)

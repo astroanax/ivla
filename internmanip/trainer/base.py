@@ -54,7 +54,7 @@ class BaseSampler(Sampler):
 
     def set_epoch(self, epoch):
         self.epoch = epoch
-        if hasattr(self.data_source, "set_epoch"):
+        if hasattr(self.data_source, 'set_epoch'):
             # this is important for dataset
             self.data_source.set_epoch(epoch)
 
@@ -74,7 +74,7 @@ class BaseTrainer(TransformersTrainer):
 
     def compute_loss(self, model, inputs, return_outputs=False, num_items_in_batch=None):
         outputs = model(inputs)
-        loss = outputs["loss"]
+        loss = outputs['loss']
         return (loss, outputs) if return_outputs else loss
 
     def create_optimizer(self):
@@ -91,23 +91,23 @@ class BaseTrainer(TransformersTrainer):
 
         if self.optimizer is None:
             decay_parameters = get_parameter_names(opt_model, ALL_LAYERNORM_LAYERS)
-            decay_parameters = [name for name in decay_parameters if "bias" not in name]
+            decay_parameters = [name for name in decay_parameters if 'bias' not in name]
             optimizer_grouped_parameters = [
                 {
-                    "params": [
+                    'params': [
                         p
                         for n, p in opt_model.named_parameters()
                         if (n in decay_parameters and p.requires_grad)
                     ],
-                    "weight_decay": self.args.weight_decay,
+                    'weight_decay': self.args.weight_decay,
                 },
                 {
-                    "params": [
+                    'params': [
                         p
                         for n, p in opt_model.named_parameters()
                         if (n not in decay_parameters and p.requires_grad)
                     ],
-                    "weight_decay": 0.0,
+                    'weight_decay': 0.0,
                 },
             ]
 
@@ -125,13 +125,13 @@ class BaseTrainer(TransformersTrainer):
         else:
             # 添加空值检查
             if self.model is None:
-                raise ValueError("Model is None")
+                raise ValueError('Model is None')
             state_dict = self.model.state_dict()
 
         if self.args.should_save:
             # 添加空值检查
             if self.model is None:
-                raise ValueError("Model is None")
+                raise ValueError('Model is None')
             return self.model.save_pretrained(output_dir, state_dict=state_dict)
 
     def train(
@@ -149,7 +149,7 @@ class BaseTrainer(TransformersTrainer):
             resume_from_checkpoint = get_last_checkpoint(self.args.output_dir)
             if resume_from_checkpoint is None:
                 raise ValueError(
-                    f"No valid checkpoint found in output directory ({self.args.output_dir})"
+                    f'No valid checkpoint found in output directory ({self.args.output_dir})'
                 )
 
         if resume_from_checkpoint is not None:
