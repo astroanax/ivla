@@ -1,13 +1,24 @@
-import os
 import copy
+import os
 import pickle
 
-from internutopia.core.vec_env import Env
 from internutopia.core.config import Config, SimConfig
 from internutopia.core.config.distribution import RayDistributionCfg as DistributionCfg
+from internutopia.core.vec_env import Env
 
-from .config.env_config import *
-from .config.task_config import *
+from .config.env_config import EnvSettings
+from .config.task_config import (
+    AlohaSplitRobotCfg,
+    CameraCfg,
+    FrankaPandaRobotCfg,
+    FrankaRobotiqRobotCfg,
+    GripperControllerCfg,
+    IKAlohaSplitCuroboControllerCfg,
+    InverseKinematicsControllerCfg,
+    JointControllerCfg,
+    ManipulationSuccessMetricCfg,
+    ManipulationTaskCfg,
+)
 
 
 class ConfigGenerator:
@@ -26,29 +37,39 @@ class ConfigGenerator:
 
     def create_controllers_cfg(self):
         joint_controller_cfg = JointControllerCfg()
-        ik_controller_cfg = InverseKinematicsControllerCfg()
 
-        if self.env_settings.gripper_type=='panda':
-            gripper_controller_cfg = GripperControllerCfg()
-            return [joint_controller_cfg, gripper_controller_cfg, ik_controller_cfg]
+        if self.env_settings.robot_type == 'franka':
+            ik_controller_cfg = InverseKinematicsControllerCfg()
+
+            if self.env_settings.gripper_type == 'panda':
+                gripper_controller_cfg = GripperControllerCfg()
+
+                return [joint_controller_cfg, gripper_controller_cfg, ik_controller_cfg]
+            else:
+                return [joint_controller_cfg, ik_controller_cfg]
         else:
+            ik_controller_cfg = IKAlohaSplitCuroboControllerCfg()
+
             return [joint_controller_cfg, ik_controller_cfg]
 
     def create_sensors_cfg(self):
-        camera_enable_list = self.env_settings.camera_enable
+        if self.env_settings.robot_type == 'franka':
+            camera_enable_list = self.env_settings.franka_camera_enable
+        else:
+            camera_enable_list = self.env_settings.aloha_split_camera_enable
+
         assert camera_enable_list, 'camera_enable cannot be empty'
 
         camera_config = []
         for camera_name, enable in camera_enable_list.model_dump().items():
-            assert camera_name in ['realsense', 'obs_camera', 'obs_camera_2']
-
             if not enable:
                 continue
 
             per_camera_config = CameraCfg(
                 name=camera_name,
                 depth_obs=self.env_settings.depth_obs,
-                gripper_type=self.env_settings.gripper_type
+                robot_type=self.env_settings.robot_type,
+                gripper_type=self.env_settings.gripper_type,
             )
 
             camera_config.append(per_camera_config)
@@ -56,18 +77,23 @@ class ConfigGenerator:
         return camera_config
 
     def create_robots_cfg(self):
-        if self.env_settings.gripper_type=='panda':
-            franka_robot = FrankaPandaRobotCfg(
-                controllers=self.create_controllers_cfg(),
-                sensors=self.create_sensors_cfg()
-            )
+        if self.env_settings.robot_type == 'franka':
+            if self.env_settings.gripper_type == 'panda':
+                franka_robot = FrankaPandaRobotCfg(
+                    controllers=self.create_controllers_cfg(), sensors=self.create_sensors_cfg()
+                )
+            else:
+                franka_robot = FrankaRobotiqRobotCfg(
+                    controllers=self.create_controllers_cfg(), sensors=self.create_sensors_cfg()
+                )
+
+            return [franka_robot]
         else:
-            franka_robot = FrankaRobotiqRobotCfg(
-                controllers=self.create_controllers_cfg(),
-                sensors=self.create_sensors_cfg()
+            aloha_split_robot = AlohaSplitRobotCfg(
+                controllers=self.create_controllers_cfg(), sensors=self.create_sensors_cfg()
             )
 
-        return [franka_robot]
+            return [aloha_split_robot]
 
     def create_task_config(self):
         task_config = []
@@ -75,8 +101,7 @@ class ConfigGenerator:
             meta_info_path = os.path.join(episode_info.episode_path, 'meta_info.pkl')
             scene_asset_path = os.path.join(episode_info.episode_path, 'scene.usd')
 
-            if not os.path.exists(meta_info_path) or \
-                not os.path.exists(scene_asset_path):
+            if not os.path.exists(meta_info_path) or not os.path.exists(scene_asset_path):
                 continue
 
             with open(meta_info_path, 'rb') as f:
@@ -84,14 +109,14 @@ class ConfigGenerator:
 
             per_task_config = ManipulationTaskCfg(
                 metrics=self.create_metrics_cfg(),
-                scene_asset_path = scene_asset_path,
+                scene_asset_path=scene_asset_path,
                 robots=self.create_robots_cfg(),
                 max_step=self.env_settings.max_step,
                 max_success_step=self.env_settings.max_success_step,
                 prompt=meta_info['language_instruction'],
                 target=meta_info['task_data']['goal'],
-                task_name=episode_info.task_name, # meta_info["task_name"]
-                episode_name=episode_info.episode_name, # meta_info["episode_name"]
+                task_name=episode_info.task_name,  # meta_info["task_name"]
+                episode_name=episode_info.episode_name,  # meta_info["episode_name"]
             )
 
             task_config.append(per_task_config)
@@ -105,7 +130,7 @@ class ConfigGenerator:
             rendering_interval=0,
             use_fabric=False,
             headless=self.env_settings.headless,
-            native=self.env_settings.headless
+            native=self.env_settings.headless,
         )
 
         return simulator
@@ -115,7 +140,7 @@ class ConfigGenerator:
             simulator=self.create_simulator_config(),
             env_num=self.env_settings.env_num,
             env_offset_size=50.0,
-            task_configs=self.create_task_config()
+            task_configs=self.create_task_config(),
         )
 
         if self.env_settings.ray_distribution is not None:
@@ -127,14 +152,14 @@ class ConfigGenerator:
 
 
 def import_extensions():
-    from .robots import franka_panda
-    from .robots import franka_robotiq
-    from .sensors import camera
-    from .tasks import manipulation_task
-    from .controllers import ik_controller
-    from .controllers import joint_controller
-    from .controllers import gripper_controller
-    from .metrics import manipulation_success_metric
+    from .controllers import gripper_controller  # noqa: F401
+    from .controllers import ik_aloha_curobo_controller  # noqa: F401
+    from .controllers import ik_controller  # noqa: F401
+    from .controllers import joint_controller  # noqa: F401; noqa: F401
+    from .metrics import manipulation_success_metric  # noqa: F401
+    from .robots import aloha_split, franka_panda, franka_robotiq  # noqa: F401
+    from .sensors import camera  # noqa: F401
+    from .tasks import manipulation_task  # noqa: F401
 
 
 def create_env(env_settings: EnvSettings):

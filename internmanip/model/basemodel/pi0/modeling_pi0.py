@@ -251,10 +251,7 @@ class PI0Policy(BasePolicyModel):
         """
         self.eval()
 
-        # batch = self.normalize_inputs(batch)
-
-
-        batch['video'] = (batch['video'] - 1) * 2
+        batch['video'] = (batch['video'] - 0.5) * 2
 
 
         if batch['video'].shape[2] == 1:
@@ -285,16 +282,8 @@ class PI0Policy(BasePolicyModel):
 
     def forward(self, batch: dict[str, Tensor], noise=None, time=None) -> tuple[Tensor, dict[str, Tensor]]:
         """Do a full training forward pass to compute the loss"""
-
-        # batch = self.normalize_inputs(batch)
-        # batch = self.normalize_targets(batch)
-        # images, img_masks = self.prepare_images(batch)
-        # import ipdb;ipdb.set_trace()
-
         # pi0 specific transform
-        batch['video'] = (batch['video'] - 1) * 2
-        if 'annotation.human.action.task_description' not in batch:
-            batch['annotation.human.action.task_description'] = [[''] * len(batch['video'])]
+        batch['video'] = (batch['video'] - 0.5) * 2
 
         if batch['video'].shape[2] == 1:
             device = batch['video'].device
@@ -345,41 +334,6 @@ class PI0Policy(BasePolicyModel):
 
         return loss_dict
 
-    def prepare_images(self, batch):
-        """Apply Pi0 preprocessing to the images, like resizing to 224x224 and padding to keep aspect ratio, and
-        convert pixel range from [0.0, 1.0] to [-1.0, 1.0] as requested by SigLIP.
-        """
-        images = []
-        img_masks = []
-        # # model.config.input_features = {'video.base_view':
-    #                                'video.ego_view': }
-
-        present_img_keys = [key for key in ['video.base_view', 'video.ego_view'] if key in batch]
-        # missing_img_keys = [key for key in self.config.image_features if key not in batch]
-
-        # if len(present_img_keys) == 0:
-        #     raise ValueError(
-        #         f"All image features are missing from the batch. At least one expected. (batch: {batch.keys()}) (image_features:{self.config.image_features})"
-        #     )
-
-        # Preprocess image features present in the batch
-        for key in present_img_keys:
-            img = batch[key]
-
-            # if self.config.resize_imgs_with_padding is not None:
-            #     img = resize_with_pad(img, *self.config.resize_imgs_with_padding, pad_value=0)
-
-            # Normalize from range [0,1] to [-1,1] as expected by siglip
-            img = img * 2.0 - 1.0
-
-            bsize = img.shape[0]
-            device = img.device
-            mask = torch.ones(bsize, dtype=torch.bool, device=device)
-            images.append(img)
-            img_masks.append(mask)
-
-
-        return images, img_masks
 
     def prepare_language(self, batch) -> tuple[Tensor, Tensor]:
         """Tokenize the text input"""
@@ -390,14 +344,13 @@ class PI0Policy(BasePolicyModel):
         tasks = [task if type(task) == list else [task] for task in tasks] #convert to a list
         tasks = [task[0] if task[0].endswith('\n') else f'{task[0]}\n' for task in tasks]
 
-        max_length = 64
         # import ipdb;ipdb.set_trace()
         tokenized_prompt = self.language_tokenizer.__call__(
             tasks,
-            padding='max_length',
-            padding_side='right',
-            max_length=max_length,
-            return_tensors='pt',
+            padding="max_length",
+            padding_side="right",
+            max_length=self.tokenizer_max_length,
+            return_tensors="pt",
         )
         lang_tokens = tokenized_prompt['input_ids'].to(device=device)
         lang_masks = tokenized_prompt['attention_mask'].to(device=device, dtype=torch.bool)
@@ -424,15 +377,21 @@ class PI0Policy(BasePolicyModel):
         The policy is set in evaluation mode by default using `policy.eval()` (dropout modules are
         deactivated). To train it, you should first set it back in training mode with `policy.train()`.
         """
-
-        tune_visual = kwargs.pop('tune_visual', True)
-        tune_llm = kwargs.pop('tune_llm', False)
-        tune_projector = kwargs.pop('tune_projector', True)
-        tune_diffusion_model = kwargs.pop('tune_diffusion_model', True)
-        tokenizer_max_length = kwargs.pop('tokenizer_max_length', 48)
+        
+        tune_visual = kwargs.pop("tune_visual", True)
+        tune_llm = kwargs.pop("tune_llm", False)
+        tune_projector = kwargs.pop("tune_projector", True)
+        tune_diffusion_model = kwargs.pop("tune_diffusion_model", True)
+        tokenizer_max_length = kwargs.pop("tokenizer_max_length", 64)
         policy = super().from_pretrained(
             pretrained_model_name_or_path, **kwargs
         )
+        if tune_visual:
+            for p in policy.model.paligemma_with_expert.paligemma.vision_tower.parameters():
+                p.requires_grad=True
+        if tune_projector:
+            for p in policy.model.paligemma_with_expert.paligemma.multi_modal_projector.parameters():
+                p.requires_grad=True        
         policy.config.tokenizer_max_length = tokenizer_max_length
         policy.model.paligemma_with_expert.paligemma.language_model.lm_head.weight.requires_grad = False
         policy.model.paligemma_with_expert.gemma_expert.lm_head.weight.requires_grad = False

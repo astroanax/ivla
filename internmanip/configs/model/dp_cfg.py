@@ -17,7 +17,6 @@
 from dataclasses import dataclass, field
 
 from transformers.configuration_utils import PretrainedConfig
-from internmanip.model.types import NormalizationMode
 
 @dataclass
 class DiffusionConfig(PretrainedConfig):
@@ -103,8 +102,6 @@ class DiffusionConfig(PretrainedConfig):
         language_embedding_dim: Original dimension of the language embeddings from CLIP.
         language_projection_dim: Target dimension for text embeddings after projection (reduced from original).
         language_dropout_prob: Dropout probability for language embeddings during training.
-        # Device configuration
-        eval_device: str = field(default="cpu", metadata={"help": "Device for evaluation"})
     """
 
     model_type = 'dp_clip'
@@ -113,15 +110,6 @@ class DiffusionConfig(PretrainedConfig):
     n_obs_steps: int = field(default=1, metadata={'help': 'Number of observation steps'})
     horizon: int = field(default=16, metadata={'help': 'Diffusion model action prediction size'})
     n_action_steps: int = field(default=8, metadata={'help': 'Number of action steps'})
-
-    normalization_mapping: dict[str, NormalizationMode] = field(
-        default_factory=lambda: {
-            'VISUAL': NormalizationMode.MEAN_STD,
-            'STATE': NormalizationMode.MIN_MAX,
-            'ACTION': NormalizationMode.MIN_MAX,
-        },
-        metadata={'help': 'Normalization mapping for different modalities'}
-    )
 
     # The original implementation doesn't sample frames for the last 7 steps,
     # which avoids excessive padding and leads to improved training results.
@@ -137,7 +125,7 @@ class DiffusionConfig(PretrainedConfig):
     spatial_softmax_num_keypoints: int = field(default=64, metadata={'help': 'Number of keypoints for spatial softmax'})
     use_separate_rgb_encoder_per_camera: bool = field(default=False, metadata={'help': 'Whether to use separate RGB encoder per camera'})
     # Unet.
-    down_dims: tuple[int, ...] = field(default=(512, 1024, 2048), metadata={'help': 'Down dimensions for Unet'})
+    down_dims: tuple[int, ...] = field(default=(128, 256, 256, 512), metadata={'help': 'Down dimensions for Unet'})
     kernel_size: int = field(default=5, metadata={'help': 'Kernel size for Unet'})
     n_groups: int = field(default=8, metadata={'help': 'Number of groups for group norm'})
     diffusion_step_embed_dim: int = field(default=128, metadata={'help': 'Diffusion step embedding dimension'})
@@ -176,12 +164,21 @@ class DiffusionConfig(PretrainedConfig):
     # Feature properties - these will be set during initialization
     robot_state_dim: int = field(default=0, metadata={'help': 'Robot state feature'})
     image_features: list[int] = field(default_factory=list, metadata={'help': 'Image features'})
-    action_dim: int = field(default=7, metadata={'help': 'Action feature'})
+    action_dim: int = field(default=0, metadata={'help': 'Action feature'})
+
+    # Training parameters
+    tune_visual: bool = field(default=True, metadata={'help': 'Whether to tune visual encoder'})
+    tune_llm: bool = field(default=False, metadata={'help': 'Whether to tune language encoder'})
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         if 'data_config' in kwargs:
             self.set_dim(kwargs['data_config'])
+        
+        if 'tune_visual' in kwargs:
+            self.tune_visual = kwargs['tune_visual']
+        if 'tune_llm' in kwargs:
+            self.tune_llm = kwargs['tune_llm']
         # for key, value in kwargs.items():
         #     setattr(self, key, value)
 
@@ -189,54 +186,21 @@ class DiffusionConfig(PretrainedConfig):
         if not hasattr(self, 'normalization_mapping'):
             from internmanip.model.types import NormalizationMode
             self.normalization_mapping = {}
-
+        
         if not hasattr(self, 'image_features'):
-            self.image_features = [1,224,224]
-
-    # @classmethod
-    # def from_dict(cls, config_dict, **kwargs):
-    #     """从字典创建 DiffusionConfig 实例，处理序列化/反序列化"""
-    #     # 过滤掉 transformers 库传递的额外参数
-    #     valid_config_keys = {
-    #         'model_type', 'n_obs_steps', 'horizon', 'n_action_steps',
-    #         'normalization_mapping', 'drop_n_last_frames', 'vision_backbone',
-    #         'crop_shape', 'crop_is_random', 'pretrained_backbone_weights',
-    #         'use_group_norm', 'spatial_softmax_num_keypoints',
-    #         'use_separate_rgb_encoder_per_camera', 'down_dims', 'kernel_size',
-    #         'n_groups', 'diffusion_step_embed_dim', 'use_film_scale_modulation',
-    #         'noise_scheduler_type', 'num_train_timesteps', 'beta_schedule',
-    #         'beta_start', 'beta_end', 'prediction_type', 'clip_sample',
-    #         'clip_sample_range', 'num_inference_steps', 'do_mask_loss_for_padding',
-    #         'use_language_conditioning', 'language_model_name',
-    #         'language_embedding_dim', 'language_projection_dim',
-    #         'language_dropout_prob', 'optimizer_lr', 'optimizer_betas',
-    #         'optimizer_eps', 'optimizer_weight_decay', 'scheduler_name',
-    #         'scheduler_warmup_steps', 'robot_state_dim', 'image_features',
-    #         'action_dim'
-    #     }
-
-    #     # 只保留有效的配置键
-    #     filtered_config = {k: v for k, v in config_dict.items() if k in valid_config_keys}
-
-    #     return cls(**filtered_config)
-
-    # def to_dict(self):
-    #     """转换为字典，确保包含 model_type"""
-    #     result = super().to_dict()
-    #     result['model_type'] = self.model_type
-    #     return result
-
+            self.image_features = [1,3,224,224]
+    
     def transform(self):
         transforms = None
         return transforms, list(range(self.n_obs_steps)), list(range(self.horizon))
 
     def set_dim(self, data_config):
         # end effector is recommnened for diffusion model
-        if data_config in ['genmanip_eef']:
-            self.robot_state_dim = 8
+        if data_config in ['genmanip_v1']:
+            self.robot_state_dim = 24
             self.action_dim = 7
-            self.image_features = [2,3,224,224]
-        elif data_config in ['google','google_minmax','google_q99']:
+            self.image_features = [3,3,224,224]
+        elif data_config in ['google','google_minmax','google_q99','google_robot']:
             self.robot_state_dim = 7
             self.action_dim = 7
             self.image_features = [1,3,224,224]

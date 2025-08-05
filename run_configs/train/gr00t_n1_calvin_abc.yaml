@@ -1,0 +1,14 @@
+model_type: gr00t_n1
+dataset_path: InternRobotics/InternData-Calvin_ABC
+num_gpus: 1
+batch_size: 16
+output_dir: Checkpoints/runs/gr00t_n1_calvin_abc
+max_steps: 10000
+tune_visual: True
+tune_llm: True
+save_steps: 1000
+data_config: calvin_abc
+video_backend: torchcodec
+report_to: wandb
+gradient_accumulation_steps: 8
+base_model_path: nvidia/GR00T-N1-2B

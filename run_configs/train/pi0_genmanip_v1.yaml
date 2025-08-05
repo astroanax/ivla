@@ -1,0 +1,14 @@
+model_type: pi0
+dataset_path: InternRobotics/InternData-GenmanipTest
+num_gpus: 1
+batch_size: 16
+output_dir: Checkpoints/runs/pi0_genmanip_v1
+max_steps: 10000
+tune_visual: True
+tune_llm: True
+save_steps: 1000
+data_config: genmanip_v1
+video_backend: torchcodec
+report_to: wandb
+gradient_accumulation_steps: 8
+base_model_path: lerobot/pi0

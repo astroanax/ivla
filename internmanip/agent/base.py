@@ -9,25 +9,25 @@ class AgentRegistry(Enum):
     The value is the agent subclass.
     """
     GR00T_N1 = 'Gr00t_N1_Agent'
-    GR00T_N15 = 'Gr00t_N1_Agent'
-    GR00T_N15_GENMANIP = 'Gr00tAgent_Genmanip'
+    GR00T_N1_5 = 'Gr00t_N1_Agent'
+    GR00T_N1_5_GENMANIP = 'Gr00tAgent_Genmanip'
     PI0 = 'PI0Agent'
-    DP = 'DPAgent'
-
+    DP_CLIP = 'DPAgent'
+    
     @property
     def value(self):
         if self.name == 'GR00T_N1':
             from internmanip.agent.simpler_agent import SimplerAgent
             return SimplerAgent
-        elif self.name == 'GR00T_N15':
+        elif self.name == 'GR00T_N1_5':
             from internmanip.agent.simpler_agent import SimplerAgent
             return SimplerAgent
-        elif self.name == 'GR00T_N15_GENMANIP':
+        elif self.name == 'GR00T_N1_5_GENMANIP':
             from internmanip.agent.genmanip_agent import GenmanipAgent
             return GenmanipAgent
-        elif self.name == 'DP':
-            from internmanip.agent.dp_agent_genmanip import DPAgent
-            return DPAgent
+        elif self.name == 'DP_CLIP':
+            from internmanip.agent.genmanip_agent import GenmanipAgent
+            return GenmanipAgent
         elif self.name == 'PI0':
             from internmanip.agent.simpler_agent import SimplerAgent
             return SimplerAgent

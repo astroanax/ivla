@@ -528,11 +528,93 @@ class So100DataConfig(BaseDataConfig):
 
 ###########################################################################################
 
+class AlohaDataConfig(BaseDataConfig):
+    video_keys = ['video.left_view', 'video.right_view', 'video.top_view']
+    state_keys = ['state.arm_qpos']
+    action_keys = ['action.left_arm_delta_qpos', 'action.right_arm_delta_qpos', 'action.left_gripper_close', 'action.right_gripper_close']
+    language_keys = ['annotation.human.action.task_description']
+
+    def modality_config(self, observation_indices, action_indices) -> dict[str, ModalityConfig]:
+        self.action_indices = action_indices
+        self.observation_indices = observation_indices
+        video_modality = ModalityConfig(
+            delta_indices=self.observation_indices,
+            modality_keys=self.video_keys,
+        )
+
+        state_modality = ModalityConfig(
+            delta_indices=self.observation_indices,
+            modality_keys=self.state_keys,
+        )
+
+        action_modality = ModalityConfig(
+            delta_indices=self.action_indices,
+            modality_keys=self.action_keys,
+        )
+
+        language_modality = ModalityConfig(
+            delta_indices=self.observation_indices,
+            modality_keys=self.language_keys,
+        )
+
+
+        modality_configs = {
+            'video': video_modality,
+            'state': state_modality,
+            'action': action_modality,
+            'language': language_modality,
+        }
+
+        return modality_configs
+
+    def transform(self):
+        transforms = [
+            VideoToTensor(apply_to=self.video_keys),
+            VideoCrop(apply_to=self.video_keys, scale=0.95),
+            VideoResize(apply_to=self.video_keys, height=224, width=224, interpolation='linear'),
+            VideoColorJitter(
+                apply_to=self.video_keys,
+                brightness=0.3,
+                contrast=0.4,
+                saturation=0.5,
+                hue=0.08,
+            ),
+            # state transforms
+            StateActionToTensor(apply_to=self.state_keys),
+            StateActionTransform(
+                apply_to=self.state_keys,
+                normalization_modes={
+                    'state.arm_qpos': 'mean_std'
+                },
+            ),
+            # action transforms
+            StateActionToTensor(apply_to=self.action_keys),
+            StateActionTransform(
+                apply_to=self.action_keys,
+                normalization_modes={
+                    'action.left_arm_delta_qpos': 'mean_std',
+                    'action.right_arm_delta_qpos': 'mean_std',
+                    'action.left_gripper_close': 'binary',
+                    'action.right_gripper_close': 'binary'
+                }
+            ),
+            # concat transforms
+            ConcatTransform(
+                video_concat_order=self.video_keys,
+                state_concat_order=self.state_keys,
+                action_concat_order=self.action_keys,
+            )
+        ]
+        return transforms
+
+###########################################################################################
+
 DATA_CONFIG_MAP = {
     'sweep': SweepDataConfig(),
     'bridgedata_v2': BridgeDataV2DataConfig(),
     'genmanip_v1': GenManipDataConfig(),
     'google_robot': GoogleRobotDataConfig(),
-    'calvin_abcd': CalvinDataConfig(),
-    'so100': So100DataConfig()
+    'calvin_abc': CalvinDataConfig(),
+    'so100': So100DataConfig(),
+    'aloha_v3': AlohaDataConfig()
 }

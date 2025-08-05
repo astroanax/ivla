@@ -32,7 +32,7 @@ from internmanip.configs.dataset.data_config import DATA_CONFIG_MAP
 from internmanip.dataset.embodiment_tags import EmbodimentTag
 from internmanip.dataset.transform.base import ComposedModalityTransform
 from internmanip.dataset.transform.video import VideoCrop, VideoPadSquareCrop
-from internmanip.dataset.base import LeRobotSingleDataset
+from internmanip.dataset.base import LeRobotSingleDataset, LeRobotMixtureDataset
 from internmanip.utils.peft import get_lora_model
 from internmanip.model.data_collator_registry import DataCollatorRegistry
 
@@ -91,15 +91,55 @@ def main(config: TrainCfg):
 
     transforms = ComposedModalityTransform(transforms=transforms)
     # data_loader
-    train_dataset = LeRobotSingleDataset(
-        dataset_path=config.dataset_path,
-        modality_configs=modality_configs,
-        transforms=transforms,
-        embodiment_tag=embodiment_tag,  # This will override the dataset's embodiment tag to "new_embodiment"
-        video_backend=config.video_backend,
-        cache_dir=config.HF_cache_dir,
-        skip_unlabeled=config.skip_unlabeled
-    )
+    if isinstance(config.dataset_path, str):
+        train_dataset = LeRobotSingleDataset(
+            dataset_path=config.dataset_path,
+            modality_configs=modality_configs,
+            transforms=transforms,
+            embodiment_tag=embodiment_tag,  # This will override the dataset's embodiment tag to "new_embodiment"
+            video_backend=config.video_backend,
+            cache_dir=config.HF_cache_dir,
+            skip_unlabeled=config.skip_unlabeled
+        )
+    else:
+        print("\n" + "="*30)
+        print("⚠️  WARNING: MULTIPLE DATASETS DETECTED")
+        print("="*30)
+        print("You are about to train on multiple datasets simultaneously.")
+        print("Please ensure that:")
+        print("  1. All datasets have compatible and consistent modality configurations")
+        print("  2. The datasets are from the same embodiment or compatible embodiments")
+        print("  3. The datasets have similar data distributions and task objectives")
+        print("="*30 + "\n")
+        single_datasets = []
+        for p in config.dataset_path:
+            assert os.path.exists(p), f"Dataset path {p} does not exist"
+            # We use the same transforms, modality configs, and embodiment tag for all datasets here
+            dataset = LeRobotSingleDataset(
+                dataset_path=p,
+                modality_configs=modality_configs,
+                transforms=transforms,
+                embodiment_tag=embodiment_tag,
+                video_backend=config.video_backend,
+                cache_dir=config.HF_cache_dir,
+                skip_unlabeled=config.skip_unlabeled
+            )
+            single_datasets.append(dataset)
+
+        train_dataset = LeRobotMixtureDataset(
+            data_mixture=[
+                (dataset, 1.0)  # we will use equal weights for all datasets
+                for dataset in single_datasets
+            ],
+            mode="train",
+            balance_dataset_weights=config.balance_dataset_weights,
+            balance_trajectory_weights=config.balance_trajectory_weights,
+            seed=42,
+            metadata_config={
+                "percentile_mixing_method": "weighted_average",
+            },
+        )
+        print(f"Loaded {len(single_datasets)} datasets, with {config.dataset_path} ")
 
     if config.lora_rank > 0:
         model = get_lora_model(
@@ -273,9 +313,20 @@ class CheckpointFormatCallback(TrainerCallback):
             if os.path.exists(exp_cfg_dir / 'metadata.json'):
                 with open(exp_cfg_dir / 'metadata.json', 'r') as f:
                     metadata_json = json.load(f)
-            metadata_json.update(
-                {self.train_dataset.tag: self.train_dataset.metadata.model_dump(mode='json')}
-            )
+            if hasattr(self.train_dataset, 'metadata'):
+                # Single dataset
+                metadata_json.update(
+                    {self.train_dataset.tag: self.train_dataset.metadata.model_dump(mode='json')}
+                )
+            elif hasattr(self.train_dataset, 'merged_metadata'):
+                # Mixture dataset
+                for tag, metadata in self.train_dataset.merged_metadata.items():
+                    metadata_json.update(
+                        {tag: metadata.model_dump(mode='json')}
+                    )
+            else:
+                print(f"Warning: Unknown dataset type {type(self.train_dataset)}")
+
             with open(exp_cfg_dir / 'metadata.json', 'w') as f:
                 json.dump(metadata_json, f, indent=4)
 

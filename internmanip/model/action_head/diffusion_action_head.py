@@ -91,11 +91,7 @@ class DiffusionActionHead(nn.Module):
                 print('1. Internet connection is stable')
                 print('2. Or use a local model path instead of HuggingFace identifier')
                 print('3. Or download the model manually to local cache')
-                raise RuntimeError(f'CLIP model loading failed: {e}')
-
-            # Freeze the language model parameters
-            for param in self.language_encoder.parameters():
-                param.requires_grad = False
+                raise RuntimeError(f'CLIP model loading failed: {e}')         
             # Add a trainable projection layer to reduce text embedding dimension
             self.language_projection = nn.Linear(self.config.language_embedding_dim, self.config.language_projection_dim)
             # Add language projection dimension to global conditioning
@@ -125,14 +121,43 @@ class DiffusionActionHead(nn.Module):
         else:
             self.num_inference_steps: int = config.num_inference_steps
 
+    def set_trainable_parameters(self, tune_visual: bool, tune_llm: bool):
+        self.tune_visual = tune_visual
+        self.tune_llm = tune_llm
+        print(f"Tune action head visual: {self.tune_visual}")
+        print(f"Tune action head LLM: {self.tune_llm}")
+        
+        # Handle visual encoder (rgb_encoder)
+        if not tune_visual:
+            if isinstance(self.rgb_encoder, nn.ModuleList):
+                # If using separate encoders per camera
+                for encoder in self.rgb_encoder:
+                    for param in encoder.parameters():
+                        param.requires_grad = False
+            else:
+                # If using single shared encoder
+                for param in self.rgb_encoder.parameters():
+                    param.requires_grad = False
+        
+        # Handle language encoder
+        if not tune_llm:
+            for param in self.language_encoder.parameters():
+                param.requires_grad = False
+        
+        print(f"Tune action head visual: {self.tune_visual}")
+        print(f"Tune action head LLM: {self.tune_llm}")
 
     def to(self, *args, **kwargs):
         """Override to() method to ensure noise_scheduler parameters are moved to the correct device."""
         super().to(*args, **kwargs)
 
         # Move noise scheduler parameters to the same device
-        device = next(self.parameters()).device
-
+        try:
+            device = next(self.parameters()).device
+        except StopIteration:
+            # If model has no parameters, use cuda if available, otherwise cpu
+            device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        
         # Move scheduler's internal tensors to the correct device
         for attr_name in dir(self.noise_scheduler):
             attr = getattr(self.noise_scheduler, attr_name)
@@ -234,7 +259,11 @@ class DiffusionActionHead(nn.Module):
                         max_length=77
                     )
                     # Move inputs to the same device as the model
-                    device = next(self.parameters()).device
+                    try:
+                        device = next(self.parameters()).device
+                    except StopIteration:
+                        # If model has no parameters, use cuda if available, otherwise cpu
+                        device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
                     inputs = {k: v.to(device) for k, v in inputs.items()}
 
                     # Get text embeddings for this instruction (language encoder is frozen)
@@ -325,7 +354,7 @@ class DiffusionActionHead(nn.Module):
         """
         This function expects `batch` to have (at least):
         {
-            "observation.state": (B, n_obs_steps, state_dim)
+            "state": (B, n_obs_steps, state_dim)
 
             "observation.images": (B, n_obs_steps, num_cameras, C, H, W)
                 AND/OR
@@ -605,4 +634,6 @@ def _make_noise_scheduler(name: str, **kwargs: dict) -> DDPMScheduler | DDIMSche
     elif name == 'DDIM':
         return DDIMScheduler(**kwargs)  # type: ignore
     else:
-        raise ValueError(f'Unsupported noise scheduler type {name}')
+        raise ValueError(f"Unsupported noise scheduler type {name}")
+
+

@@ -1,3 +1,5 @@
+from typing import Any, Dict, Optional, Union
+
 import base64
 import numpy as np
 import torch
@@ -96,3 +98,35 @@ def deserialize_data(data):
         return {key: deserialize_data(value) for key, value in data.items()}
     else:
         return data
+
+
+# Helper functions
+def unsqueeze_dict_values(data: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Unsqueeze the values of a dictionary.
+    This converts the data to be batched of size 1.
+    """
+    unsqueezed_data = {}
+    for k, v in data.items():
+        if isinstance(v, np.ndarray):
+            unsqueezed_data[k] = np.expand_dims(v, axis=0)
+        elif isinstance(v, torch.Tensor):
+            unsqueezed_data[k] = v.unsqueeze(0)
+        else:
+            unsqueezed_data[k] = v
+    return unsqueezed_data
+
+
+def squeeze_dict_values(data: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Squeeze the values of a dictionary. This removes the batch dimension.
+    """
+    squeezed_data = {}
+    for k, v in data.items():
+        if isinstance(v, np.ndarray):
+            squeezed_data[k] = np.squeeze(v)
+        elif isinstance(v, torch.Tensor):
+            squeezed_data[k] = v.squeeze()
+        else:
+            squeezed_data[k] = v
+    return squeezed_data

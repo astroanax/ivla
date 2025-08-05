@@ -38,7 +38,7 @@ class BasePolicyModel(PreTrainedModel):
                 f'Model found in the huggingface hub. Loading from path: {pretrained_model_name_or_path}'
             )
             # HFValidationError, RepositoryNotFoundError
-        except (HFValidationError, RepositoryNotFoundError):
+        except (HFValidationError, RepositoryNotFoundError, KeyError):
             print(
                 f'Model not found or avail in the huggingface hub. Loading from local path: {pretrained_model_name_or_path}'
             )

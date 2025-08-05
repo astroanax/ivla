@@ -1,11 +1,10 @@
 from typing import List, Tuple
 
 import numpy as np
-
-from internutopia.core.scene.scene import IScene
-from internutopia.core.robot.robot import BaseRobot
-from internutopia.core.robot.controller import BaseController
 from internutopia.core.robot.articulation_action import ArticulationAction
+from internutopia.core.robot.controller import BaseController
+from internutopia.core.robot.robot import BaseRobot
+from internutopia.core.scene.scene import IScene
 
 from ..config.task_config import InverseKinematicsControllerCfg
 
@@ -93,7 +92,7 @@ class InverseKinematicsController(BaseController):
             return (
                 subset.make_articulation_action(
                     joint_positions=subset.get_joint_positions(),
-                    joint_velocities=subset.get_joint_velocities()
+                    joint_velocities=subset.get_joint_velocities(),
                 ),
                 True,
             )
@@ -101,7 +100,7 @@ class InverseKinematicsController(BaseController):
         ik_base_pose = self.get_ik_base_world_pose()
         self._kinematics_solver.set_robot_base_pose(
             robot_position=ik_base_pose[0] / self._robot.get_robot_scale(),
-            robot_orientation=ik_base_pose[1]
+            robot_orientation=ik_base_pose[1],
         )
 
         return self._kinematics_solver.compute_inverse_kinematics(

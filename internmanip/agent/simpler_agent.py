@@ -9,7 +9,7 @@ from internmanip.configs import AgentCfg
 from internmanip.configs.dataset.data_config import DATA_CONFIG_MAP
 # from internmanip.benchmarks.SimplerEnv.simpler_env.utils.action.action_ensemble import ActionEnsembler
 from internmanip.agent.utils.geometry import euler2mat, quat2mat, mat2euler
-from internmanip.agent.gr00t.Gr00tPolicy import unsqueeze_dict_values, squeeze_dict_values
+from internmanip.agent.utils.io_utils import unsqueeze_dict_values, squeeze_dict_values
 from internmanip.dataset.embodiment_tags import EmbodimentTag
 from internmanip.dataset.transform.base import ComposedModalityTransform
 from internmanip.dataset.schema import DatasetMetadata

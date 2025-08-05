@@ -1,11 +1,10 @@
 from typing import List
 
 import numpy as np
-
 from internutopia.core.robot.articulation_action import ArticulationAction
-from internutopia.core.scene.scene import IScene
-from internutopia.core.robot.robot import BaseRobot
 from internutopia.core.robot.controller import BaseController
+from internutopia.core.robot.robot import BaseRobot
+from internutopia.core.scene.scene import IScene
 
 from ..config.task_config import GripperControllerCfg
 
@@ -28,5 +27,6 @@ class GripperController(BaseController):
         assert len(action) == 1 and action[0] in [
             'open',
             'close',
-        ], f'action must be a list with one str elem, which is one of "open" / "close", but got {action}'
+        ], f'action must be a list with one str elem, which is one of \
+            "open" / "close", but got {action}'
         return self.forward(action[0])

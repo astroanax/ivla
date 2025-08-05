@@ -1,6 +1,5 @@
 from internmanip.env.base import EnvWrapper
 from internmanip.configs.env.env_cfg import EnvCfg
-from internmanip.benchmarks.genmanip.config.env_config import EnvSettings
 from internmanip.benchmarks.genmanip.create_env import create_env
 
 
@@ -14,9 +13,9 @@ class GenmanipEnv(EnvWrapper):
     def warm_up(self, steps):
         self._env.warm_up(steps=steps)
 
-    def reset(self, terminated_status=None):
-        if terminated_status:
-            return self._env.reset(env_ids=[idx for idx, term in enumerate(terminated_status) if term])
+    def reset(self, env_reset_ids=[]):
+        if env_reset_ids:
+            return self._env.reset(env_reset_ids)
         else:
             return self._env.reset()
 

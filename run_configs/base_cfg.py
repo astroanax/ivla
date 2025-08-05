@@ -2,19 +2,19 @@ from pydantic import BaseModel
 
 class TrainCfg(BaseModel):
     """Configuration List."""
-    model_type: str = ''
+    model_type: str = 'pi0'
     """pi0 gr00t_n1 gr00t_n1_5 dp_clip act_clip pi0fast"""
     # Dataset parameters
-    dataset_path: str = './internmanip/demo_data/robot_sim_converted.PickNPlace/'
+    dataset_path: str | list[str] = 'InternRobotics/InternData-GenmanipTest'
     """Path to the dataset directory."""
 
     HF_cache_dir: str = None
     """Path to user-defined HF cache"""
 
-    output_dir: str = ''
+    output_dir: str = 'Checkpoints/runs'
     """Directory to save model checkpoints."""
 
-    data_config: str = 'genmanip_joint'
+    data_config: str = 'genmanip_v1'
     """Data configuration name from DATA_CONFIG_MAP."""
 
     # Training parameters
@@ -84,6 +84,14 @@ class TrainCfg(BaseModel):
     video_backend: str = 'torchcodec'
     """Video backend to use for training. [torchcodec, decord, torchvision_av]"""
 
+    # Mixture dataset parameters
+    balance_dataset_weights: bool = True
+    """Used in LeRobotMixtureDataset. If True, we will balance the dataset weights, by multiplying the total trajectory to each dataset"""
+
+    balance_trajectory_weights: bool = True
+    """Used in LeRobotMixtureDataset. If True, sample trajectories within a dataset weighted by their length; otherwise, equal weighting."""
+
+
     augsteps: int = 4
     """number of extra steps for augmentation when gripper changes"""
 
@@ -95,3 +103,4 @@ class TrainCfg(BaseModel):
     """Whether to use a pretrained model."""
 
     skip_unlabeled: bool = False
+    """Whether to skip unlabeled data."""

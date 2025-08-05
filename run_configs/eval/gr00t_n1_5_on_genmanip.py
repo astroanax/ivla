@@ -1,11 +1,11 @@
 from internmanip.configs import *
-from internmanip.configs.env.genmanip_env import CameraEnable
+from internmanip.benchmarks.genmanip.config.env_config import FrankaCameraEnable, AlohaSplitCameraEnable
 
 
 eval_cfg = EvalCfg(
     eval_type='genmanip',
     agent=AgentCfg(
-        agent_type='gr00t_n15_genmanip',
+        agent_type='gr00t_n1_5_genmanip',
         base_model_path='/PATH/TO/YOUR/FINETUNED_CHECKPOINT',
         agent_settings={
             'data_config': 'genmanip_v1',
@@ -27,17 +27,23 @@ eval_cfg = EvalCfg(
             dataset_path='path/to/genmanip/benchmark_data',
             eval_tasks=['task1', 'task2', ...],
             res_save_path='path/to/save/results',
-            is_save_image=True,
-            camera_enable=CameraEnable(realsense=True, obs_camera=True, obs_camera_2=True),
-            depth_obs=False,
+            is_save_img=True,
+            robot_type='franka',
             gripper_type='panda',
-            env_num=1,
+            franka_camera_enable=FrankaCameraEnable(
+                realsense=True, obs_camera=True, obs_camera_2=True
+            ),
+            aloha_split_camera_enable=AlohaSplitCameraEnable(
+                top_camera=True, left_camera=True, right_camera=True
+            ),
+            depth_obs=False,
             max_step=500,
             max_success_step=50,
-            physics_dt=1/60,
-            rendering_dt=1/60,
+            env_num=1,
+            physics_dt=1/30,
+            rendering_dt=1/30,
             headless=True,
             ray_distribution=None,
-        )
+        ),
     ),
 )

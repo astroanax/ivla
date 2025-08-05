@@ -1,6 +1,6 @@
 from transformers import AutoModel
 from internmanip.configs import ServerCfg, AgentCfg
-from internmanip.model.basemodel.base import BasePolicyModel
+# from internmanip.model.basemodel.base import BasePolicyModel
 from internmanip.agent.utils.io_utils import deserialize_data, serialize_data
 from typing import Dict, Any
 import uvicorn
@@ -15,7 +15,7 @@ class PolicyServer:
         self.host = config.server_host
         self.port = config.server_port
         self.app = FastAPI(title='Policy Service')
-        self.policy_instances: Dict[str, BasePolicyModel] = {}
+        self.policy_instances: Dict[str, Any] = {}
 
         self._router = APIRouter(prefix='/policy')
         self._register_routes()

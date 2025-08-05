@@ -2,14 +2,13 @@ from collections import defaultdict
 
 import numpy as np
 import roboticstoolbox as rtb
-from scipy.spatial.transform import Rotation as R
-
 from internutopia.core.robot.robot import BaseRobot
 from internutopia.core.scene.scene import IScene
 from internutopia_extension.robots.franka import Franka
+from scipy.spatial.transform import Rotation as R
 
-from .actions import validate_action
 from ..config.task_config import FrankaPandaRobotCfg
+from .franka_actions import validate_action
 
 
 @BaseRobot.register('FrankaPanda')
@@ -27,7 +26,7 @@ class FrankaPanda(BaseRobot):
             position=config.position,
             end_effector_prim_name='franka/panda_hand',
             usd_path=config.usd_path,
-            scale=self._robot_scale
+            scale=self._robot_scale,
         )
 
     def get_robot_scale(self):
@@ -54,21 +53,35 @@ class FrankaPanda(BaseRobot):
         gripper_controller = self.controllers['gripper_controller']
         ik_controller = self.controllers['arm_ik_controller']
 
-        if action_type=='joint':
+        if action_type == 'joint':
             control = joint_controller.action_to_control([action])
-        elif action_type=='arm_gripper':
+        elif action_type == 'arm_gripper':
             if isinstance(action.gripper_action, list):
-                control = joint_controller.action_to_control([action.arm_action+action.gripper_action])
+                control = joint_controller.action_to_control(
+                    [action.arm_action + action.gripper_action]
+                )
             else:
-                gripper_control = gripper_controller.action_to_control(['open' if action.gripper_action==-1 else 'close'])
-                control = joint_controller.action_to_control([action.arm_action+gripper_control.joint_positions[-2:]])
-        elif action_type=='eef':
-            arm_control = ik_controller.action_to_control([action.eef_position, action.eef_orientation])
+                gripper_control = gripper_controller.action_to_control(
+                    ['open' if action.gripper_action == -1 else 'close']
+                )
+                control = joint_controller.action_to_control(
+                    [action.arm_action + gripper_control.joint_positions[-2:]]
+                )
+        elif action_type == 'eef':
+            arm_control = ik_controller.action_to_control(
+                [action.eef_position, action.eef_orientation]
+            )
             if isinstance(action.gripper_action, list):
-                control = joint_controller.action_to_control([arm_control.joint_positions.tolist()+action.gripper_action])
+                control = joint_controller.action_to_control(
+                    [arm_control.joint_positions.tolist() + action.gripper_action]
+                )
             else:
-                gripper_control = gripper_controller.action_to_control(['open' if action.gripper_action==-1 else 'close'])
-                control = joint_controller.action_to_control([arm_control.joint_positions.tolist()+gripper_control.joint_positions[-2:]])
+                gripper_control = gripper_controller.action_to_control(
+                    ['open' if action.gripper_action == -1 else 'close']
+                )
+                control = joint_controller.action_to_control(
+                    [arm_control.joint_positions.tolist() + gripper_control.joint_positions[-2:]]
+                )
 
         self.articulation.apply_action(control)
 
@@ -88,10 +101,6 @@ class FrankaPanda(BaseRobot):
         eef_position = hand_pose[:3, 3]
         eef_orientation = R.from_matrix(hand_pose[:3, :3]).as_quat()[[3, 0, 1, 2]]
         obs['eef_pose'] = (np.array(eef_position), np.array(eef_orientation))
-
-        # controllers
-        # for c_obs_name, controller_obs in self.controllers.items():
-        #     obs['controllers'][c_obs_name] = controller_obs.get_obs()
 
         # sensors
         for sensor_name, sensor_obs in self.sensors.items():

@@ -1,13 +1,11 @@
 from typing import List
 
 import numpy as np
-
-from internutopia.core.scene.scene import IScene
-from internutopia.core.robot.robot import BaseRobot
-from internutopia.core.robot.controller import BaseController
 from internutopia.core.robot.articulation_action import ArticulationAction
 from internutopia.core.robot.articulation_subset import ArticulationSubset
-
+from internutopia.core.robot.controller import BaseController
+from internutopia.core.robot.robot import BaseRobot
+from internutopia.core.scene.scene import IScene
 
 from ..config.task_config import JointControllerCfg
 
@@ -24,9 +22,13 @@ class JointController(BaseController):
         if self.joint_names is not None:
             self.joint_subset = ArticulationSubset(self.robot.articulation, self.joint_names)
 
-    def forward(self, joint_positions: np.ndarray = None, joint_velocities: np.ndarray = None) -> ArticulationAction:
+    def forward(
+        self, joint_positions: np.ndarray = None, joint_velocities: np.ndarray = None
+    ) -> ArticulationAction:
         if self.joint_subset is None:
-            return ArticulationAction(joint_positions=joint_positions, joint_velocities=joint_velocities)
+            return ArticulationAction(
+                joint_positions=joint_positions, joint_velocities=joint_velocities
+            )
 
         return self.joint_subset.make_articulation_action(
             joint_positions=joint_positions, joint_velocities=joint_velocities

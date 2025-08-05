@@ -1,16 +1,16 @@
-import scipy
 import numpy as np
 import open3d as o3d
-
+import scipy
 from concave_hull import concave_hull
+from scipy.spatial.transform import Rotation as R
+import copy
+
+from internutopia.core.task.metric import BaseMetric
 from shapely.geometry import Polygon
 from shapely.vectorized import contains
 from sklearn.neighbors import NearestNeighbors
 
-from internutopia.core.task.metric import BaseMetric
-
 from ..config.task_config import ManipulationSuccessMetricCfg, ManipulationTaskCfg
-
 
 XY_DISTANCE_CLOSE_THRESHOLD = 0.15
 MAX_TO_BE_TOUCHING_DISTANCE = 0.1
@@ -44,56 +44,39 @@ class ManipulationSuccessMetric(BaseMetric):
                 self.object_prim_paths.add(subgoal['obj1_uid'])
                 self.object_prim_paths.add(subgoal['obj2_uid'])
 
+        self.mesh_cache = {}
+
     def reset(self):
         self.step = 0
         self.episode_sr = 0
         self.first_success_step = -1
 
-    def recursive_get_mesh(self, prim, coord_prim) -> np.ndarray:
-        vertices = []
-
-        try:
-            from omni.isaac.core.utils.mesh import get_mesh_vertices_relative_to
-
-            vertices.append(get_mesh_vertices_relative_to(prim, coord_prim))
-        except Exception as e:
-            pass
-
-        children = prim.GetChildren()
-        for child in children:
-            child_vertices = self.recursive_get_mesh(child, coord_prim)
-            if child_vertices is not None:
-                vertices.append(child_vertices)
-
-        if len(vertices) > 0:
-            return np.concatenate(vertices, axis=0)
-        else:
-            return None
-
     def calc_episode_sr(self):
         """
         This function is called at each world step.
         """
-        from omni.isaac.core.utils.stage import get_current_stage
-
-        stage = get_current_stage()
-        coord_prim = stage.GetPrimAtPath(f'/World/env_{self.env_id}/scene')
+        from isaacsim.core.prims import SingleXFormPrim
 
         point_cloud_list = {}
         for uid in self.object_prim_paths:
-            mesh_prim = stage.GetPrimAtPath(f'/World/env_{self.env_id}/scene/obj_{uid}')
-            vertices = self.recursive_get_mesh(mesh_prim, coord_prim)
-            if len(vertices) > self.max_vertices_num:
-                step = len(vertices) // self.max_vertices_num + 1
-                vertices = vertices[::step]
+            if uid not in self.mesh_cache:
+                self.mesh_cache[uid] = get_mesh_info(SingleXFormPrim(f'/World/env_{self.env_id}/scene/obj_{uid}'))
+            o3d_pcd = get_pcd_from_mesh(
+                get_current_mesh(
+                    SingleXFormPrim(f'/World/env_{self.env_id}/scene/obj_{uid}'),
+                    self.mesh_cache[uid]
+                ),
+                num_points=self.max_vertices_num
+            )
+            vertices = np.asarray(o3d_pcd.points)
             point_cloud_list[uid] = vertices
 
         try:
             self.episode_sr = check_finished(self.task_config.target, point_cloud_list)
-        except Exception as e:
+        except Exception:
             self.episode_sr = 0
 
-        if self.episode_sr==1 and self.first_success_step < 0:
+        if self.episode_sr == 1 and self.first_success_step < 0:
             self.first_success_step = self.step
 
         return {
@@ -162,9 +145,7 @@ def get_related_position(pcd1, pcd2, pcd3=None):
     min_pcd1 = np.min(pcd1, axis=0)
     max_pcd2 = np.max(pcd2, axis=0)
     min_pcd2 = np.min(pcd2, axis=0)
-    return infer_spatial_relationship(
-        pcd1, pcd2, min_pcd1, max_pcd1, min_pcd2, max_pcd2, pcd3
-    )
+    return infer_spatial_relationship(pcd1, pcd2, min_pcd1, max_pcd1, min_pcd2, max_pcd2, pcd3)
 
 
 def infer_spatial_relationship(
@@ -179,9 +160,7 @@ def infer_spatial_relationship(
 ):
     relation_list = []
     if point_cloud_c is None:
-        xy_dist = calculate_xy_distance_between_two_point_clouds(
-            point_cloud_a, point_cloud_b
-        )
+        xy_dist = calculate_xy_distance_between_two_point_clouds(point_cloud_a, point_cloud_b)
         if xy_dist > XY_DISTANCE_CLOSE_THRESHOLD * (1 + error_margin_percentage):
             return []
         dist = calculate_distance_between_two_point_clouds(point_cloud_a, point_cloud_b)
@@ -295,32 +274,29 @@ def calculate_distance_between_two_point_clouds(point_cloud_a, point_cloud_b):
     return res
 
 
-def is_inside(src_pts, target_pts, thresh=0.5):
+def is_point_in_convex_hull_fast(points, hull_obj, tolerance=1e-12):
+    """
+    Faster method using ConvexHull equations directly
+
+    `points` should be a `NxK` coordinates of `N` points in `K` dimensions
+    `hull_obj` should be a scipy.spatial.ConvexHull object
+    """
+    return np.all(np.add(np.dot(points, hull_obj.equations[:, :-1].T),
+                         hull_obj.equations[:, -1]) <= tolerance, axis=1)
+
+
+def is_inside(src_pts, target_pts, thresh=0.5, use_fast_method=True):
     try:
         hull = scipy.spatial.ConvexHull(target_pts)
     except:
         return False
-    # print("vertices of hull: ", np.array(hull.vertices).shape)
-    hull_vertices = np.array([[0, 0, 0]])
-    for v in hull.vertices:
-        try:
-            hull_vertices = np.vstack(
-                (
-                    hull_vertices,
-                    np.array([target_pts[v, 0], target_pts[v, 1], target_pts[v, 2]]),
-                )
-            )
-        except:
-            import pdb
-
-            pdb.set_trace()
-    hull_vertices = hull_vertices[1:]
-
     num_src_pts = len(src_pts)
-    # Don't want threshold to be too large (specially with more objects, like 4, 0.9*thresh becomes too large)
     thresh_obj_particles = thresh * num_src_pts
-    src_points_in_hull = is_point_in_hull(src_pts, hull_vertices)
-    # print("src pts in target, thresh: ", src_points_in_hull.sum(), thresh_obj_particles)
+    if use_fast_method:
+        src_points_in_hull = is_point_in_convex_hull_fast(src_pts, hull)
+    else:
+        hull_vertices = target_pts[hull.vertices]
+        src_points_in_hull = is_point_in_hull(src_pts, hull_vertices)
     if src_points_in_hull.sum() > thresh_obj_particles:
         return True
     else:
@@ -350,7 +326,7 @@ def crop_pcd(pcd1, pcd2):
 
 
 def get_xy_contour(points, contour_type='convex_hull'):
-    if type(points) == o3d.geometry.PointCloud:
+    if type(points) is o3d.geometry.PointCloud:
         points = np.asarray(points.points)
     if points.shape[1] == 3:
         points = points[:, :2]
@@ -411,3 +387,226 @@ def sort_points_clockwise(points):
     angles = np.arctan2(points[:, 1] - center[1], points[:, 0] - center[0])
     sorted_indices = np.argsort(angles)
     return points[sorted_indices]
+
+
+def get_mesh_from_points_and_faces(points, faceVertexCounts, faceVertexIndices):
+    mesh = o3d.geometry.TriangleMesh()
+    mesh.vertices = o3d.utility.Vector3dVector(points)
+    triangles = []
+    idx = 0
+    for count in faceVertexCounts:
+        if count == 3:
+            triangles.append(faceVertexIndices[idx : idx + 3])
+        elif count == 4:
+            face_indices = faceVertexIndices[idx : idx + 4]
+            triangles.append([face_indices[0], face_indices[1], face_indices[2]])
+            triangles.append([face_indices[0], face_indices[2], face_indices[3]])
+        elif count > 4:
+            face_indices = faceVertexIndices[idx : idx + count]
+            for i in range(1, count - 1):
+                triangles.append(
+                    [face_indices[0], face_indices[i], face_indices[i + 1]]
+                )
+        idx += count
+    mesh.triangles = o3d.utility.Vector3iVector(triangles)
+    mesh.compute_vertex_normals()
+    return mesh
+
+
+def recursive_parse(prim):
+    from pxr import UsdGeom  # type: ignore
+
+    translation = prim.GetAttribute('xformOp:translate').Get()
+    if translation is None:
+        translation = np.zeros(3)
+    else:
+        translation = np.array(translation)
+    scale = prim.GetAttribute('xformOp:scale').Get()
+    if scale is None:
+        scale = np.ones(3)
+    else:
+        scale = np.array(scale)
+    orient = prim.GetAttribute('xformOp:orient').Get()
+    if orient is None:
+        orient = np.zeros([4, 1])
+        orient[0] = 1.0
+    else:
+        r = orient.GetReal()
+        i, j, k = orient.GetImaginary()
+        orient = np.array([r, i, j, k]).reshape(4, 1)
+    rotation_matrix = o3d.geometry.get_rotation_matrix_from_quaternion(orient)
+    points_total = []
+    faceuv_total = []
+    normals_total = []
+    faceVertexCounts_total = []
+    faceVertexIndices_total = []
+    mesh_total = []
+    if prim.IsA(UsdGeom.Mesh):
+        mesh_path = str(prim.GetPath()).split('/')[-1]
+        if not mesh_path == 'SM_Dummy':
+            mesh_total.append(mesh_path)
+            points = prim.GetAttribute('points').Get()
+            normals = prim.GetAttribute('normals').Get()
+            faceVertexCounts = prim.GetAttribute('faceVertexCounts').Get()
+            faceVertexIndices = prim.GetAttribute('faceVertexIndices').Get()
+            faceuv = prim.GetAttribute('primvars:st').Get()
+            if points is None:
+                points = []
+            if normals is None:
+                normals = []
+            if faceVertexCounts is None:
+                faceVertexCounts = []
+            if faceVertexIndices is None:
+                faceVertexIndices = []
+            if faceuv is None:
+                faceuv = []
+            normals = [_ for _ in normals]
+            faceVertexCounts = [_ for _ in faceVertexCounts]
+            faceVertexIndices = [_ for _ in faceVertexIndices]
+            faceuv = [_ for _ in faceuv]
+            ps = []
+            for p in points:
+                x, y, z = p
+                p = np.array((x, y, z))
+                ps.append(p)
+            points = ps
+            base_num = len(points_total)
+            for idx in faceVertexIndices:
+                faceVertexIndices_total.append(base_num + idx)
+            faceVertexCounts_total += faceVertexCounts
+            faceuv_total += faceuv
+            normals_total += normals
+            points_total += points
+    else:
+        children = prim.GetChildren()
+        for child in children:
+            points, faceuv, normals, faceVertexCounts, faceVertexIndices, mesh_list = (
+                recursive_parse(child)
+            )
+            base_num = len(points_total)
+            for idx in faceVertexIndices:
+                faceVertexIndices_total.append(base_num + idx)
+            faceVertexCounts_total += faceVertexCounts
+            faceuv_total += faceuv
+            normals_total += normals
+            points_total += points
+            mesh_total += mesh_list
+    new_points = []
+    for i, p in enumerate(points_total):
+        pn = np.array(p)
+        pn *= scale
+        pn = np.matmul(rotation_matrix, pn)
+        pn += translation
+        new_points.append(pn)
+    return (
+        new_points,
+        faceuv_total,
+        normals_total,
+        faceVertexCounts_total,
+        faceVertexIndices_total,
+        mesh_total,
+    )
+
+
+def get_mesh_from_prim(prim):
+    points, faceuv, normals, faceVertexCounts, faceVertexIndices, mesh_total = (
+        recursive_parse(prim)
+    )
+    mesh = get_mesh_from_points_and_faces(points, faceVertexCounts, faceVertexIndices)
+    return mesh
+
+
+def get_pcd_from_mesh(mesh, num_points=1000):
+    pcd = mesh.sample_points_uniformly(number_of_points=num_points)
+    return pcd
+
+
+def inverse_transform_mesh(mesh, scale_factors, quaternion, translation_vector):
+    vertices = mesh.vertices
+    vertices = vertices - translation_vector
+    rotation = R.from_quat(quaternion)
+    vertices = rotation.inv().apply(vertices)
+    vertices = vertices / np.array(scale_factors)
+    transformed_mesh = copy.deepcopy(mesh)
+    transformed_mesh.vertices = o3d.utility.Vector3dVector(vertices)
+    return transformed_mesh
+
+
+def forward_transform_mesh(mesh, scale_factors, quaternion, translation_vector):
+    vertices = mesh.vertices
+    vertices = vertices * np.array(scale_factors)
+    rotation = R.from_quat(quaternion)
+    vertices = rotation.apply(vertices)
+    vertices = vertices + translation_vector
+    transformed_mesh = copy.deepcopy(mesh)
+    transformed_mesh.vertices = o3d.utility.Vector3dVector(vertices)
+    return transformed_mesh
+
+
+def get_world_mesh(mesh, prim_path):
+    from omni.isaac.core.utils.prims import get_prim_at_path, get_prim_parent, get_prim_path  # type: ignore
+    prim = get_prim_at_path(prim_path)
+    mesh = copy.deepcopy(mesh)
+    while get_prim_path(prim) != '/':
+        scale = prim.GetAttribute('xformOp:scale').Get()
+        if scale is None:
+            scale = np.ones(3)
+        else:
+            scale = np.array(scale)
+        trans = prim.GetAttribute('xformOp:translate').Get()
+        if trans is None:
+            trans = np.zeros(3)
+        else:
+            trans = np.array(trans)
+        quat = prim.GetAttribute('xformOp:orient').Get()
+        if quat is not None:
+            r = quat.GetReal()
+            i, j, k = quat.GetImaginary()
+            quat = np.array([i, j, k, r])
+        else:
+            quat = np.array([0, 0, 0, 1])
+        mesh = forward_transform_mesh(mesh, scale, quat, trans)
+        prim = get_prim_parent(prim)
+    return mesh
+
+
+def get_mesh_info(object):
+    try:
+        mesh = get_mesh_from_prim(object.prim)
+    except:
+        return None
+    scale = object.get_local_scale()
+    trans, quat = object.get_local_pose()
+    quat = quat[[1, 2, 3, 0]]
+    mesh = inverse_transform_mesh(mesh, scale, quat, trans)
+    mesh_info = {}
+    mesh_info['mesh'] = get_world_mesh(mesh, object.prim_path)
+    mesh_info['trans'], mesh_info['quat'] = object.get_world_pose()
+    mesh_info['quat'] = mesh_info['quat'][[1, 2, 3, 0]]
+    mesh_info['scale'] = np.array([1, 1, 1])
+    return mesh_info
+
+
+def transform_between_meshes(
+    mesh_A, scale_A, quat_A, trans_A, scale_B, quat_B, trans_B
+):
+    mesh_in_world_frame = inverse_transform_mesh(mesh_A, scale_A, quat_A, trans_A)
+    transformed_mesh_B = forward_transform_mesh(
+        mesh_in_world_frame, scale_B, quat_B, trans_B
+    )
+    return transformed_mesh_B
+
+
+def get_current_mesh(object, mesh_dict):
+    scale = np.array([1, 1, 1])
+    trans, quat = object.get_world_pose()
+    quat = quat[[1, 2, 3, 0]]
+    return transform_between_meshes(
+        mesh_dict['mesh'],
+        mesh_dict['scale'],
+        mesh_dict['quat'],
+        mesh_dict['trans'],
+        scale,
+        quat,
+        trans,
+    )

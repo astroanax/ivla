@@ -9,7 +9,7 @@ from scipy.spatial.transform import Rotation
 import torch
 
 from internmanip.agent.base import BaseAgent
-from internmanip.agent.gr00t.Gr00tPolicy import unsqueeze_dict_values, squeeze_dict_values
+from internmanip.agent.utils.io_utils import unsqueeze_dict_values, squeeze_dict_values
 from internmanip.configs import AgentCfg
 from internmanip.configs.dataset.data_config import DATA_CONFIG_MAP
 from internmanip.dataset.embodiment_tags import EmbodimentTag
@@ -63,9 +63,9 @@ class GenmanipAgent(BaseAgent):
                 outputs.append({})
                 continue
 
-            if input['franka_robot']['step'] == 0:
+            if input['robot']['step'] == 0:
                 self.reset_env(env)
-            self.step_count[env] = input['franka_robot']['step']
+            self.step_count[env] = input['robot']['step']
 
             converted_input = self.convert_input(input)
             unsqueezed_input = unsqueeze_dict_values(converted_input)
@@ -96,20 +96,20 @@ class GenmanipAgent(BaseAgent):
         # self.output_history_list[env] = []
 
     def convert_input(self, input: dict):
-        quat_wxyz = input['franka_robot']['eef_pose'][1]
+        quat_wxyz = input['robot']['eef_pose'][1]
         quat_xyzw = [quat_wxyz[1], quat_wxyz[2], quat_wxyz[3], quat_wxyz[0]]
         ee_rot = Rotation.from_quat(quat_xyzw).as_euler('xyz', degrees=False)
         converted_data = {
-            'video.ego_view': np.array([input['franka_robot']['sensors']['realsense']['rgb']]),
-            'video.base_view': np.array([input['franka_robot']['sensors']['obs_camera']['rgb']]),
-            'video.base_2_view': np.array([input['franka_robot']['sensors']['obs_camera_2']['rgb']]),
-            'state.joints': np.array([input['franka_robot']['joints_state']['positions'][:7]]),
-            'state.gripper': np.array([input['franka_robot']['joints_state']['positions'][7:]]),
-            'state.joints_vel': np.array([input['franka_robot']['joints_state']['velocities'][:7]]),
-            'state.gripper_vel': np.array([input['franka_robot']['joints_state']['velocities'][7:]]),
-            'state.ee_pos': np.array([input['franka_robot']['eef_pose'][0]]),
+            'video.ego_view': np.array([input['robot']['sensors']['realsense']['rgb']]),
+            'video.base_view': np.array([input['robot']['sensors']['obs_camera']['rgb']]),
+            'video.base_2_view': np.array([input['robot']['sensors']['obs_camera_2']['rgb']]),
+            'state.joints': np.array([input['robot']['joints_state']['positions'][:7]]),
+            'state.gripper': np.array([input['robot']['joints_state']['positions'][7:]]),
+            'state.joints_vel': np.array([input['robot']['joints_state']['velocities'][:7]]),
+            'state.gripper_vel': np.array([input['robot']['joints_state']['velocities'][7:]]),
+            'state.ee_pos': np.array([input['robot']['eef_pose'][0]]),
             'state.ee_rot': np.array([ee_rot]),
-            'annotation.human.action.task_description': input['franka_robot']['instruction'],
+            'annotation.human.action.task_description': input['robot']['instruction'],
         }
         return converted_data
 

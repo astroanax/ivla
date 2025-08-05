@@ -12,11 +12,13 @@ from internmanip.benchmarks.genmanip.recorder import Recorder
 
 class GenmanipEvaluator(Evaluator):
     def __init__(self, config: EvalCfg):
-        if config.env.env_settings.episode_list is None:
+        if config.env.env_settings.episode_list is None \
+            or len(config.env.env_settings.episode_list) == 0:
             config.env.env_settings.episode_list = self._get_all_episodes_setting_data(config)
 
         super().__init__(config)
         self.recorder = Recorder(
+            config.env.env_settings.robot_type,
             config.env.env_settings.res_save_path,
             config.env.env_settings.is_save_img
         )
@@ -45,7 +47,7 @@ class GenmanipEvaluator(Evaluator):
             if env_reset_ids:
                 self.recorder([obs[i] for i in env_reset_ids], finished=True)
 
-                _, info = self.env.reset(terminated_status)
+                _, info = self.env.reset(env_reset_ids)
                 self.env.warm_up(steps=10)
                 obs = self.env.get_obs()
 
@@ -75,9 +77,6 @@ class GenmanipEvaluator(Evaluator):
 
         episode_list = []
         for task_item in config.env.env_settings.eval_tasks:
-            from internmanip.configs.env.genmanip_env import ALL_EVAL_TASKS
-            assert task_item in ALL_EVAL_TASKS, f'Unsupported task: {task_item}, must be in {ALL_EVAL_TASKS}'
-
             task_path = os.path.join(dataset_path, task_item)
             assert os.path.exists(task_path), f'Task path does not exist: {task_path}'
 
