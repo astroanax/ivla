@@ -8,8 +8,10 @@ from pathlib import Path
 from scipy.spatial.transform import Rotation
 import torch
 
+from huggingface_hub import snapshot_download
+
 from internmanip.agent.base import BaseAgent
-from internmanip.agent.utils.io_utils import unsqueeze_dict_values, squeeze_dict_values
+from internmanip.utils.agent_utils.io_utils import unsqueeze_dict_values, squeeze_dict_values
 from internmanip.configs import AgentCfg
 from internmanip.configs.dataset.data_config import DATA_CONFIG_MAP
 from internmanip.dataset.embodiment_tags import EmbodimentTag
@@ -27,7 +29,8 @@ class GenmanipAgent(BaseAgent):
             self.policy_model = self.policy_model.cuda()
 
         model_transform, observation_indices, action_indices = self.policy_model.config.transform()
-        data_config_cls = DATA_CONFIG_MAP[config.agent_settings['data_config']]
+        self.data_config = config.agent_settings['data_config']
+        data_config_cls = DATA_CONFIG_MAP[self.data_config]
         transforms = data_config_cls.transform()
         self.action_transforms = transforms[-2]
         if model_transform is not None:
@@ -96,42 +99,81 @@ class GenmanipAgent(BaseAgent):
         # self.output_history_list[env] = []
 
     def convert_input(self, input: dict):
-        quat_wxyz = input['robot']['eef_pose'][1]
-        quat_xyzw = [quat_wxyz[1], quat_wxyz[2], quat_wxyz[3], quat_wxyz[0]]
-        ee_rot = Rotation.from_quat(quat_xyzw).as_euler('xyz', degrees=False)
-        converted_data = {
-            'video.ego_view': np.array([input['robot']['sensors']['realsense']['rgb']]),
-            'video.base_view': np.array([input['robot']['sensors']['obs_camera']['rgb']]),
-            'video.base_2_view': np.array([input['robot']['sensors']['obs_camera_2']['rgb']]),
-            'state.joints': np.array([input['robot']['joints_state']['positions'][:7]]),
-            'state.gripper': np.array([input['robot']['joints_state']['positions'][7:]]),
-            'state.joints_vel': np.array([input['robot']['joints_state']['velocities'][:7]]),
-            'state.gripper_vel': np.array([input['robot']['joints_state']['velocities'][7:]]),
-            'state.ee_pos': np.array([input['robot']['eef_pose'][0]]),
-            'state.ee_rot': np.array([ee_rot]),
-            'annotation.human.action.task_description': input['robot']['instruction'],
-        }
+        if self.data_config == 'genmanip_v1':
+            quat_wxyz = input['robot']['eef_pose'][1]
+            quat_xyzw = [quat_wxyz[1], quat_wxyz[2], quat_wxyz[3], quat_wxyz[0]]
+            ee_rot = Rotation.from_quat(quat_xyzw).as_euler('xyz', degrees=False)
+            converted_data = {
+                'video.ego_view': np.array([input['robot']['sensors']['realsense']['rgb']]),
+                'video.base_view': np.array([input['robot']['sensors']['obs_camera']['rgb']]),
+                'video.base_2_view': np.array([input['robot']['sensors']['obs_camera_2']['rgb']]),
+                'state.joints': np.array([input['robot']['joints_state']['positions'][:7]]),
+                'state.gripper': np.array([input['robot']['joints_state']['positions'][7:]]),
+                'state.joints_vel': np.array([input['robot']['joints_state']['velocities'][:7]]),
+                'state.gripper_vel': np.array([input['robot']['joints_state']['velocities'][7:]]),
+                'state.ee_pos': np.array([input['robot']['eef_pose'][0]]),
+                'state.ee_rot': np.array([ee_rot]),
+                'annotation.human.action.task_description': input['robot']['instruction'],
+            }
+        elif self.data_config == 'aloha_v3':
+            converted_data = {
+                'video.left_view': np.array([input['robot']['sensors']['left_camera']['rgb']]),
+                'video.right_view': np.array([input['robot']['sensors']['right_camera']['rgb']]),
+                'video.top_view': np.array([input['robot']['sensors']['top_camera']['rgb']]),
+                'state.arm_qpos': np.array([input['robot']['joints_state']['positions']]),
+                'annotation.human.action.task_description': input['robot']['instruction'],
+            }
+        else:
+            raise ValueError(f'Unsupported data config class: {self.data_config}')
         return converted_data
 
     def convert_output(self, output: np.ndarray, input: dict):
-        converted_data = {
-            'action.gripper': torch.from_numpy(output[:1]),
-            'action.delta_ee_pos': torch.from_numpy(output[1:4]),
-            'action.delta_ee_rot': torch.from_numpy(output[4:7]),
-        }
-        converted_data = self.action_transforms.unapply(deepcopy(converted_data))
-        converted_data = squeeze_dict_values(converted_data)
-        ee_rot = (converted_data['action.delta_ee_rot'] + input['state.ee_rot'])[0].tolist()
-        quat_xyzw = Rotation.from_euler('xyz', ee_rot, degrees=False).as_quat()
-        quat_wxyz = [quat_xyzw[3], quat_xyzw[0], quat_xyzw[1], quat_xyzw[2]]
-        eef_position = (converted_data['action.delta_ee_pos'] + input['state.ee_pos'])[0].tolist()
-        eef_orientation = quat_wxyz
-        gripper_action = converted_data['action.gripper']*2-1
-        converted_data = {
-            'eef_position': eef_position,
-            'eef_orientation': eef_orientation,
-            'gripper_action': gripper_action,
-        }
+        if self.data_config == 'genmanip_v1':
+            converted_data = {
+                'action.gripper': torch.from_numpy(output[:1]),
+                'action.delta_ee_pos': torch.from_numpy(output[1:4]),
+                'action.delta_ee_rot': torch.from_numpy(output[4:7]),
+            }
+            converted_data = self.action_transforms.unapply(deepcopy(converted_data))
+            converted_data = squeeze_dict_values(converted_data)
+            ee_rot = (converted_data['action.delta_ee_rot'] + input['state.ee_rot'])[0].tolist()
+            quat_xyzw = Rotation.from_euler('xyz', ee_rot, degrees=False).as_quat()
+            quat_wxyz = [quat_xyzw[3], quat_xyzw[0], quat_xyzw[1], quat_xyzw[2]]
+            eef_position = (converted_data['action.delta_ee_pos'] + input['state.ee_pos'])[0].tolist()
+            eef_orientation = quat_wxyz
+            gripper_action = converted_data['action.gripper']*2-1
+            converted_data = {
+                'eef_position': eef_position,
+                'eef_orientation': eef_orientation,
+                'gripper_action': gripper_action,
+            }
+        elif self.data_config == 'aloha_v3':
+            converted_data = {
+                'action.left_arm_delta_qpos': torch.from_numpy(output[:12]),
+                'action.right_arm_delta_qpos': torch.from_numpy(output[:12]),
+                'action.left_gripper_close': torch.from_numpy(output[12:14]),
+                'action.right_gripper_close': torch.from_numpy(output[12:14]),
+            }
+            converted_data = self.action_transforms.unapply(deepcopy(converted_data))
+            converted_data = squeeze_dict_values(converted_data)
+
+            left_arm_joint_indices = [12, 14, 16, 18, 20, 22]
+            right_arm_joint_indices = [13, 15, 17, 19, 21, 23]
+            left_gripper_joint_indices = [24, 25]
+            right_gripper_joint_indices = [26, 27]
+
+            left_arm_action = (converted_data['action.left_arm_delta_qpos'][:6] + torch.tensor([input['state.arm_qpos'][0][idx] for idx in left_arm_joint_indices])).tolist()
+            left_gripper_action = converted_data['action.left_gripper_close'][0]*2-1
+            right_arm_action = (converted_data['action.right_arm_delta_qpos'][6:] + torch.tensor([input['state.arm_qpos'][0][idx] for idx in right_arm_joint_indices])).tolist()
+            right_gripper_action = converted_data['action.right_gripper_close'][1]*2-1
+            converted_data = {
+                'left_arm_action': left_arm_action,
+                'left_gripper_action': left_gripper_action,
+                'right_arm_action': right_arm_action,
+                'right_gripper_action': right_gripper_action,
+            }
+        else:
+            raise ValueError(f'Unsupported data config class: {self.data_config}')
         return converted_data
 
     def _load_metadata(self, config: AgentCfg):

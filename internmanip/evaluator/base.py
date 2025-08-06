@@ -1,8 +1,9 @@
-from internmanip.configs.evaluator.eval_cfg import EvalCfg
-from internmanip.agent import BaseAgent
-from internmanip.env import EnvWrapper
 from typing import List, Dict, Any
 from enum import Enum
+
+from internmanip.configs.evaluator.eval_cfg import EvalCfg
+from internmanip.utils.agent_utils.client import AgentClient
+from internmanip.env import EnvWrapper
 
 
 class EvaluatorRegistry(Enum):
@@ -40,7 +41,11 @@ class Evaluator:
         if config.distributed_cfg is not None:
             self._set_distributed_device_ids()
         self.env = EnvWrapper.init(config.env)
-        self.agent = BaseAgent.init(config.agent)
+        if config.agent.server_cfg is not None:
+            self.agent = AgentClient(config.agent)
+        else:
+            from internmanip.agent import BaseAgent
+            self.agent = BaseAgent.init(config.agent)
 
     @classmethod
     def _update_results(cls, result):

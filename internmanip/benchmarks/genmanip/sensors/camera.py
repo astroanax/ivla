@@ -41,19 +41,19 @@ class Camera(BaseSensor):
         if robot_type == 'aloha_split' and self.name == 'top_camera':
             return (
                 self._robot.prim_path
-                + '/split_aloha_mid_360_with_piper/split_aloha_mid_360_with_piper/top_camera_link/Camera'  # noqa E501
+                + '/aloha_split/split_aloha_mid_360_with_piper/split_aloha_mid_360_with_piper/top_camera_link/Camera'  # noqa E501
             )
 
         if robot_type == 'aloha_split' and self.name == 'left_camera':
             return (
                 self._robot.prim_path
-                + '/split_aloha_mid_360_with_piper/split_aloha_mid_360_with_piper/fl/link6/Camera'
+                + '/aloha_split/split_aloha_mid_360_with_piper/split_aloha_mid_360_with_piper/fl/link6/Camera'
             )
 
         if robot_type == 'aloha_split' and self.name == 'right_camera':
             return (
                 self._robot.prim_path
-                + '/split_aloha_mid_360_with_piper/split_aloha_mid_360_with_piper/fr/link6/Camera'
+                + '/aloha_split/split_aloha_mid_360_with_piper/split_aloha_mid_360_with_piper/fr/link6/Camera'
             )
 
     def create_camera(self) -> ICamera:

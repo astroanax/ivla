@@ -70,14 +70,14 @@ class EnvSettings(BaseModel):
         default=False, description='is needed depth image of each camera in obs'
     )
     robot_type: Literal['franka', 'aloha_split'] = Field(
-        default='franka', description='type of robot'
+        default='aloha_split', description='type of robot'
     )
     gripper_type: Literal['panda', 'robotiq'] = Field(
         default='panda',
         description="type of gripper, must be 'panda' or 'robotiq' (under robot_type='franka')",
     )
     env_num: int = Field(default=1, description='the number of parallel execution environments')
-    max_step: int = Field(default=500, description='max action step number per episode')
+    max_step: int = Field(default=1000, description='max action step number per episode')
     max_success_step: int = Field(
         default=100,
         description='the max number of successful steps in each episode for early stopping',

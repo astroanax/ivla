@@ -4,15 +4,6 @@ Original repository link: https://github.com/DelinQu/SimplerEnv-OpenVLA/blob/mai
 
 The copyright of the original code belongs to its respective authors. Please adhere to the open-source license requirements when using this code.
 """
-from internmanip.agent.base import BaseAgent
-from internmanip.configs import AgentCfg
-from internmanip.configs.dataset.data_config import DATA_CONFIG_MAP
-# from internmanip.benchmarks.SimplerEnv.simpler_env.utils.action.action_ensemble import ActionEnsembler
-from internmanip.agent.utils.geometry import euler2mat, quat2mat, mat2euler
-from internmanip.agent.utils.io_utils import unsqueeze_dict_values, squeeze_dict_values
-from internmanip.dataset.embodiment_tags import EmbodimentTag
-from internmanip.dataset.transform.base import ComposedModalityTransform
-from internmanip.dataset.schema import DatasetMetadata
 import os
 from typing import Dict, Any
 from pathlib import Path
@@ -25,6 +16,18 @@ import cv2 as cv
 from PIL import Image
 import matplotlib.pyplot as plt
 from transforms3d.euler import euler2axangle
+from huggingface_hub import snapshot_download
+
+from internmanip.agent.base import BaseAgent
+from internmanip.configs import AgentCfg
+from internmanip.configs.dataset.data_config import DATA_CONFIG_MAP
+# from internmanip.benchmarks.SimplerEnv.simpler_env.utils.action.action_ensemble import ActionEnsembler
+from internmanip.utils.agent_utils.geometry import euler2mat, quat2mat, mat2euler
+from internmanip.utils.agent_utils.io_utils import unsqueeze_dict_values, squeeze_dict_values
+from internmanip.dataset.embodiment_tags import EmbodimentTag
+from internmanip.dataset.transform.base import ComposedModalityTransform
+from internmanip.dataset.schema import DatasetMetadata
+
 
 
 class SimplerAgent(BaseAgent):

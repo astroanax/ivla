@@ -20,7 +20,7 @@ class GenmanipEnv(EnvWrapper):
             return self._env.reset()
 
     def step(self, all_env_action):
-        return self._env.step(action=[{'franka_robot':action} for action in all_env_action])
+        return self._env.step(action=[{'robot':action} for action in all_env_action])
 
     def close(self):
         self._env.close()

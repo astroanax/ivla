@@ -14,7 +14,7 @@ Note:
 """
 
 from internmanip.configs import ServerCfg
-from internmanip.agent.utils import PolicyServer
+from internmanip.utils.agent_utils.server import AgentServer
 import argparse
 
 
@@ -25,7 +25,7 @@ def main():
     args = parser.parse_args()
     server_cfg = ServerCfg(server_host=args.host, server_port=args.port)
 
-    server = PolicyServer(server_cfg)
+    server = AgentServer(server_cfg)
     server.run()
 
 if __name__ == '__main__':

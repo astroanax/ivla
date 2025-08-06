@@ -1,5 +1,9 @@
-from internmanip.configs import AgentCfg
 from enum import Enum
+from transformers import AutoModel
+
+from internmanip import model
+from internmanip.configs import AgentCfg
+
 
 
 class AgentRegistry(Enum):
@@ -40,19 +44,12 @@ class BaseAgent:
     def __init__(self, config: AgentCfg):
         self.config = config
 
-        if self.config.server_cfg is not None:
-            from internmanip.agent.utils import PolicyClient
-            self.policy_model = PolicyClient(self.config)
+        if config.base_model_path is None:
+            policy_model = AutoModel.from_config(config.model_cfg, **config.model_kwargs)
         else:
-            # TODO: should change the kwargs
-            from internmanip import model
-            from transformers import AutoModel
-            if config.base_model_path is None:
-                model = AutoModel.from_config(config.model_cfg, **config.model_kwargs)
-            else:
-                # must ensure that if the path is a huggingface model, it should be a repo that has only one model weight
-                model = AutoModel.from_pretrained(config.base_model_path, **config.model_kwargs)
-            self.policy_model = model
+            # must ensure that if the path is a huggingface model, it should be a repo that has only one model weight
+            policy_model = AutoModel.from_pretrained(config.base_model_path, **config.model_kwargs)
+        self.policy_model = policy_model
 
     def step(self):
         raise NotImplementedError('Not implemented in base agent class')

@@ -45,10 +45,35 @@ def main():
         action='store_true',
         help='whether to use client-server evaluation mode'
     )
+    parser.add_argument(
+        '--dataset_path',
+        type=str,
+        default=None,
+        help='dataset_path'
+    )
+    parser.add_argument(
+        '--res_save_path',
+        type=str,
+        default=None,
+        help='res_save_path'
+    )
+    parser.add_argument(
+        '--server_port',
+        type=int,
+        default=None,
+        help='server_port'
+    )
 
     args = parser.parse_args()
 
     eval_cfg: EvalCfg = load_eval_cfg(args.config)
+
+    if args.dataset_path is not None:
+        eval_cfg.env.env_settings.dataset_path = args.dataset_path
+    if args.res_save_path is not None:
+        eval_cfg.env.env_settings.res_save_path = args.res_save_path
+    if args.server_port is not None and eval_cfg.agent.server_cfg is not None:
+        eval_cfg.agent.server_cfg.server_port = args.server_port
 
     if not args.server:
         eval_cfg.agent.server_cfg = None

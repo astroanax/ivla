@@ -8,3 +8,6 @@
 	path = internmanip/benchmarks/SimplerEnv
 	url = https://github.com/tianshihan818/SimplerEnv.git
 	branch = main
+[submodule "internmanip/benchmarks/genmanip/utils/curobo"]
+	path = internmanip/benchmarks/genmanip/utils/curobo
+	url = https://github.com/NVlabs/curobo.git

@@ -68,15 +68,24 @@ class GenmanipEvaluator(Evaluator):
     @classmethod
     def _get_all_episodes_setting_data(cls, config):
         if config.env.env_settings.dataset_path is None:
+            # TODO: upload the dataset to huggingface
             dataset_path = snapshot_download('InternRobotics/InternBench-M1', repo_type='dataset')
         else:
             dataset_path = config.env.env_settings.dataset_path
 
-        if not config.env.env_settings.eval_tasks:
-            raise ValueError('At least one task is required with corresponding dataset relative path.')
+        if config.env.env_settings.eval_tasks:
+            eval_tasks = config.env.env_settings.eval_tasks
+        else:
+            eval_tasks = []
+            root_path = os.path.abspath(config.env.env_settings.dataset_path)
+            for root, _, files in os.walk(root_path):
+                if 'scene.usd' in files and 'meta_info.pkl' in files:
+                    task_name = os.path.relpath(os.path.dirname(root), start=root_path)
+                    if task_name not in eval_tasks:
+                        eval_tasks.append(task_name)
 
         episode_list = []
-        for task_item in config.env.env_settings.eval_tasks:
+        for task_item in eval_tasks:
             task_path = os.path.join(dataset_path, task_item)
             assert os.path.exists(task_path), f'Task path does not exist: {task_path}'
 
