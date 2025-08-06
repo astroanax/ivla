@@ -91,7 +91,7 @@ class DiffusionActionHead(nn.Module):
                 print('1. Internet connection is stable')
                 print('2. Or use a local model path instead of HuggingFace identifier')
                 print('3. Or download the model manually to local cache')
-                raise RuntimeError(f'CLIP model loading failed: {e}')         
+                raise RuntimeError(f'CLIP model loading failed: {e}')
             # Add a trainable projection layer to reduce text embedding dimension
             self.language_projection = nn.Linear(self.config.language_embedding_dim, self.config.language_projection_dim)
             # Add language projection dimension to global conditioning
@@ -124,9 +124,9 @@ class DiffusionActionHead(nn.Module):
     def set_trainable_parameters(self, tune_visual: bool, tune_llm: bool):
         self.tune_visual = tune_visual
         self.tune_llm = tune_llm
-        print(f"Tune action head visual: {self.tune_visual}")
-        print(f"Tune action head LLM: {self.tune_llm}")
-        
+        print(f'Tune action head visual: {self.tune_visual}')
+        print(f'Tune action head LLM: {self.tune_llm}')
+
         # Handle visual encoder (rgb_encoder)
         if not tune_visual:
             if isinstance(self.rgb_encoder, nn.ModuleList):
@@ -138,14 +138,14 @@ class DiffusionActionHead(nn.Module):
                 # If using single shared encoder
                 for param in self.rgb_encoder.parameters():
                     param.requires_grad = False
-        
+
         # Handle language encoder
         if not tune_llm:
             for param in self.language_encoder.parameters():
                 param.requires_grad = False
-        
-        print(f"Tune action head visual: {self.tune_visual}")
-        print(f"Tune action head LLM: {self.tune_llm}")
+
+        print(f'Tune action head visual: {self.tune_visual}')
+        print(f'Tune action head LLM: {self.tune_llm}')
 
     def to(self, *args, **kwargs):
         """Override to() method to ensure noise_scheduler parameters are moved to the correct device."""
@@ -157,7 +157,7 @@ class DiffusionActionHead(nn.Module):
         except StopIteration:
             # If model has no parameters, use cuda if available, otherwise cpu
             device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-        
+
         # Move scheduler's internal tensors to the correct device
         for attr_name in dir(self.noise_scheduler):
             attr = getattr(self.noise_scheduler, attr_name)
@@ -634,6 +634,4 @@ def _make_noise_scheduler(name: str, **kwargs: dict) -> DDPMScheduler | DDIMSche
     elif name == 'DDIM':
         return DDIMScheduler(**kwargs)  # type: ignore
     else:
-        raise ValueError(f"Unsupported noise scheduler type {name}")
-
-
+        raise ValueError(f'Unsupported noise scheduler type {name}')

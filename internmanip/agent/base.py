@@ -13,7 +13,7 @@ class AgentRegistry(Enum):
     GR00T_N1_5_GENMANIP = 'Gr00tAgent_Genmanip'
     PI0 = 'PI0Agent'
     DP_CLIP = 'DPAgent'
-    
+
     @property
     def value(self):
         if self.name == 'GR00T_N1':

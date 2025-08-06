@@ -347,10 +347,10 @@ class PI0Policy(BasePolicyModel):
         # import ipdb;ipdb.set_trace()
         tokenized_prompt = self.language_tokenizer.__call__(
             tasks,
-            padding="max_length",
-            padding_side="right",
+            padding='max_length',
+            padding_side='right',
             max_length=self.tokenizer_max_length,
-            return_tensors="pt",
+            return_tensors='pt',
         )
         lang_tokens = tokenized_prompt['input_ids'].to(device=device)
         lang_masks = tokenized_prompt['attention_mask'].to(device=device, dtype=torch.bool)
@@ -377,12 +377,12 @@ class PI0Policy(BasePolicyModel):
         The policy is set in evaluation mode by default using `policy.eval()` (dropout modules are
         deactivated). To train it, you should first set it back in training mode with `policy.train()`.
         """
-        
-        tune_visual = kwargs.pop("tune_visual", True)
-        tune_llm = kwargs.pop("tune_llm", False)
-        tune_projector = kwargs.pop("tune_projector", True)
-        tune_diffusion_model = kwargs.pop("tune_diffusion_model", True)
-        tokenizer_max_length = kwargs.pop("tokenizer_max_length", 64)
+
+        tune_visual = kwargs.pop('tune_visual', True)
+        tune_llm = kwargs.pop('tune_llm', False)
+        tune_projector = kwargs.pop('tune_projector', True)
+        tune_diffusion_model = kwargs.pop('tune_diffusion_model', True)
+        tokenizer_max_length = kwargs.pop('tokenizer_max_length', 64)
         policy = super().from_pretrained(
             pretrained_model_name_or_path, **kwargs
         )
@@ -391,7 +391,7 @@ class PI0Policy(BasePolicyModel):
                 p.requires_grad=True
         if tune_projector:
             for p in policy.model.paligemma_with_expert.paligemma.multi_modal_projector.parameters():
-                p.requires_grad=True        
+                p.requires_grad=True
         policy.config.tokenizer_max_length = tokenizer_max_length
         policy.model.paligemma_with_expert.paligemma.language_model.lm_head.weight.requires_grad = False
         policy.model.paligemma_with_expert.gemma_expert.lm_head.weight.requires_grad = False

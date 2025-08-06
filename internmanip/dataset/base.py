@@ -158,7 +158,7 @@ def calculate_dataset_statistics(parquet_paths: list[Path]) -> dict:
 
 def safe_hash(input_tuple):
     # keep 128 bits of the hash
-    tuple_string = repr(input_tuple).encode("utf-8")
+    tuple_string = repr(input_tuple).encode('utf-8')
     sha256 = hashlib.sha256()
     sha256.update(tuple_string)
 
@@ -1167,7 +1167,7 @@ class LeRobotMixtureDataset(Dataset):
         balance_trajectory_weights: bool = True,
         seed: int = 42,
         metadata_config: dict = {
-            "percentile_mixing_method": "min_max",
+            'percentile_mixing_method': 'min_max',
         },
     ):
         """
@@ -1247,11 +1247,11 @@ class LeRobotMixtureDataset(Dataset):
         dataset_descriptions = []
         for dataset, weight in zip(self.datasets, self.dataset_sampling_weights):
             dataset_description = {
-                "Dataset": str(dataset),
-                "Sampling weight": float(weight),
+                'Dataset': str(dataset),
+                'Sampling weight': float(weight),
             }
             dataset_descriptions.append(dataset_description)
-        return json.dumps({"Mixture dataset": dataset_descriptions}, indent=2)
+        return json.dumps({'Mixture dataset': dataset_descriptions}, indent=2)
 
     def set_epoch(self, epoch: int):
         """Set the epoch for the dataset.
@@ -1267,7 +1267,7 @@ class LeRobotMixtureDataset(Dataset):
         # return self.sampled_steps[index]
 
         # Set seed
-        seed = index if self.mode != "train" else safe_hash((self.epoch, index, self.seed))
+        seed = index if self.mode != 'train' else safe_hash((self.epoch, index, self.seed))
         rng = np.random.default_rng(seed)
 
         # Sample dataset
@@ -1312,7 +1312,7 @@ class LeRobotMixtureDataset(Dataset):
     def compute_overall_statistics(
         per_task_stats: list[dict[str, dict[str, list[float] | np.ndarray]]],
         dataset_sampling_weights: list[float] | np.ndarray,
-        percentile_mixing_method: str = "weighted_average",
+        percentile_mixing_method: str = 'weighted_average',
     ) -> dict[str, dict[str, list[float]]]:
         """
         Computes overall statistics from per-task statistics using dataset sample weights.
@@ -1349,7 +1349,7 @@ class LeRobotMixtureDataset(Dataset):
 
         for modality in modality_keys:
             # Number of dimensions (assuming consistent across tasks)
-            num_dims = len(per_task_stats[0][modality]["mean"])
+            num_dims = len(per_task_stats[0][modality]['mean'])
 
             # Initialize accumulators for means and variances
             weighted_means = np.zeros(num_dims)
@@ -1364,18 +1364,18 @@ class LeRobotMixtureDataset(Dataset):
             for task_idx, task_stats in enumerate(per_task_stats):
                 w_i = normalized_weights[task_idx]
                 stats = task_stats[modality]
-                means = np.array(stats["mean"])
-                stds = np.array(stats["std"])
+                means = np.array(stats['mean'])
+                stds = np.array(stats['std'])
 
                 # Update weighted sums for mean and variance
                 weighted_means += w_i * means
                 weighted_squares += w_i * (stds**2 + means**2)
 
                 # Collect min, max, q01, q99
-                min_list.append(stats["min"])
-                max_list.append(stats["max"])
-                q01_list.append(stats["q01"])
-                q99_list.append(stats["q99"])
+                min_list.append(stats['min'])
+                max_list.append(stats['max'])
+                q01_list.append(stats['q01'])
+                q99_list.append(stats['q99'])
 
             # Compute overall mean
             overall_mean = weighted_means.tolist()
@@ -1392,7 +1392,7 @@ class LeRobotMixtureDataset(Dataset):
             # Use weighted average of per-task quantiles
             q01_array = np.array(q01_list)
             q99_array = np.array(q99_list)
-            if percentile_mixing_method == "weighted_average":
+            if percentile_mixing_method == 'weighted_average':
                 weighted_q01 = np.average(q01_array, axis=0, weights=normalized_weights).tolist()
                 weighted_q99 = np.average(q99_array, axis=0, weights=normalized_weights).tolist()
                 # std_q01 = np.std(q01_array, axis=0).tolist()
@@ -1400,20 +1400,20 @@ class LeRobotMixtureDataset(Dataset):
                 # print(modality)
                 # print(f"{std_q01=}, {std_q99=}")
                 # print(f"{weighted_q01=}, {weighted_q99=}")
-            elif percentile_mixing_method == "min_max":
+            elif percentile_mixing_method == 'min_max':
                 weighted_q01 = np.min(q01_array, axis=0).tolist()
                 weighted_q99 = np.max(q99_array, axis=0).tolist()
             else:
-                raise ValueError(f"Invalid percentile mixing method: {percentile_mixing_method}")
+                raise ValueError(f'Invalid percentile mixing method: {percentile_mixing_method}')
 
             # Store the overall statistics for the modality
             overall_stats[modality] = {
-                "min": overall_min,
-                "max": overall_max,
-                "mean": overall_mean,
-                "std": overall_std,
-                "q01": weighted_q01,
-                "q99": weighted_q99,
+                'min': overall_min,
+                'max': overall_max,
+                'mean': overall_mean,
+                'std': overall_std,
+                'q01': weighted_q01,
+                'q99': weighted_q99,
             }
 
         return overall_stats
@@ -1426,48 +1426,48 @@ class LeRobotMixtureDataset(Dataset):
     ) -> DatasetMetadata:
         """Merge multiple metadata into one."""
         # Convert to dicts
-        metadata_dicts = [metadata.model_dump(mode="json") for metadata in metadatas]
+        metadata_dicts = [metadata.model_dump(mode='json') for metadata in metadatas]
         # Create a new metadata dict
         merged_metadata = {}
 
         # Check all metadata have the same embodiment tag
         assert all(
             metadata.embodiment_tag == metadatas[0].embodiment_tag for metadata in metadatas
-        ), "All metadata must have the same embodiment tag"
-        merged_metadata["embodiment_tag"] = metadatas[0].embodiment_tag
+        ), 'All metadata must have the same embodiment tag'
+        merged_metadata['embodiment_tag'] = metadatas[0].embodiment_tag
 
         # Merge the dataset statistics
         dataset_statistics = {}
-        dataset_statistics["state"] = LeRobotMixtureDataset.compute_overall_statistics(
-            per_task_stats=[m["statistics"]["state"] for m in metadata_dicts],
+        dataset_statistics['state'] = LeRobotMixtureDataset.compute_overall_statistics(
+            per_task_stats=[m['statistics']['state'] for m in metadata_dicts],
             dataset_sampling_weights=dataset_sampling_weights,
             percentile_mixing_method=percentile_mixing_method,
         )
-        dataset_statistics["action"] = LeRobotMixtureDataset.compute_overall_statistics(
-            per_task_stats=[m["statistics"]["action"] for m in metadata_dicts],
+        dataset_statistics['action'] = LeRobotMixtureDataset.compute_overall_statistics(
+            per_task_stats=[m['statistics']['action'] for m in metadata_dicts],
             dataset_sampling_weights=dataset_sampling_weights,
             percentile_mixing_method=percentile_mixing_method,
         )
 
-        for modality in ["state", "action"]:
+        for modality in ['state', 'action']:
             for key, stats in dataset_statistics[modality].items():
                 for stat_name, stat_value in stats.items():
                     dataset_statistics[modality][key][stat_name] = np.array(stat_value)
 
-        merged_metadata["statistics"] = dataset_statistics
+        merged_metadata['statistics'] = dataset_statistics
 
         # Merge the modality configs
         modality_configs = defaultdict(set)
         for metadata in metadata_dicts:
-            for modality, configs in metadata["modalities"].items():
+            for modality, configs in metadata['modalities'].items():
                 modality_configs[modality].add(json.dumps(configs))
-        merged_metadata["modalities"] = {}
+        merged_metadata['modalities'] = {}
         for modality, configs in modality_configs.items():
             # Check that all modality configs correspond to the same tag matches
             assert (
                 len(configs) == 1
-            ), f"Multiple modality configs for modality {modality}: {list(configs)}"
-            merged_metadata["modalities"][modality] = json.loads(configs.pop())
+            ), f'Multiple modality configs for modality {modality}: {list(configs)}'
+            merged_metadata['modalities'][modality] = json.loads(configs.pop())
 
         return DatasetMetadata.model_validate(merged_metadata)
 
@@ -1493,7 +1493,7 @@ class LeRobotMixtureDataset(Dataset):
             self.merged_metadata[tag] = self.merge_metadata(
                 metadatas=metadatas,
                 dataset_sampling_weights=self.dataset_sampling_weights.tolist(),
-                percentile_mixing_method=metadata_config["percentile_mixing_method"],
+                percentile_mixing_method=metadata_config['percentile_mixing_method'],
             )
         for dataset in self.datasets:
             dataset.set_transforms_metadata(self.merged_metadata[dataset.tag])

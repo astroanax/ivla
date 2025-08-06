@@ -5,7 +5,7 @@ This document walks you through the end-to-end workflow: from pulling the base i
 
 ## Environment Setup (placeholder)
 
-### Activate your virtual environment 
+### Activate your virtual environment
 ```bash
 source .venv/{environment_name}/bin/activate
 export PYTHONPATH="$(pwd):$PYTHONPATH"

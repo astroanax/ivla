@@ -102,18 +102,18 @@ def main(config: TrainCfg):
             skip_unlabeled=config.skip_unlabeled
         )
     else:
-        print("\n" + "="*30)
-        print("⚠️  WARNING: MULTIPLE DATASETS DETECTED")
-        print("="*30)
-        print("You are about to train on multiple datasets simultaneously.")
-        print("Please ensure that:")
-        print("  1. All datasets have compatible and consistent modality configurations")
-        print("  2. The datasets are from the same embodiment or compatible embodiments")
-        print("  3. The datasets have similar data distributions and task objectives")
-        print("="*30 + "\n")
+        print('\n' + '='*30)
+        print('⚠️  WARNING: MULTIPLE DATASETS DETECTED')
+        print('='*30)
+        print('You are about to train on multiple datasets simultaneously.')
+        print('Please ensure that:')
+        print('  1. All datasets have compatible and consistent modality configurations')
+        print('  2. The datasets are from the same embodiment or compatible embodiments')
+        print('  3. The datasets have similar data distributions and task objectives')
+        print('='*30 + '\n')
         single_datasets = []
         for p in config.dataset_path:
-            assert os.path.exists(p), f"Dataset path {p} does not exist"
+            assert os.path.exists(p), f'Dataset path {p} does not exist'
             # We use the same transforms, modality configs, and embodiment tag for all datasets here
             dataset = LeRobotSingleDataset(
                 dataset_path=p,
@@ -131,15 +131,15 @@ def main(config: TrainCfg):
                 (dataset, 1.0)  # we will use equal weights for all datasets
                 for dataset in single_datasets
             ],
-            mode="train",
+            mode='train',
             balance_dataset_weights=config.balance_dataset_weights,
             balance_trajectory_weights=config.balance_trajectory_weights,
             seed=42,
             metadata_config={
-                "percentile_mixing_method": "weighted_average",
+                'percentile_mixing_method': 'weighted_average',
             },
         )
-        print(f"Loaded {len(single_datasets)} datasets, with {config.dataset_path} ")
+        print(f'Loaded {len(single_datasets)} datasets, with {config.dataset_path} ')
 
     if config.lora_rank > 0:
         model = get_lora_model(
@@ -325,7 +325,7 @@ class CheckpointFormatCallback(TrainerCallback):
                         {tag: metadata.model_dump(mode='json')}
                     )
             else:
-                print(f"Warning: Unknown dataset type {type(self.train_dataset)}")
+                print(f'Warning: Unknown dataset type {type(self.train_dataset)}')
 
             with open(exp_cfg_dir / 'metadata.json', 'w') as f:
                 json.dump(metadata_json, f, indent=4)

@@ -1,4 +1,4 @@
-    
+
 ![iros](../assets/_static/video/iros_challenge.gif "iros")
 
 # InternManip: IROS 2025 Grand Challenge Toolkits
@@ -6,8 +6,8 @@
 
 ![track-badge](https://img.shields.io/badge/Track_1-Manipulation-blueviolet)
 
-> This repository provides the **official baseline and evaluation toolkit** for  
-> **Track: Vision-Language Manipulation in Open Tabletop Environments**,  
+> This repository provides the **official baseline and evaluation toolkit** for
+> **Track: Vision-Language Manipulation in Open Tabletop Environments**,
 > featured at the *[IROS 2025 Workshop](https://internrobotics.shlab.org.cn/workshop/2025/)*.
 
 
@@ -42,18 +42,18 @@ This repository serves as the **starter kit and evaluation toolkit**—you can u
 
 ## 🛠️ Codebase & Tools
 
-- **Starter Code**: [InternManip GitHub Repo](https://github.com/InternRobotics/InternManip)  
-- **Data Format**: GenManip public benchmark  
-- **Simulation & Evaluation**: InternUtopia physics-based simulator  
-- **Docker**: A base image with all dependencies and starter scripts will be provided  
+- **Starter Code**: [InternManip GitHub Repo](https://github.com/InternRobotics/InternManip)
+- **Data Format**: GenManip public benchmark
+- **Simulation & Evaluation**: InternUtopia physics-based simulator
+- **Docker**: A base image with all dependencies and starter scripts will be provided
 
 
 ## 📌 Task Definition
 
 Participants must:
-1. **Implement a custom control policy** using `InternManip`, compatible with the GenManip data format  
-2. **Train on GenManip public data** using supported loaders and APIs  
-3. **Submit a Docker image** that runs closed-loop rollouts on our private test set  
+1. **Implement a custom control policy** using `InternManip`, compatible with the GenManip data format
+2. **Train on GenManip public data** using supported loaders and APIs
+3. **Submit a Docker image** that runs closed-loop rollouts on our private test set
 4. Compete for **highest success rate** on the held-out test scenes
 
 
@@ -66,7 +66,7 @@ Submissions will be automatically evaluated on three splits:
 - `test` (private)
 
 Evaluation metrics:
-- ✅ **Success Rate**: average success per episode  
+- ✅ **Success Rate**: average success per episode
 
 
 
@@ -86,9 +86,9 @@ Evaluation metrics:
 ## 💻 Resource Configuration
 
 Each submission runs on a dedicated evaluation machine with:
-- **CPU**: 14 cores  
-- **RAM**: 100 GB  
-- **GPU**: 1 × NVIDIA GeForce RTX 4090  
+- **CPU**: 14 cores
+- **RAM**: 100 GB
+- **GPU**: 1 × NVIDIA GeForce RTX 4090
 
 
 ## 📆 Timeline
@@ -99,8 +99,8 @@ Each submission runs on a dedicated evaluation machine with:
 | Submission Deadline | Sep 30, 2025 @ 23:59 CST       |
 
 Submission rules:
-- ⏱ **Max Submissions**: 5 per day / 50 per month / 50 total  
-- 🚫 **Concurrent Submissions**: 1 at a time  
+- ⏱ **Max Submissions**: 5 per day / 50 per month / 50 total
+- 🚫 **Concurrent Submissions**: 1 at a time
 
 
 
@@ -127,17 +127,17 @@ Submission rules:
 
 ## 📎 Rules & Eligibility
 
-- 👥 Team size: up to 10 members  
-- 🧪 One submission account per team  
-- 🔒 No access to private test data  
-- 🕑 Late or invalid submissions will be disqualified  
+- 👥 Team size: up to 10 members
+- 🧪 One submission account per team
+- 🔒 No access to private test data
+- 🕑 Late or invalid submissions will be disqualified
 
 
 
 ## 📬 Contact & Support
 
-- **Discord**: Join via invite link in the repo  
-- **WeChat**: Scan QR code in the repo  
+- **Discord**: Join via invite link in the repo
+- **WeChat**: Scan QR code in the repo
 - **Email**: [embodiedai@pjlab.org.cn](mailto:embodiedai@pjlab.org.cn)
 
 

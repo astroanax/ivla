@@ -18,7 +18,7 @@ eval_cfg = EvalCfg(
         },
         model_kwargs={
             'HF_cache_dir': None,
-        }, 
+        },
         server_cfg=ServerCfg(
             server_host='localhost',
             server_port=5000,

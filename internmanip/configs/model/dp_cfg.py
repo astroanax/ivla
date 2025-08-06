@@ -174,7 +174,7 @@ class DiffusionConfig(PretrainedConfig):
         super().__init__(**kwargs)
         if 'data_config' in kwargs:
             self.set_dim(kwargs['data_config'])
-        
+
         if 'tune_visual' in kwargs:
             self.tune_visual = kwargs['tune_visual']
         if 'tune_llm' in kwargs:
@@ -186,10 +186,10 @@ class DiffusionConfig(PretrainedConfig):
         if not hasattr(self, 'normalization_mapping'):
             from internmanip.model.types import NormalizationMode
             self.normalization_mapping = {}
-        
+
         if not hasattr(self, 'image_features'):
             self.image_features = [1,3,224,224]
-    
+
     def transform(self):
         transforms = None
         return transforms, list(range(self.n_obs_steps)), list(range(self.horizon))
