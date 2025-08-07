@@ -25,7 +25,7 @@ eval_cfg = EvalCfg(
         env_type='genmanip',
         env_settings=GenmanipEnvSettings(
             dataset_path='./data/dataset',
-            res_save_path='./result',
+            res_save_path='./results',
             is_save_img=False,
             aloha_split_camera_enable=AlohaSplitCameraEnable(
                 top_camera=True, left_camera=True, right_camera=True
