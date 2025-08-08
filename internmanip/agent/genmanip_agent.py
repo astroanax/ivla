@@ -116,11 +116,20 @@ class GenmanipAgent(BaseAgent):
                 'annotation.human.action.task_description': input['robot']['instruction'],
             }
         elif self.data_config == 'aloha_v3':
+            left_arm_joint_indices = [12, 14, 16, 18, 20, 22]
+            right_arm_joint_indices = [13, 15, 17, 19, 21, 23]
+            left_gripper_joint_indices = [24, 25]
+            right_gripper_joint_indices = [26, 27]
+            arm_qpos = (input['robot']['joints_state']['positions'][:12].tolist()
+                     + [input['robot']['joints_state']['positions'][idx] for idx in left_arm_joint_indices]
+                     + [input['robot']['joints_state']['positions'][idx] for idx in left_gripper_joint_indices]
+                     + [input['robot']['joints_state']['positions'][idx] for idx in right_arm_joint_indices]
+                     + [input['robot']['joints_state']['positions'][idx] for idx in right_gripper_joint_indices])
             converted_data = {
                 'video.left_view': np.array([input['robot']['sensors']['left_camera']['rgb']]),
                 'video.right_view': np.array([input['robot']['sensors']['right_camera']['rgb']]),
                 'video.top_view': np.array([input['robot']['sensors']['top_camera']['rgb']]),
-                'state.arm_qpos': np.array([input['robot']['joints_state']['positions']]),
+                'state.arm_qpos': np.array([arm_qpos]),
                 'annotation.human.action.task_description': input['robot']['instruction'],
             }
         else:
@@ -156,15 +165,9 @@ class GenmanipAgent(BaseAgent):
             }
             converted_data = self.action_transforms.unapply(deepcopy(converted_data))
             converted_data = squeeze_dict_values(converted_data)
-
-            left_arm_joint_indices = [12, 14, 16, 18, 20, 22]
-            right_arm_joint_indices = [13, 15, 17, 19, 21, 23]
-            left_gripper_joint_indices = [24, 25]
-            right_gripper_joint_indices = [26, 27]
-
-            left_arm_action = (converted_data['action.left_arm_delta_qpos'][:6] + torch.tensor([input['state.arm_qpos'][0][idx] for idx in left_arm_joint_indices])).tolist()
+            left_arm_action = (converted_data['action.left_arm_delta_qpos'][:6] + torch.tensor(input['state.arm_qpos'][0][12:18])).tolist()
             left_gripper_action = converted_data['action.left_gripper_close'][0]*2-1
-            right_arm_action = (converted_data['action.right_arm_delta_qpos'][6:] + torch.tensor([input['state.arm_qpos'][0][idx] for idx in right_arm_joint_indices])).tolist()
+            right_arm_action = (converted_data['action.right_arm_delta_qpos'][6:] + torch.tensor(input['state.arm_qpos'][0][20:26])).tolist()
             right_gripper_action = converted_data['action.right_gripper_close'][1]*2-1
             converted_data = {
                 'left_arm_action': left_arm_action,
