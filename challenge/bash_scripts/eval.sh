@@ -1,6 +1,7 @@
 #!/bin/bash
 set -m
 source /root/anaconda3/etc/profile.d/conda.sh
+source ${CONDA_PREFIX}/etc/profile.d/conda.sh
 
 declare -A params=(
   [server_conda_name]=""
@@ -58,6 +59,7 @@ echo "FREE_PORT: ${FREE_PORT}"
 
 
 cd /root/InternManip
+cd $(dirname $(dirname $(dirname $(readlink -f "$0"))))
 
 mkdir -p ${params[res_save_path]}
 
