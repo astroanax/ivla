@@ -70,7 +70,7 @@ You can use `gr00t_n1_5` as a reference example.
 ### Train
 
 
-Before training, please create a training configuration YAML file named `custom.yaml` under the `challenge/run_configs/train/gr00t_n1_5_aloha.yaml` directory.
+Before training, please create a training configuration YAML file named `custom.yaml` under the `challenge/run_configs/train/` directory.
 This YAML file specifies which model to train, dataset paths, hyperparameters, and cache settings. 
 
 **Example Minimal YAML**
