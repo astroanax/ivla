@@ -74,7 +74,6 @@ class SimplerAgent(BaseAgent):
         # BaseAgent.__init__ will load the model
         super().__init__(config)
 
-        # import ipdb;ipdb.set_trace()
         # data_config_cls = DATA_CONFIG_MAP[config.data_config]
         model_transform, observation_indices, action_indices = self.policy_model.config.transform()
 

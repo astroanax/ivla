@@ -283,7 +283,6 @@ class BaseTrainerWrapper(BaseTrainer):
         plt.tight_layout()
         plt.savefig('debug_value_{}.png'.format(0))
         plt.close()
-        import pdb; pdb.set_trace()
 
         return mean_diff
 

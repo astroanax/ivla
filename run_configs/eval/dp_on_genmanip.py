@@ -1,5 +1,4 @@
 from internmanip.configs import *
-from internmanip.configs.model.dp_cfg import DiffusionConfig
 from internmanip.benchmarks.genmanip.config.env_config import FrankaCameraEnable, AlohaSplitCameraEnable
 
 
@@ -8,7 +7,6 @@ eval_cfg = EvalCfg(
     agent=AgentCfg(
         agent_type='dp_clip',
         base_model_path='/PATH/TO/YOUR/FINETUNED_CHECKPOINT',
-        model_cfg=DiffusionConfig(),
         agent_settings={
             'data_config': 'genmanip_v1',
             'embodiment_tag': 'new_embodiment',
@@ -26,9 +24,9 @@ eval_cfg = EvalCfg(
     env=EnvCfg(
         env_type='genmanip',
         env_settings=GenmanipEnvSettings(
-            dataset_path='path/to/genmanip/benchmark_data',
-            eval_tasks=['task1', 'task2', ...],
-            res_save_path='path/to/save/results',
+            dataset_path='InternRobotics/InternData-GenmanipBench',
+            eval_tasks=['instruction_16_1'],
+            res_save_path=f'{Path(__file__).absolute().parents[2]}/logs/eval/dp_on_genmanip',
             is_save_img=True,
             robot_type='franka',
             gripper_type='panda',

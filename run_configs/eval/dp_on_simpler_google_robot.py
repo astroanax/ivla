@@ -1,5 +1,4 @@
 from internmanip.configs import *
-from internmanip.configs.model.dp_cfg import DiffusionConfig
 from pathlib import Path
 
 
@@ -8,7 +7,6 @@ eval_cfg = EvalCfg(
     agent=AgentCfg(
         agent_type='dp_clip',
         base_model_path='/PATH/TO/YOUR/DP_FINETUNED_CHECKPOINT',
-        model_cfg=DiffusionConfig(),
         agent_settings={
             'policy_setup': 'google_robot',
             'action_scale': 1.0,
@@ -40,7 +38,7 @@ eval_cfg = EvalCfg(
 
             ]
     ),
-    logging_dir=f'{Path(__file__).absolute().parents[2]}/logs/eval/gr00t_n1_5_on_simpler',
+    logging_dir=f'{Path(__file__).absolute().parents[2]}/logs/eval/dp_on_simpler/google_robot',
     distributed_cfg=DistributedCfg(
         num_workers=4,
         ray_head_ip='10.150.91.18', # or "auto"

@@ -1,0 +1,24 @@
+model_type: gr00t_n1_5
+dataset_path:
+  - InternRobotics/IROS-2025-Challenge-Manip/train/collec_three_glues
+  - InternRobotics/IROS-2025-Challenge-Manip/train/collect_two_alarm_clocks
+  - InternRobotics/IROS-2025-Challenge-Manip/train/collect_two_shoes
+  - InternRobotics/IROS-2025-Challenge-Manip/train/gather_three_teaboxes
+  - InternRobotics/IROS-2025-Challenge-Manip/train/make_sandwich
+  - InternRobotics/IROS-2025-Challenge-Manip/train/oil_painting_recognition
+  - InternRobotics/IROS-2025-Challenge-Manip/train/organize_colorful_cups
+  - InternRobotics/IROS-2025-Challenge-Manip/train/purchase_gift_box
+  - InternRobotics/IROS-2025-Challenge-Manip/train/put_drink_on_basket
+  - InternRobotics/IROS-2025-Challenge-Manip/train/sort_waste
+num_gpus: 1
+batch_size: 8
+output_dir: Checkpoints/runs/gr00t_n1_5_aloha_v3
+max_steps: 10000
+tune_visual: True
+tune_llm: True
+save_steps: 100
+data_config: aloha_v3
+video_backend: decord
+report_to: wandb
+gradient_accumulation_steps: 8
+base_model_path: nvidia/GR00T-N1.5-3B

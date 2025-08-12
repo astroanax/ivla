@@ -1,5 +1,4 @@
 from internmanip.configs import *
-from internmanip.configs.model.pi0_cfg import PI0Config
 from pathlib import Path
 
 
@@ -8,14 +7,16 @@ eval_cfg = EvalCfg(
     agent=AgentCfg(
         agent_type='pi0',
         model_name_or_path='/PATH/TO/YOUR/PI0_FINETUNED_CHECKPOINT',
-        model_cfg=PI0Config(),
         agent_settings={
-            'policy_setup': 'widowx_bridge',
+            'policy_setup': 'bridgedata_v2',
             'action_scale': 1.0,
             'exec_horizon': 1,
             'action_ensemble_temp': -0.8,
-            'embodiment_tag': 'gr1',
+            'embodiment_tag': 'new_embodiment',
             'denoising_steps': 16,
+        },
+        model_kwargs={
+            'HF_cache_dir': None,
         },
         server_cfg=ServerCfg(
             server_host='localhost',
@@ -33,7 +34,7 @@ eval_cfg = EvalCfg(
 
             ]
     ),
-    logging_dir=f'{Path(__file__).absolute().parents[2]}/logs/eval/pi0_windowx_node2_bs16_acc8_meanstd_new1/',
+    logging_dir=f'{Path(__file__).absolute().parents[2]}/logs/eval/pi0_on_simpler/bridgedata_v2',
     distributed_cfg=DistributedCfg(
         num_workers=4,
         ray_head_ip='10.150.91.18', # or "auto"

@@ -163,7 +163,6 @@ if __name__ == '__main__':
         all_mse.append(mse)
         all_mse_.append(mse_)
     import ipdb
-    ipdb.set_trace()
     print('Average MSE across all trajs:', np.mean(all_mse))
     print('Average Group MSE across all trajs:', np.mean(all_mse_,axis=0))
     print('Done')

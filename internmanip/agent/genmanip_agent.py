@@ -61,6 +61,7 @@ class GenmanipAgent(BaseAgent):
             self.step_count.append(0)
 
         outputs = []
+        # GenManip has only one environment, so this loop will iterate only once
         for env, input in enumerate(inputs):
             if input == {}:
                 outputs.append({})

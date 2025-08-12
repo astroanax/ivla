@@ -5,10 +5,10 @@ from pathlib import Path
 eval_cfg = EvalCfg(
     eval_type='simpler',
     agent=AgentCfg(
-        agent_type='gr00t_n1',
-        base_model_path='InternRobotics/Gr00t-n1_BridgeDataV2',
+        agent_type='pi0',
+        base_model_path='InternRobotics/Pi0_GoogleRobot_meanstd',
         agent_settings={
-            'policy_setup': 'bridgedata_v2',
+            'policy_setup': 'google_robot',
             'action_scale': 1.0,
             'exec_horizon': 1,
             'action_ensemble_temp': -0.8,
@@ -25,16 +25,21 @@ eval_cfg = EvalCfg(
     ),
     env=EnvCfg(
         env_type='simpler',
-        device_id=0,
+        device_id=None,
         episodes_config_path=[
-                f'{Path(__file__).absolute().parents[2]}/internmanip/benchmarks/utils/SimplerEnv/widowx_bridge/visual_matching/put_carrot_on_plate.json',
-                f'{Path(__file__).absolute().parents[2]}/internmanip/benchmarks/utils/SimplerEnv/widowx_bridge/visual_matching/put_eggplant_in_basket.json',
-                f'{Path(__file__).absolute().parents[2]}/internmanip/benchmarks/utils/SimplerEnv/widowx_bridge/visual_matching/put_spoon_on_towel.json',
-                f'{Path(__file__).absolute().parents[2]}/internmanip/benchmarks/utils/SimplerEnv/widowx_bridge/visual_matching/stack_cube.json',
+                f'{Path(__file__).absolute().parents[2]}/internmanip/benchmarks/utils/SimplerEnv/google_robot/variant_aggregation/move_near.json',
+                f'{Path(__file__).absolute().parents[2]}/internmanip/benchmarks/utils/SimplerEnv/google_robot/variant_aggregation/open_and_close_drawer.json',
+                f'{Path(__file__).absolute().parents[2]}/internmanip/benchmarks/utils/SimplerEnv/google_robot/variant_aggregation/pick_coke_can.json',
+                f'{Path(__file__).absolute().parents[2]}/internmanip/benchmarks/utils/SimplerEnv/google_robot/variant_aggregation/place_in_drawer.json',
+
+                f'{Path(__file__).absolute().parents[2]}/internmanip/benchmarks/utils/SimplerEnv/google_robot/visual_matching/move_near.json',
+                f'{Path(__file__).absolute().parents[2]}/internmanip/benchmarks/utils/SimplerEnv/google_robot/visual_matching/open_and_close_drawer.json',
+                f'{Path(__file__).absolute().parents[2]}/internmanip/benchmarks/utils/SimplerEnv/google_robot/visual_matching/pick_coke_can.json',
+                f'{Path(__file__).absolute().parents[2]}/internmanip/benchmarks/utils/SimplerEnv/google_robot/visual_matching/place_in_drawer.json',
 
             ]
     ),
-    logging_dir=f'{Path(__file__).absolute().parents[2]}/logs/demo/gr00t_n1_on_simpler',
+    logging_dir=f'{Path(__file__).absolute().parents[2]}/logs/demo/pi0_on_simpler/google_robot',
     distributed_cfg=DistributedCfg(
         num_workers=4,
         ray_head_ip='10.150.91.18', # or "auto"

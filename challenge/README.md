@@ -117,7 +117,7 @@ Submission rules:
 
 ## ✅ Submission Guidelines
 
-- Teams must implement a `run_policy()` entry point (see [GUIDELINES.md](./guidelines.md))
+- Teams must implement a `custom_policy()` class (see [GUIDELINES.md](./guidelines.md))
 - Docker image must include all dependencies for inference
 - Final Dockerfile and inference code must be open-sourced
 - Public datasets and pretrained models are allowed

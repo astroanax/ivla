@@ -39,7 +39,7 @@ eval_cfg = EvalCfg(
 
             ]
     ),
-    logging_dir=f'{Path(__file__).absolute().parents[2]}/logs/eval/gr00t_n1_5_on_simpler',
+    logging_dir=f'{Path(__file__).absolute().parents[2]}/logs/eval/gr00t_n1_5_on_simpler/google_robot',
     distributed_cfg=DistributedCfg(
         num_workers=4,
         ray_head_ip='10.150.91.18', # or "auto"

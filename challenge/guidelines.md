@@ -32,7 +32,9 @@ xhost +local:root # Allow the container to access the display
 
 cd InternManip
 
-docker run --name internmanip -it --rm --gpus all --network host \
+docker run --name internmanip -it --rm --privileged \
+  --gpus all \
+  --network host \
   -e "ACCEPT_EULA=Y" \
   -e "PRIVACY_CONSENT=Y" \
   -e "DISPLAY=${DISPLAY}" \
@@ -40,6 +42,7 @@ docker run --name internmanip -it --rm --gpus all --network host \
   -w /root/InternManip \
   -v /tmp/.X11-unix/:/tmp/.X11-unix \
   -v ${PWD}:/root/InternManip \
+  -v ${dataset_save_path}:/root/InternManip/data/dataset \
   -v ${HOME}/docker/isaac-sim/cache/kit:/isaac-sim/kit/cache:rw \
   -v ${HOME}/docker/isaac-sim/cache/ov:/root/.cache/ov:rw \
   -v ${HOME}/docker/isaac-sim/cache/pip:/root/.cache/pip:rw \
@@ -56,14 +59,69 @@ docker run --name internmanip -it --rm --gpus all --network host \
 ## 🛠️ Local Development & Testing
   
 ### Implement your policy  
-- Implement your policy under `internmanip/agent` and `internmanip/model`.
-  
----  
+
+Please implement your model in `internmanip/model/basemodel/{model_name}/`
+and its config in `internmanip/configs/model/{model_name}_cfg.py`
+
+For detailed implementation steps and examples, please refer to the documentation: [✍🏻 Create a New Model](https://internrobotics.github.io/user_guide/internmanip/quick_start/add_model.html).
+You can use `gr00t_n1_5` as a reference example.
+
+
+### Train
+
+
+Before training, please create a training configuration YAML file named `custom.yaml` under the `challenge/run_configs/train/` directory.
+This YAML file specifies which model to train, dataset paths, hyperparameters, and cache settings. 
+
+**Example Minimal YAML**
+```yaml
+model_type: custom_policy                 # registered model name
+dataset_path:
+  - InternRobotics/IROS-2025-Challenge-Manip/train/collec_three_glues
+  - InternRobotics/IROS-2025-Challenge-Manip/train/collect_two_alarm_clocks
+  - InternRobotics/IROS-2025-Challenge-Manip/train/collect_two_shoes
+  - InternRobotics/IROS-2025-Challenge-Manip/train/gather_three_teaboxes
+  - InternRobotics/IROS-2025-Challenge-Manip/train/make_sandwich
+  - InternRobotics/IROS-2025-Challenge-Manip/train/oil_painting_recognition
+  - InternRobotics/IROS-2025-Challenge-Manip/train/organize_colorful_cups
+  - InternRobotics/IROS-2025-Challenge-Manip/train/purchase_gift_box
+  - InternRobotics/IROS-2025-Challenge-Manip/train/put_drink_on_basket
+  - InternRobotics/IROS-2025-Challenge-Manip/train/sort_waste
+data_config: aloha_v3                     # pre-registered data config preset
+base_model_path: nvidia/GR00T-N1.5-3B     # optional pretrained checkpoint path
+hf_cache_dir: /your/custom/cache/path     # optional cache directory
+```
+
+
+You can base your config on existing ones (e.g., `gr00t_n1_5_aloha.yaml`) and adjust accordingly.
+
+**Recommended Training Setup**
+
+- Global batch size: 2048
+- Training steps: 40,000 or more
+- This setup typically requires multiple GPUs for efficient training.
+
+
+Use the following command to start batch training on a single node with multiple GPUs:
+
+```bash
+conda activate your_agent_env_name
+export PYTHONPATH="$(pwd):$PYTHONPATH"
+torchrun --nnodes 1 --nproc_per_node 8 scripts/train/train.py --config run_configs/train/custom.yaml
+```
+If you use Slurm or multi-node clusters, refer to the official multi-node training scripts and procedures.
+You will be prompted to log in to Weights & Biases (WandB) for monitoring training progress.
+
+
+For more detailed instructions, advanced options, and troubleshooting, please refer to the full training documentation:
+[🏃🏻‍♂️ Training and Evaluation](https://internrobotics.github.io/user_guide/internmanip/quick_start/train_eval.html) and [Tutorials of Training](https://internrobotics.github.io/user_guide/internmanip/tutorials/training.html).
+
   
 ### Test  
 #### 1. Configuration File Preparation  
-Create your custom configuration file by replicating the structure of: 
-`challenge/run_configs/eval/gr00t_n1_5_on_genmanip.py`
+Create your custom evaluation configuration file based on the structure of:
+`challenge/run_configs/eval/custom_on_genmanip.py`
+You can refer to the existing `gr00t_n1_5_on_genmanip.py` as an example.
 
 
 #### 2. Evaluation Methods (Choose One)  
@@ -78,7 +136,7 @@ Terminal 2 (Evaluator):
 ```bash
 conda activate genmanip
 python -m scripts.eval.start_evaluator \
-  --config challenge/run_configs/eval/gr00t_n1_5_on_genmanip.py \
+  --config challenge/run_configs/eval/custom_on_genmanip.py \
   --server
 ```
 
@@ -86,12 +144,90 @@ python -m scripts.eval.start_evaluator \
 ```bash
 ./challenge/bash_scripts/eval.sh \
   --server_conda_name your_agent_env_name \
-  --config challenge/run_configs/eval/gr00t_n1_5_on_genmanip.py \
+  --config challenge/run_configs/eval/custom_on_genmanip.py \
   --server \
-  --dataset_path ./data/dataset \
+  --dataset_path data/dataset/IROS-2025-Challenge-Manip/validation \
   --res_save_path ./results
 ```
 ▶ **Output logs in Method 2** : Check `./results/server.log` and `./results/eval.log`
+
+### Integrating a Custom Model for Inference in Internmanip
+
+To integrate a custom model into the **Internmanip** framework, you need to complete the following tasks:
+
+1. **Interface Adaptation**
+
+   * Correctly parse the input data provided by the simulation environment.
+   * Generate control commands in the required output format.
+2. **Inference Execution**
+
+   * Call your model within the `step` function to perform inference and return results.
+   * The server will execute the simulation based on your outputs and return the next-step observation.
+
+#### 1. `step` Function Input
+
+The `step` function in `internmanip/agent/genmanip_agent.py` receives a **list of length 1**, whose sole element is a Python `dict` containing the full robot state and sensor data.
+The complete field structure is described in the [Aloha Split Input Format](https://internrobotics.github.io/user_guide/internmanip/tutorials/environment.html#when-robote-type-is-aloha-split).
+
+Commonly used fields include:
+
+* **Joint Positions**
+
+  ```python
+  inputs[0]["robot"]["joints_state"]["positions"]
+  ```
+
+  The Aloha robot has **28 degrees of freedom** (including the mobile base). If your model only requires the dual-arm joints, slice the array according to the documentation.
+
+* **RGB Camera Images**
+
+  ```python
+  inputs[0]["robot"]["sensors"]["top_camera"]["rgb"]
+  inputs[0]["robot"]["sensors"]["left_camera"]["rgb"]
+  inputs[0]["robot"]["sensors"]["right_camera"]["rgb"]
+  ```
+
+#### 2. `step` Function Output
+
+The return value must also be a **list of length 1**, containing a dictionary that conforms to one of the two output formats defined in the documentation.
+
+* All control signals are in **absolute pose**.
+* End-effector (EE) pose control is **relative to the base of the corresponding arm**, aligned with the training data.
+* If you require **relative pose control**, you must implement the coordinate transformation logic yourself.
+
+#### 3. Reusing the Default Implementation
+
+The repository provides a default `step` implementation supporting **history smoothing** and **relative joint position (relative qpos)** control (with absolute gripper control).
+
+If you wish to reuse it, see **line 77**:
+
+```python
+pred_actions = self.policy_model.inference(transformed_input)['action_pred'][0].cpu().float()
+```
+
+Here, `transformed_input` is a preprocessed dictionary. Common keys include:
+
+* `"video.left_view"` / `"video.right_view"` / `"video.top_view"` — three RGB camera views
+* `"state.arm_qpos"` — dual-arm joint positions
+* `"annotation.human.action.task_description"` — task description
+
+**Joint position index mapping** (after conversion):
+
+* Left arm: `12:18`
+* Left gripper: `18:20`
+* Right arm: `20:26`
+* Right gripper: `26:28`
+
+#### 4. Model Output Format: `pred_actions`
+
+The inference result `pred_actions` is a **NumPy array of length 14**, with the following layout:
+
+| Index Range | Meaning                                          |
+| ----------- | ------------------------------------------------ |
+| `0:6`       | Left arm relative qpos                           |
+| `6:12`      | Right arm relative qpos                          |
+| `12`        | Left gripper control (`1` = open, `-1` = close)  |
+| `13`        | Right gripper control (`1` = open, `-1` = close) |
 
 ### Critical Notes
 1. **Environment Parameters**  
@@ -104,36 +240,46 @@ python -m scripts.eval.start_evaluator \
 ## 📦 Packaging & Submission
 
 ### ✅ Create your image registry  
-You can follow the following [document](https://help.aliyun.com/zh/acr/user-guide/create-a-repository-and-build-images?spm=a2c4g.11186623.help-menu-60716.d_2_15_4.75c362cbMywaYx&scm=20140722.H_60997._.OR_help-T_cn~zh-V_1) to create a free personal image registry. After uploading the image to be submitted, please set it to public access.
+You can follow the following [document](https://help.aliyun.com/zh/acr/user-guide/create-a-repository-and-build-images?spm=a2c4g.11186623.help-menu-60716.d_2_15_4.75c362cbMywaYx&scm=20140722.H_60997._.OR_help-T_cn~zh-V_1) to create a free personal image registry. During the creation of the repository, please set it to **public** access.
 
 ### ✅ Build your submission image
+
+Before creating an image, please note the following points:  
+- **Make sure your Modified Code are correctly packaged in your submitted Docker image at `/root/InternManip`.**  
+- **Your trained model weights are best placed in your submitted Docker image at `/root/InternManip/data/model`.**  
+- **Please delete cache and other operations to reduce the image size.**  
+
+
+> **NOTE !**  
+> When using the `docker cp` command to move code files, first use the `umount /root/InternManip/data/dataset` and `umount /root/InternManip` commands in the container. Then delete all soft links in the local code repository, such as `rm InternManip/data/dataset`.
+
+---  
 
 You can build a new image by customizing the `Dockerfile`, or use command `docker commit`:
 
 ```bash
-$ docker commit internmanip your-custom-image:v1
+docker commit internmanip your-custom-image:v1
 ```
 
 Push to your public registry
 ```bash
-$ docker tag your-custom-image:v1 your-registry/submit-image:v1
-$ docker push your-registry/submit-image:v1
+docker tag your-custom-image:v1 your-registry/your-repository:v1
+docker push your-registry/your-repository:v1
 ```
 
-> **NOTE !**  
-> - **Make sure your Modified Code are correctly packaged in your submitted Docker image at `/root/InternManip`.**  
-> - **Your trained model weights are best placed in your submitted Docker image at `/root/InternManip/data/model`.**  
-> - **Please delete cache and other operations to reduce the image size.**  
 
-### ✅ Submit your image URL on Eval.AI
+### ✅ Submit and view the results
 
-#### Submission Format
+#### Submit your image URL on Eval.AI
+
+After creating an account and team on eval.ai, please submit your entry **[here](https://eval.ai/web/challenges/challenge-page/2626/submission)**. In the "Make Submission" column at the bottom, you can select phase. Please select `Upload file` as the `submission type` and upload the **JSON file** shown below. If you select `private` for your `submission visibility`, the results will not be published on the leaderboard. You can select public again on the subsequent result viewing page.
+
 
 Create a JSON file with your Docker image URL and team information. The submission must follow this exact structure:
 
 ```json
 {
-    "url": "your-registry/submit-image:v1",
+    "url": "your-registry/your-repository:v1",
     "args": {
         "agent_conda_name": "gr00t",
         "config_path": "/root/InternManip/challenge/run_configs/eval/gr00t_n1_5_on_genmanip.py"
@@ -157,8 +303,7 @@ Create a JSON file with your Docker image URL and team information. The submissi
     }
 }
 ```
-
-##### Required Fields
+ Required Fields
 
 | Field | Type | Description |
 |-------|------|-------------|
@@ -175,14 +320,8 @@ Create a JSON file with your Docker image URL and team information. The submissi
 
 For detailed submission guidelines and troubleshooting, refer to the official Eval.AI platform documentation.
 
-## Official Evaluation Flow
-### DSW Creation
-- We use the AliCloud API to instantiate a DSW from your image link.
-- The system mounts our evaluation config + full dataset (val_seen, val_unseen, test).
-### Evaluation Execution
-- Via SSH + `screen`, we launch `scripts/eval/run_eval.sh`.
-- A polling loop watches for `results.json`.
-### Results Collection
-- Upon completion, metrics for each split are parsed and pushed to Eval.AI leaderboard.
+#### Viewing Results
+
+After submitting, you can view your submissions in the corresponding phase on the `My Submissions` page (https://eval.ai/web/challenges/challenge-page/2626/my-submission). Here, you can view the submission file, result file, and logs for each submission, and choose to publish it on the leaderboard. The leaderboard address is [here](https://eval.ai/web/challenges/challenge-page/2626/leaderboard)
 
 > 😄 Good luck, and may the best vision-based policy win!

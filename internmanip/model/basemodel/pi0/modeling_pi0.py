@@ -344,12 +344,11 @@ class PI0Policy(BasePolicyModel):
         tasks = [task if type(task) == list else [task] for task in tasks] #convert to a list
         tasks = [task[0] if task[0].endswith('\n') else f'{task[0]}\n' for task in tasks]
 
-        # import ipdb;ipdb.set_trace()
         tokenized_prompt = self.language_tokenizer.__call__(
             tasks,
             padding='max_length',
             padding_side='right',
-            max_length=self.tokenizer_max_length,
+            max_length=self.config.tokenizer_max_length,
             return_tensors='pt',
         )
         lang_tokens = tokenized_prompt['input_ids'].to(device=device)
@@ -377,7 +376,6 @@ class PI0Policy(BasePolicyModel):
         The policy is set in evaluation mode by default using `policy.eval()` (dropout modules are
         deactivated). To train it, you should first set it back in training mode with `policy.train()`.
         """
-
         tune_visual = kwargs.pop('tune_visual', True)
         tune_llm = kwargs.pop('tune_llm', False)
         tune_projector = kwargs.pop('tune_projector', True)
@@ -691,6 +689,7 @@ class PI0FlowMatching(nn.Module):
     ):
         """Apply one denoising step of the noise `x_t` at a given timestep."""
         state = state[:, 0]
+        state = state.to(torch.bfloat16)
         suffix_embs, suffix_pad_masks, suffix_att_masks = self.embed_suffix(state, x_t, timestep)
 
         suffix_len = suffix_pad_masks.shape[1]
