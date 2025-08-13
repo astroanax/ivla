@@ -240,7 +240,7 @@ The inference result `pred_actions` is a **NumPy array of length 14**, with the 
 ## 📦 Packaging & Submission
 
 ### ✅ Create your image registry  
-You can follow the following [document](https://help.aliyun.com/zh/acr/user-guide/create-a-repository-and-build-images?spm=a2c4g.11186623.help-menu-60716.d_2_15_4.75c362cbMywaYx&scm=20140722.H_60997._.OR_help-T_cn~zh-V_1) to create a free personal image registry. During the creation of the repository, please set it to **public** access.
+You can follow the following [`aliyun document`](https://help.aliyun.com/zh/acr/user-guide/create-a-repository-and-build-images?spm=a2c4g.11186623.help-menu-60716.d_2_15_4.75c362cbMywaYx&scm=20140722.H_60997._.OR_help-T_cn~zh-V_1) or [`Quay document`](https://quay.io/tutorial/) to create a free personal image registry. During the creation of the repository, please set it to **public** access.
 
 ### ✅ Build your submission image
 
@@ -322,6 +322,6 @@ For detailed submission guidelines and troubleshooting, refer to the official Ev
 
 #### Viewing Results
 
-After submitting, you can view your submissions in the corresponding phase on the `My Submissions` page (https://eval.ai/web/challenges/challenge-page/2626/my-submission). Here, you can view the submission file, result file, and logs for each submission, and choose to publish it on the leaderboard. The leaderboard address is [here](https://eval.ai/web/challenges/challenge-page/2626/leaderboard)
+After submitting, you can view your submissions in the corresponding phase on the [`My Submissions`](https://eval.ai/web/challenges/challenge-page/2626/my-submission) page. Here, you can view the submission file, result file, and logs for each submission, and choose to publish it on the leaderboard. The leaderboard address is [here](https://eval.ai/web/challenges/challenge-page/2626/leaderboard).
 
 > 😄 Good luck, and may the best vision-based policy win!

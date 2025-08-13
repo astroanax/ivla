@@ -51,7 +51,6 @@ FREE_PORT=$(find_free_port)
 
 echo "config: ${params[config]}"
 echo "server: ${params[server]}"
-echo "test: ${params[test]}"
 echo "dataset_path: ${params[dataset_path]}"
 echo "res_save_path: ${params[res_save_path]}"
 echo "FREE_PORT: ${FREE_PORT}"
