@@ -24,26 +24,13 @@ eval_cfg = EvalCfg(
     env=EnvCfg(
         env_type='genmanip',
         env_settings=GenmanipEnvSettings(
-            dataset_path='InternRobotics/InternData-GenmanipBench',
-            eval_tasks=['instruction_16_1'],
+            # Optional (if you have local path to the dataset): 
+            # dataset_path='./data/dataset/IROS-2025-Challenge-Manip/validation',
             res_save_path=f'{Path(__file__).absolute().parents[2]}/logs/eval/dp_on_genmanip',
-            is_save_img=True,
-            robot_type='franka',
-            gripper_type='panda',
-            franka_camera_enable=FrankaCameraEnable(
-                realsense=True, obs_camera=True, obs_camera_2=True
-            ),
+            is_save_img=False,
             aloha_split_camera_enable=AlohaSplitCameraEnable(
                 top_camera=True, left_camera=True, right_camera=True
             ),
-            depth_obs=False,
-            max_step=500,
-            max_success_step=50,
-            env_num=1,
-            physics_dt=1/30,
-            rendering_dt=1/30,
-            headless=True,
-            ray_distribution=None,
         ),
     ),
 )

@@ -409,6 +409,9 @@ class LeRobotSingleDataset(Dataset):
                 simplified_modality_meta[modality][subkey] = {
                     'absolute': le_state_action_meta[subkey].absolute,
                     'rotation_type': le_state_action_meta[subkey].rotation_type,
+                    "shape": [
+                        (le_state_action_meta[subkey].end - le_state_action_meta[subkey].start) if (le_state_action_meta[subkey].start is not None and le_state_action_meta[subkey].end is not None) else -1
+                    ],
                     'continuous': continuous,
                 }
 
@@ -475,9 +478,13 @@ class LeRobotSingleDataset(Dataset):
                 assert isinstance(state_action_meta, LeRobotStateActionMetadata)
                 le_modality = state_action_meta.original_key if our_modality!=state_action_meta.original_key else state_action_meta.original_key + '.' + subkey
                 for stat_name in le_statistics[le_modality]:
+                    indices = np.arange(
+                        state_action_meta.start if state_action_meta.start is not None else 0,
+                        state_action_meta.end if state_action_meta.end is not None else len(le_statistics[le_modality][stat_name]),
+                    )
                     stat = np.array(le_statistics[le_modality][stat_name])
-                    dataset_statistics[our_modality][subkey][stat_name] = stat
-                    simplified_modality_meta[our_modality][subkey]['shape'] = stat.shape
+                    dataset_statistics[our_modality][subkey][stat_name] = stat[indices]
+                    simplified_modality_meta[our_modality][subkey]['shape'] = stat[indices].shape
 
         # 3. Full dataset metadata
         metadata = DatasetMetadata(
@@ -891,6 +898,11 @@ class LeRobotSingleDataset(Dataset):
         assert le_key in self.curr_traj_data.columns, f'No {le_key} found in {trajectory_id=}'
         data_array: np.ndarray = np.stack(self.curr_traj_data[le_key])  # type: ignore
         assert data_array.ndim == 2, f'Expected 2D array, got {data_array.shape} array of {le_key} in {trajectory_id=}'
+        le_indices = np.arange(
+            le_state_or_action_cfg[key].start if le_state_or_action_cfg[key].start is not None else 0,
+            le_state_or_action_cfg[key].end if le_state_or_action_cfg[key].end is not None else data_array.shape[1],
+        )
+        data_array = data_array[:, le_indices]
         # Get the state or action configuration
         state_or_action_cfg = getattr(self.metadata.modalities, modality)[key]
 

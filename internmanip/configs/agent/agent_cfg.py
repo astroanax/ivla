@@ -13,6 +13,7 @@ class AgentCfg(BaseModel):
     model_kwargs: Optional[Dict[str, Any]] = {}
     server_cfg: Optional[ServerCfg] = None
     agent_settings: Optional[Dict[str, Any]] = {}
+    eval_type: Optional[str] = None
 
     class Config:
         arbitrary_types_allowed = True

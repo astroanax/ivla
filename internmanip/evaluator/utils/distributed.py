@@ -25,7 +25,7 @@ class EvaluatorRayActorGroup:
     """
     Evaluators grouped by ray actors for distributed evaluation.
     """
-    def __init__(self, config: EvalCfg):
+    def __init__(self, config: EvalCfg, server_cfg_list: List[ServerCfg] = None):
         self.config = config
         self.distributed_settings = config.distributed_cfg if config.distributed_cfg is not None else DistributedCfg(num_workers=2)
         self.num_workers = self.distributed_settings.num_workers
@@ -37,9 +37,7 @@ class EvaluatorRayActorGroup:
         if self.config.eval_type == 'GENMANIP':
             self.episodes_data = self.evaluator_class._get_all_episodes_setting_data(self.config)
             self.episodes_batches = self._prepare_episodes_batches()
-            self.server_cfg_list = []
-            for i in range(self.num_workers):
-                self.server_cfg_list.append(ServerCfg(server_port=5000+i))
+            self.server_cfg_list = server_cfg_list
         else:
             if self.evaluator_class.__name__ == 'CalvinEvaluator':
                 self.evaluator_class.num_sequences = self.config.env.env_settings.num_sequences
@@ -112,6 +110,8 @@ class EvaluatorRayActorGroup:
 
         for i in range(self.num_workers):
             if self.config.eval_type == 'GENMANIP':
+                if not self.episodes_batches[i]:
+                    continue
                 self.config.env.env_settings.episode_list = self.episodes_batches[i]
                 self.config.agent.server_cfg = self.server_cfg_list[i]
 
@@ -132,7 +132,7 @@ class EvaluatorRayActorGroup:
 
         logger.info(f'Waiting for {self.num_workers} evaluator ray actors to be ready...')
         try:
-            ray.wait([actor.ping.remote() for actor in self.evaluator_ray_actors], num_returns=self.num_workers)
+            ray.wait([actor.ping.remote() for actor in self.evaluator_ray_actors], num_returns=len(self.evaluator_ray_actors))
             logger.info('All evaluator ray actors are ready now.')
         except Exception as e:
             raise RuntimeError(f'Failed to connect to evaluator ray actors: {e}')

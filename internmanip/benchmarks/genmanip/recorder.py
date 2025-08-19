@@ -19,7 +19,11 @@ class Recorder:
     :param is_save_img: (bool) When True, saves environment observation images.
     """
 
-    def __init__(self, robot_type='panda', res_save_path=None, is_save_img=False):
+    def __init__(self,
+                 robot_type='panda',
+                 res_save_path=None,
+                 is_save_img=False,
+                 metric_type="soft"):
         self.res_save_path = None
         if res_save_path is not None:
             time_str = datetime.now().strftime('%Y_%m_%d_%H_%M_%S')
@@ -27,6 +31,7 @@ class Recorder:
             os.makedirs(self.res_save_path, exist_ok=True)
 
         self.is_save_img = is_save_img
+        self.metric_type = metric_type
         if robot_type == 'panda':
             self.saved_obs_keys = ['robot_pose', 'joints_state', 'eef_pose']
         else:
@@ -149,23 +154,18 @@ class Recorder:
         result = defaultdict(dict)
 
         for task_name in success_rate.keys():
-            if task_name not in result:
-                result[task_name]['success_episodes'] = []
-                result[task_name]['failure_episodes'] = []
+            episodes_list = list(success_rate[task_name].values())
+            if self.metric_type == "hard":
+                sum_episode_sr = sum(1 if item['episode_sr'] == 1 else 0 for item in episodes_list)
+            else:
+                sum_episode_sr = sum(item['episode_sr'] for item in episodes_list)
 
-            for episode_name in success_rate[task_name].keys():
-                episode_sr_info = success_rate[task_name][episode_name]
-                if episode_sr_info['episode_sr'] == 1:
-                    result[task_name]['success_episodes'].append(episode_sr_info)
-                else:
-                    result[task_name]['failure_episodes'].append(episode_sr_info)
-
-        for task_name in result.keys():
-            succ_num = len(result[task_name]['success_episodes'])
-            fail_num = len(result[task_name]['failure_episodes'])
-
-            task_sr = round(succ_num / (succ_num + fail_num), 3)
-            result[task_name]['success_rate'] = task_sr
+            result[task_name]['episodes'] = sorted(
+                episodes_list,
+                key=lambda x: x['episode_sr'],
+                reverse=True
+            )
+            result[task_name]['success_rate'] = round(sum_episode_sr / len(episodes_list), 3)
 
             print(
                 f"\n{'='*50}\n",

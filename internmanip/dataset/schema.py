@@ -55,14 +55,14 @@ class LeRobotModalityField(BaseModel):
 class LeRobotStateActionMetadata(LeRobotModalityField):
     """Metadata for a LeRobot modality."""
 
-    # start: int = Field(
-    #     ...,
-    #     description="The start index of the modality in the concatenated state/action vector",
-    # )
-    # end: int = Field(
-    #     ...,
-    #     description="The end index of the modality in the concatenated state/action vector",
-    # )
+    start: Optional[int] = Field(
+        default=None,
+        description="The start index of the modality in the concatenated state/action vector",
+    )
+    end: Optional[int] = Field(
+        default=None,
+        description="The end index of the modality in the concatenated state/action vector",
+    )
     rotation_type: Optional[RotationType] = Field(
         default=None, description='The type of rotation for the modality'
     )

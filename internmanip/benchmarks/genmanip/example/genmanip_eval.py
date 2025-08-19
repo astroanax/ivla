@@ -29,21 +29,31 @@ class GenmanipEvaluator:
     :param **kwargs: more env setting params see `Class EnvSettings` in ../config.py
     """
 
-    def __init__(self, dataset_path, eval_tasks, res_save_path=None, is_save_img=False, **kwargs):
+    def __init__(self,
+                 dataset_path,
+                 eval_tasks,
+                 res_save_path=None,
+                 is_save_img=False,
+                 metric_type="soft",
+                 **kwargs):
         episode_list = self.get_all_episode_list(dataset_path, eval_tasks)
         env_settings = EnvSettings(episode_list=episode_list, **kwargs)
         _, self.env = create_env(env_settings)
         self.agent = ReplayEpisodesAgent(
             dataset_path, action_type=kwargs.get('action_type', 'joint_action')
         )
-        self.recorder = Recorder(env_settings.robot_type, res_save_path, is_save_img)
+        self.recorder = Recorder(env_settings.robot_type, res_save_path, is_save_img, metric_type)
         self.res_save_path = res_save_path
 
     def get_all_episode_list(self, dataset_path, eval_tasks):
         if not eval_tasks:
-            raise ValueError(
-                'At least one task is required with corresponding dataset relative path.'
-            )
+            eval_tasks = []
+            root_path = os.path.abspath(dataset_path)
+            for root, _, files in os.walk(root_path):
+                if 'scene.usd' in files and 'meta_info.pkl' in files:
+                    task_name = os.path.relpath(os.path.dirname(root), start=root_path)
+                    if task_name not in eval_tasks:
+                        eval_tasks.append(task_name)
 
         episode_list = []
         for task_item in eval_tasks:
@@ -112,12 +122,10 @@ class GenmanipEvaluator:
 if __name__ == '__main__':
     evaluator = GenmanipEvaluator(
         dataset_path='/path/to/genmanip/dataset/root',
-        eval_tasks=[
-            'path/to/task1',
-            'path/to/task2',
-        ],  # relative task path to be evaluated under dataset_path
+        eval_tasks=[],  # relative task path to be evaluated under dataset_path
         res_save_path=None,
         is_save_img=False,  # saves environment observation images (res_save_path must not be None)
+        metric_type="soft",
         franka_camera_enable=FrankaCameraEnable(
             realsense=False, obs_camera=False, obs_camera_2=False
         ),

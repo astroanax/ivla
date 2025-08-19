@@ -200,15 +200,15 @@ class DiffusionConfig(PretrainedConfig):
             self.robot_state_dim = 24
             self.action_dim = 7
             self.image_features = [3,3,224,224]
-        elif data_config in ['google','google_minmax','google_q99','google_robot']:
+        elif data_config in ['google_robot']:
             self.robot_state_dim = 7
             self.action_dim = 7
             self.image_features = [1,3,224,224]
-        elif data_config in ['widowx','widowx_minmax']:
+        elif data_config in ['bridgedata_v2']:
             self.robot_state_dim = 7
             self.action_dim = 7
             self.image_features = [1,3,224,224]
-        elif data_config in ['calvin']:
+        elif data_config in ['calvin_abc']:
             self.robot_state_dim = 7
             self.action_dim = 7
             self.image_features = [2,3,224,224]

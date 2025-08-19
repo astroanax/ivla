@@ -125,7 +125,6 @@ class DiffusionModel(BasePolicyModel):
         Returns:
             BatchFeature: Generated actions of shape (B, n_action_steps, action_dim)
         """
-        # 获取模型所在的设备和数据类型
         device = next(self.parameters()).device
         dtype = next(self.parameters()).dtype
 

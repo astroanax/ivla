@@ -20,7 +20,8 @@ class GenmanipEvaluator(Evaluator):
         self.recorder = Recorder(
             config.env.env_settings.robot_type,
             config.env.env_settings.res_save_path,
-            config.env.env_settings.is_save_img
+            config.env.env_settings.is_save_img,
+            config.env.env_settings.metric_type
         )
 
     def eval(self, distributed=False):
@@ -69,7 +70,7 @@ class GenmanipEvaluator(Evaluator):
     def _get_all_episodes_setting_data(cls, config):
         if config.env.env_settings.dataset_path is None:
             # TODO: upload the dataset to huggingface
-            dataset_path = snapshot_download('InternRobotics/InternBench-M1', repo_type='dataset')
+            dataset_path = snapshot_download('InternRobotics/IROS-2025-Challenge-Manip', repo_type='dataset', allow_patterns="validation/*")
         else:
             dataset_path = config.env.env_settings.dataset_path
 

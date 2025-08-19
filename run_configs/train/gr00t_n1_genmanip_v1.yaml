@@ -1,5 +1,16 @@
 model_type: gr00t_n1
-dataset_path: InternRobotics/InternData-GenmanipTest
+# download the data from: https://huggingface.co/datasets/InternRobotics/IROS-2025-Challenge-Manip/tree/main
+dataset_path: 
+  - ./data/dataset/IROS-2025-Challenge-Manip/train/collec_three_glues
+  - ./data/dataset/IROS-2025-Challenge-Manip/train/collect_two_alarm_clocks
+  - ./data/dataset/IROS-2025-Challenge-Manip/train/collect_two_shoes
+  - ./data/dataset/IROS-2025-Challenge-Manip/train/gather_three_teaboxes
+  - ./data/dataset/IROS-2025-Challenge-Manip/train/make_sandwich
+  - ./data/dataset/IROS-2025-Challenge-Manip/train/oil_painting_recognition
+  - ./data/dataset/IROS-2025-Challenge-Manip/train/organize_colorful_cups
+  - ./data/dataset/IROS-2025-Challenge-Manip/train/purchase_gift_box
+  - ./data/dataset/IROS-2025-Challenge-Manip/train/put_drink_on_basket
+  - ./data/dataset/IROS-2025-Challenge-Manip/train/sort_waste
 num_gpus: 1
 batch_size: 16
 output_dir: Checkpoints/runs/gr00t_n1_genmanip_v1
@@ -7,7 +18,7 @@ max_steps: 10000
 tune_visual: True
 tune_llm: True
 save_steps: 1000
-data_config: genmanip_v1
+data_config: aloha_v3
 video_backend: torchcodec
 report_to: wandb
 gradient_accumulation_steps: 8

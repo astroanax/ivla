@@ -22,3 +22,7 @@ class GenmanipEnvSettings(EnvSettings):
         default=False,
         description='when True, saves environment observation images (res_save_path must not be None)'
     )
+    metric_type: bool = Field(
+        default="soft",
+        description='`hard` requires all conditions in the episode to succeed, while `soft` allows partial success'
+    )

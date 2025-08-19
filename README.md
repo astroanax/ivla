@@ -16,7 +16,7 @@
 
 # InternManip
 
-An **All-in-one** Robot Manipulation Learning Suite for Polcy Models Training and Evaluation on Various Datasets and Benchmarks.
+An **All-in-one** Robot Manipulation Learning Suite for Policy Models Training and Evaluation on Various Datasets and Benchmarks.
 
 
 

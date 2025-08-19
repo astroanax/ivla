@@ -12,29 +12,17 @@ class AgentRegistry(Enum):
     The key is the agent type.
     The value is the agent subclass.
     """
-    GR00T_N1 = 'Gr00t_N1_Agent'
-    GR00T_N1_5 = 'Gr00t_N1_Agent'
-    GR00T_N1_5_GENMANIP = 'Gr00tAgent_Genmanip'
-    PI0 = 'PI0Agent'
-    DP_CLIP = 'DPAgent'
+    SIMPLER = 'SimplerAgent'
+    GENMANIP = 'GenmanipAgent'
 
     @property
     def value(self):
-        if self.name == 'GR00T_N1':
+        if self.name == 'SIMPLER':
             from internmanip.agent.simpler_agent import SimplerAgent
             return SimplerAgent
-        elif self.name == 'GR00T_N1_5':
-            from internmanip.agent.simpler_agent import SimplerAgent
-            return SimplerAgent
-        elif self.name == 'GR00T_N1_5_GENMANIP':
+        elif self.name == 'GENMANIP':
             from internmanip.agent.genmanip_agent import GenmanipAgent
             return GenmanipAgent
-        elif self.name == 'DP_CLIP':
-            from internmanip.agent.genmanip_agent import GenmanipAgent
-            return GenmanipAgent
-        elif self.name == 'PI0':
-            from internmanip.agent.simpler_agent import SimplerAgent
-            return SimplerAgent
         else:
             raise ValueError(f'Invalid agent type: {self.name}. Only {[agent_type.name for agent_type in AgentRegistry]} are registered.')
 
@@ -62,5 +50,5 @@ class BaseAgent:
         """
         Init a agent instance from a config.
         """
-        print(f'Initializing agent {config.agent_type}')
-        return AgentRegistry[config.agent_type].value(config)
+        print(f'Initializing {config.agent_type} on {config.eval_type}')
+        return AgentRegistry[config.eval_type].value(config)

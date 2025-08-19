@@ -32,4 +32,8 @@ eval_cfg = EvalCfg(
             ),
         ),
     ),
+    distributed_cfg=DistributedCfg(
+        num_workers=2,
+        ray_head_ip='localhost'
+    )
 )
