@@ -19,7 +19,7 @@ tune_visual: True
 tune_llm: True
 save_steps: 1000
 data_config: aloha_v3
-video_backend: torchcodec
+video_backend: decord
 report_to: wandb
 gradient_accumulation_steps: 8
 base_model_path: nvidia/GR00T-N1-2B

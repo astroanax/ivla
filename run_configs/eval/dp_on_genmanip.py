@@ -8,7 +8,7 @@ eval_cfg = EvalCfg(
         agent_type='dp_clip',
         base_model_path='/PATH/TO/YOUR/FINETUNED_CHECKPOINT',
         agent_settings={
-            'data_config': 'genmanip_v1',
+            'data_config': 'aloha_v3',
             'embodiment_tag': 'new_embodiment',
             'pred_action_horizon': 16,
             'adaptive_ensemble_alpha': 0.5,
