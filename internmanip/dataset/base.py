@@ -551,7 +551,7 @@ class LeRobotSingleDataset(Dataset):
                 values = []
                 for key in self._get_modality_keys()['action']: # iteration
                     subkey = key.split('.')[1]
-                    if 'gripper' in subkey:
+                    if any('gripper' in key for key in subkey):
                         le_key = le_state_or_action_cfg[subkey].original_key if 'action'!=le_state_or_action_cfg[subkey].original_key else le_state_or_action_cfg[subkey].original_key + '.' + subkey
                         value = data[le_key].to_numpy().tolist()
                         values.append(value)
