@@ -16,8 +16,7 @@
 from enum import Enum
 from typing import Optional
 
-# from numpydantic import NDArray
-from numpy.typing import NDArray
+from numpydantic import NDArray
 from pydantic import BaseModel, Field, field_serializer
 
 from .embodiment_tags import EmbodimentTag, EMBODIMENT_TAG_MAPPING

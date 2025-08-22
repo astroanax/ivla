@@ -551,11 +551,11 @@ class LeRobotSingleDataset(Dataset):
                 values = []
                 for key in self._get_modality_keys()['action']: # iteration
                     subkey = key.split('.')[1]
-                    if any('gripper' in key for key in subkey):
+                    if 'gripper' in subkey: # assume 'gripper' in gripper action keys
                         le_key = le_state_or_action_cfg[subkey].original_key if 'action'!=le_state_or_action_cfg[subkey].original_key else le_state_or_action_cfg[subkey].original_key + '.' + subkey
                         value = data[le_key].to_numpy().tolist()
                         values.append(value)
-                if values != []:
+                if values != []: # if values not empty, do augmentation
                     for i in range(len(values[0])-2):
                         flag = [(values[j][i] == values[j][i + 1]).all() and (values[j][i + 1] == values[j][i + 2]).all() for j in range(len(values))] # window_size 3
                         if False in flag:

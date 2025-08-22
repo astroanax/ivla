@@ -647,22 +647,6 @@ class GR00TTransform_15(InvertibleModalityTransform):
         # Split on batch dimension.
         import tree
         data_split = [tree.map_structure(lambda x: x[i], data) for i in range(batch_size)]
-        # data_split = []
-        # for i in range(batch_size):
-        #     single_data = {}
-        #     for key, value in data.items():
-        #         # Special handling for string values to prevent character-wise splitting
-        #         if isinstance(value, str):
-        #             # For string values, keep the entire string instead of indexing
-        #             single_data[key] = value
-        #         else:
-        #             # For arrays and other data types, extract the i-th element
-        #             try:
-        #                 single_data[key] = value[i]
-        #             except (TypeError, IndexError):
-        #                 # If value is not indexable or index is out of bounds, use the whole value
-        #                 single_data[key] = value
-        #     data_split.append(single_data)
         # Process each element.
         data_split_processed = [self.apply_single(elem) for elem in data_split]
         return collate_gr00t_n15(data_split_processed)

@@ -37,6 +37,11 @@ class AlohaSplit(BaseRobot):
             joint_indices=[7]
         )
         self.init_joint_positions = self.articulation.get_joint_positions()
+        self.articulation.set_gains(
+            kps=[572957800.0] * 12,
+            kds=[57295.78] * 12,
+            joint_indices=[i for i in self.left_arm_joint_indices + self.right_arm_joint_indices],
+        )
 
     def apply_action(self, action):
         """

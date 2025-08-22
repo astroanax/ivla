@@ -634,19 +634,11 @@ class FlowmatchingActionHead_1_5(nn.Module):
         action_mask = action_input.action_mask
         loss = F.mse_loss(pred_actions, velocity, reduction='none') * action_mask
         loss = loss.sum() / action_mask.sum()
-        # output_dict = {
-        #     "loss": loss,
-        # }
-        # return BatchFeature(data=output_dict)
         output_dict = {
             'loss': loss,
             'predictions': pred_actions
         }
         return BatchFeature(data=output_dict)
-
-
-
-
 
     @torch.no_grad()
     def get_action(self, backbone_output: BatchFeature, action_input: BatchFeature) -> BatchFeature:

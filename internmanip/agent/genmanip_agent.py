@@ -1,9 +1,6 @@
 from collections import deque
-from copy import deepcopy
 import json
-import matplotlib.pyplot as plt
 import numpy as np
-import os
 from pathlib import Path
 from scipy.spatial.transform import Rotation
 import torch
@@ -11,20 +8,17 @@ import torch
 from huggingface_hub import snapshot_download
 
 from internmanip.agent.base import BaseAgent
-from internmanip.utils.agent_utils.io_utils import unsqueeze_dict_values, squeeze_dict_values
 from internmanip.configs import AgentCfg
 from internmanip.configs.dataset.data_config import DATA_CONFIG_MAP
 from internmanip.dataset.embodiment_tags import EmbodimentTag
 from internmanip.dataset.schema import DatasetMetadata
 from internmanip.dataset.transform.base import ComposedModalityTransform
+from internmanip.utils.agent_utils.io_utils import unsqueeze_dict_values, squeeze_dict_values
 
 
 class GenmanipAgent(BaseAgent):
     def __init__(self, config: AgentCfg):
         super().__init__(config)
-        self.policy_model.compute_dtype = 'bfloat16'
-        self.policy_model.config.compute_dtype = 'bfloat16'
-        self.policy_model = self.policy_model.to(torch.bfloat16)
         if torch.cuda.is_available():
             self.policy_model = self.policy_model.cuda()
 
@@ -32,7 +26,6 @@ class GenmanipAgent(BaseAgent):
         self.data_config = config.agent_settings['data_config']
         data_config_cls = DATA_CONFIG_MAP[self.data_config]
         transforms = data_config_cls.transform()
-        self.action_transforms = transforms[-2]
         if model_transform is not None:
             transforms.append(model_transform)
         self.transforms = ComposedModalityTransform(transforms=transforms)
@@ -40,27 +33,25 @@ class GenmanipAgent(BaseAgent):
         self.embodiment_tag = EmbodimentTag(config.agent_settings['embodiment_tag'])
         self._load_metadata(config)
 
-        self.pred_action_horizon = config.agent_settings['pred_action_horizon']
-        self.adaptive_ensemble_alpha = config.agent_settings['adaptive_ensemble_alpha']
+        self.pred_action_horizon = config.agent_settings.get('pred_action_horizon', 16)
+        self.action_ensemble = config.agent_settings.get('action_ensemble', False)
+        self.adaptive_ensemble_alpha = config.agent_settings.get('adaptive_ensemble_alpha', 0.5)
         self.ensembler_list = []
 
-        self.episode_count = []
-        self.step_count = []
-        # self.save_folder = ""
-        # self.output_history_list = []
 
     def step(self, inputs: list[dict]) -> list[dict]:
-        while len(self.ensembler_list) < len(inputs):
-            self.ensembler_list.append(
-                AdaptiveEnsembler(
-                    pred_action_horizon=self.pred_action_horizon,
-                    adaptive_ensemble_alpha=self.adaptive_ensemble_alpha,
-                )
-            )
-            self.episode_count.append(0)
-            self.step_count.append(0)
-
         outputs = []
+        while len(self.ensembler_list) < len(inputs):
+            if self.action_ensemble:
+                self.ensembler_list.append(
+                    AdaptiveEnsembler(
+                        pred_action_horizon=self.pred_action_horizon,
+                        adaptive_ensemble_alpha=self.adaptive_ensemble_alpha,
+                    )
+                )
+            else:
+                self.ensembler_list.append(None)
+
         # GenManip has only one environment, so this loop will iterate only once
         for env, input in enumerate(inputs):
             if input == {}:
@@ -68,36 +59,36 @@ class GenmanipAgent(BaseAgent):
                 continue
 
             if input['robot']['step'] == 0:
-                self.reset_env(env)
-            self.step_count[env] = input['robot']['step']
+                if self.action_ensemble:
+                    self.ensembler_list[env].reset()
+                print('instruction', input['robot']['instruction'])
 
             converted_input = self.convert_input(input)
-            unsqueezed_input = unsqueeze_dict_values(converted_input)
-            transformed_input = self.transforms(unsqueezed_input)
-            pred_actions = self.policy_model.inference(transformed_input)['action_pred'][0].cpu().float()
-            output = self.ensembler_list[env].ensemble_action(pred_actions)
-            converted_output = self.convert_output(output, converted_input)
+            if self.action_ensemble:
+                model_pred = self.inference(converted_input)
+                pred_action = self.ensembler_list[env].ensemble_action(model_pred[0])
+                pred_action = torch.tensor(pred_action)
+            else:
+                if input['robot']['step'] % self.pred_action_horizon == 0:
+                    model_pred = self.inference(converted_input)
+                    self.ensembler_list[env] = model_pred[0]
+                pred_action = self.ensembler_list[env][input['robot']['step'] % self.pred_action_horizon]
+            unnormalized_output = self.transforms.unapply({'action': pred_action})
+            squeezed_output = squeeze_dict_values(unnormalized_output)
+            converted_output = self.convert_output(squeezed_output, converted_input)
             outputs.append(converted_output)
 
-        # self._debug_print_data(inputs, title=f"Input Data {env}")
-        # self._debug_print_data(outputs, title=f"Output Data {env}")
-        # self._record_outputs_data(outputs)
         return outputs
 
     def reset(self):
-        for ensembler in self.ensembler_list:
-            ensembler.reset()
         self.ensembler_list = []
-        self.episode_count = []
-        self.step_count = []
-        # self.output_history_list = []
 
-    def reset_env(self, env):
-        self.ensembler_list[env].reset()
-        print(f'Reset env{env}')
-        # self.plot_output_history(env)
-        self.episode_count[env] += 1
-        # self.output_history_list[env] = []
+    def inference(self, input: dict):
+        unsqueezed_input = unsqueeze_dict_values(input)
+        normalized_input = self.transforms(unsqueezed_input)
+        with torch.inference_mode(), torch.autocast(device_type='cuda', dtype=torch.bfloat16):
+            model_pred = self.policy_model.inference(normalized_input)['action_pred'].float().cpu()
+        return model_pred
 
     def convert_input(self, input: dict):
         if self.data_config == 'genmanip_v1':
@@ -116,64 +107,55 @@ class GenmanipAgent(BaseAgent):
                 'state.ee_rot': np.array([ee_rot]),
                 'annotation.human.action.task_description': input['robot']['instruction'],
             }
-        elif self.data_config == 'aloha_v3':
+        elif self.data_config == 'aloha_v4':
             left_arm_joint_indices = [12, 14, 16, 18, 20, 22]
             right_arm_joint_indices = [13, 15, 17, 19, 21, 23]
             left_gripper_joint_indices = [24, 25]
             right_gripper_joint_indices = [26, 27]
-            arm_qpos = (input['robot']['joints_state']['positions'][:12].tolist()
-                     + [input['robot']['joints_state']['positions'][idx] for idx in left_arm_joint_indices]
-                     + [input['robot']['joints_state']['positions'][idx] for idx in left_gripper_joint_indices]
-                     + [input['robot']['joints_state']['positions'][idx] for idx in right_arm_joint_indices]
-                     + [input['robot']['joints_state']['positions'][idx] for idx in right_gripper_joint_indices])
+            left_arm_qpos = [input['robot']['joints_state']['positions'][idx] for idx in left_arm_joint_indices]
+            right_arm_qpos = [input['robot']['joints_state']['positions'][idx] for idx in right_arm_joint_indices]
+            left_gripper_qpos_state = [input['robot']['joints_state']['positions'][idx] for idx in left_gripper_joint_indices]
+            right_gripper_qpos_state = [input['robot']['joints_state']['positions'][idx] for idx in right_gripper_joint_indices]
+            # self._debug_print_data(left_arm_qpos, title='Left Arm Qpos')
+            # self._debug_print_data(left_gripper_qpos_state, title='Left Gripper Qpos State')
+            # self._debug_print_data(right_arm_qpos, title='Right Arm Qpos')
+            # self._debug_print_data(right_gripper_qpos_state, title='Right Gripper Qpos State')
             converted_data = {
                 'video.left_view': np.array([input['robot']['sensors']['left_camera']['rgb']]),
                 'video.right_view': np.array([input['robot']['sensors']['right_camera']['rgb']]),
                 'video.top_view': np.array([input['robot']['sensors']['top_camera']['rgb']]),
-                'state.arm_qpos': np.array([arm_qpos]),
-                'annotation.human.action.task_description': input['robot']['instruction'],
+                'state.left_arm_qpos': np.array([left_arm_qpos]),
+                'state.left_gripper_qpos_state': np.array([left_gripper_qpos_state]),
+                'state.right_arm_qpos': np.array([right_arm_qpos]),
+                'state.right_gripper_qpos_state': np.array([right_gripper_qpos_state]),
+                'annotation.human.action.task_description': [input['robot']['instruction']],
             }
         else:
             raise ValueError(f'Unsupported data config class: {self.data_config}')
         return converted_data
 
-    def convert_output(self, output: np.ndarray, input: dict):
+    def convert_output(self, output: dict, input: dict):
         if self.data_config == 'genmanip_v1':
-            converted_data = {
-                'action.gripper': torch.from_numpy(output[:1]),
-                'action.delta_ee_pos': torch.from_numpy(output[1:4]),
-                'action.delta_ee_rot': torch.from_numpy(output[4:7]),
-            }
-            converted_data = self.action_transforms.unapply(deepcopy(converted_data))
-            converted_data = squeeze_dict_values(converted_data)
-            ee_rot = (converted_data['action.delta_ee_rot'] + input['state.ee_rot'])[0].tolist()
+            ee_rot = (output['action.delta_ee_rot'] + input['state.ee_rot'][0]).tolist()
             quat_xyzw = Rotation.from_euler('xyz', ee_rot, degrees=False).as_quat()
             quat_wxyz = [quat_xyzw[3], quat_xyzw[0], quat_xyzw[1], quat_xyzw[2]]
-            eef_position = (converted_data['action.delta_ee_pos'] + input['state.ee_pos'])[0].tolist()
+            eef_position = (output['action.delta_ee_pos'] + input['state.ee_pos'][0]).tolist()
             eef_orientation = quat_wxyz
-            gripper_action = converted_data['action.gripper']*2-1
+            gripper_action = output['action.gripper']*2-1
             converted_data = {
                 'eef_position': eef_position,
                 'eef_orientation': eef_orientation,
                 'gripper_action': gripper_action,
             }
-        elif self.data_config == 'aloha_v3':
-            converted_data = {
-                'action.left_arm_delta_qpos': torch.from_numpy(output[:12]),
-                'action.right_arm_delta_qpos': torch.from_numpy(output[:12]),
-                'action.left_gripper_close': torch.from_numpy(output[12:14]),
-                'action.right_gripper_close': torch.from_numpy(output[12:14]),
-            }
-            converted_data = self.action_transforms.unapply(deepcopy(converted_data))
-            converted_data = squeeze_dict_values(converted_data)
-            left_arm_action = (converted_data['action.left_arm_delta_qpos'][:6] + torch.tensor(input['state.arm_qpos'][0][12:18])).tolist()
-            left_gripper_action = converted_data['action.left_gripper_close'][0]*2-1
-            right_arm_action = (converted_data['action.right_arm_delta_qpos'][6:] + torch.tensor(input['state.arm_qpos'][0][20:26])).tolist()
-            right_gripper_action = converted_data['action.right_gripper_close'][1]*2-1
+        elif self.data_config == 'aloha_v4':
+            left_arm_action = (output['action.left_arm_delta_qpos'] + input['state.left_arm_qpos'][0]).tolist()
+            right_arm_action = (output['action.right_arm_delta_qpos'] + input['state.right_arm_qpos'][0]).tolist()
+            left_gripper_action = output['action.left_gripper_close']*2-1
+            right_gripper_action = output['action.right_gripper_close']*2-1
             converted_data = {
                 'left_arm_action': left_arm_action,
-                'left_gripper_action': left_gripper_action,
                 'right_arm_action': right_arm_action,
+                'left_gripper_action': left_gripper_action,
                 'right_gripper_action': right_gripper_action,
             }
         else:
@@ -233,57 +215,6 @@ class GenmanipAgent(BaseAgent):
                 print(f"shape={data.shape}, dtype={getattr(data, 'dtype', 'unknown')}")
             else:
                 print(f'type={type(data)}')
-
-    def _record_outputs_data(self, outputs):
-        while len(self.output_history_list) < len(outputs):
-            self.output_history_list.append([])
-        for env, output in enumerate(outputs):
-            if output is not None:
-                record_data = {
-                    'step': self.step_count[env],
-                    'arm_action': output['arm_action'],
-                    'gripper_action': output['gripper_action']
-                }
-                self.output_history_list[env].append(record_data)
-
-    def plot_output_history(self, env):
-        if not self.output_history_list:
-            print('No output history to plot.')
-            return
-        if not self.output_history_list[env]:
-            print(f'No output history for environment {env}.')
-            return
-
-        steps = [data['step'] for data in self.output_history_list[env]]
-        arm_actions = [data['arm_action'] for data in self.output_history_list[env]]
-        arm_actions = np.array(arm_actions)
-        gripper_actions = [data['gripper_action'] for data in self.output_history_list[env]]
-        gripper_actions = np.array(gripper_actions)
-
-        plt.figure(figsize=(12, 8))
-        plt.suptitle(f'Environment {env} - Episode {self.episode_count[env]}', fontsize=16)
-
-        for i in range(7):
-            plt.subplot(3, 3, i+1)
-            plt.plot(steps, arm_actions[:, i])
-            plt.title(f'Joint {i+1}')
-            plt.xlabel('Step')
-            plt.ylabel('Action')
-            plt.grid(True)
-
-        plt.subplot(3, 3, 8)
-        plt.plot(steps, gripper_actions, 'r-')
-        plt.title('Gripper Action')
-        plt.xlabel('Step')
-        plt.ylabel('Action')
-        plt.grid(True)
-
-        save_folder = self.save_folder + f'/env{env}'
-        os.makedirs(save_folder, exist_ok=True)
-        save_path = f'{save_folder}/episode{self.episode_count[env]}.png'
-        plt.savefig(save_path, dpi=150, bbox_inches='tight')
-        plt.close()
-        print(f'Environment {env} plot saved: {save_path}')
 
 
 class AdaptiveEnsembler:

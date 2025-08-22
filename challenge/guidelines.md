@@ -264,7 +264,7 @@ python -m scripts.eval.start_evaluator \
 
 We also provide a bash script to launch the agent server and evaluator in one command.
 
-**Approach 2️⃣: Start in one command**  
+**Approach 2️⃣: Start in one command [recommended]**  
 ```bash
 ./challenge/bash_scripts/eval.sh \
   --server_conda_name your_agent_env_name \
@@ -479,3 +479,16 @@ For detailed submission guidelines and troubleshooting, refer to the official Ev
 After submitting, you can view your submissions in the corresponding phase on the [`My Submissions`](https://eval.ai/web/challenges/challenge-page/2626/my-submission) page. Here, you can view the submission file, result file, and logs for each submission, and choose to publish it on the leaderboard. The leaderboard address is [here](https://eval.ai/web/challenges/challenge-page/2626/leaderboard).
 
 > 😄 Good luck, and may the best vision-based policy win!
+
+---  
+## 🛠️ Troubleshooting
+
+### 1. When evaluating `make_sandwich` task, the error matrix is ​​a left-handed coordinate system.  
+Modify `line 95` of the `/root/InternManip/internmanip/benchmarks/genmanip/utils/InternUtopia/internutopia/core/task/task.py` file. And change `prim.GetAttribute('physics:rigidBodyEnabled')` to `prim.GetAttribute('physics:rigidBodyEnabled').Get()`.  
+
+### 2. When the image is run for the first time, curobo prompts that the `ninja` module is missing.
+Solved by installing the ninja module in genmanip.
+```bash
+conda activate genmanip
+pip install ninja
+```

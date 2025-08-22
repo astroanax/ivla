@@ -530,7 +530,7 @@ class So100DataConfig(BaseDataConfig):
 
 class AlohaDataConfig(BaseDataConfig):
     video_keys = ['video.left_view', 'video.right_view', 'video.top_view']
-    state_keys = ['state.arm_qpos']
+    state_keys = ['state.left_arm_qpos', 'state.left_gripper_qpos_state', 'state.right_arm_qpos', 'state.right_gripper_qpos_state']
     action_keys = ['action.left_arm_delta_qpos', 'action.right_arm_delta_qpos', 'action.left_gripper_close', 'action.right_gripper_close']
     language_keys = ['annotation.human.action.task_description']
 
@@ -584,7 +584,10 @@ class AlohaDataConfig(BaseDataConfig):
             StateActionTransform(
                 apply_to=self.state_keys,
                 normalization_modes={
-                    'state.arm_qpos': 'mean_std'
+                    'state.left_arm_qpos': 'min_max',
+                    'state.left_gripper_qpos_state': 'min_max',
+                    'state.right_arm_qpos': 'min_max',
+                    'state.right_gripper_qpos_state': 'min_max'
                 },
             ),
             # action transforms
@@ -592,8 +595,8 @@ class AlohaDataConfig(BaseDataConfig):
             StateActionTransform(
                 apply_to=self.action_keys,
                 normalization_modes={
-                    'action.left_arm_delta_qpos': 'mean_std',
-                    'action.right_arm_delta_qpos': 'mean_std',
+                    'action.left_arm_delta_qpos': 'min_max',
+                    'action.right_arm_delta_qpos': 'min_max',
                     'action.left_gripper_close': 'binary',
                     'action.right_gripper_close': 'binary'
                 }
@@ -616,5 +619,5 @@ DATA_CONFIG_MAP = {
     'google_robot': GoogleRobotDataConfig(),
     'calvin_abc': CalvinDataConfig(),
     'so100': So100DataConfig(),
-    'aloha_v3': AlohaDataConfig()
+    'aloha_v4': AlohaDataConfig(),
 }

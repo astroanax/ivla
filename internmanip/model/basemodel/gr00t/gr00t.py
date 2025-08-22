@@ -24,7 +24,7 @@ from huggingface_hub.errors import HFValidationError, RepositoryNotFoundError
 from transformers import AutoConfig, AutoModel
 from transformers.feature_extraction_utils import BatchFeature
 from internmanip.configs.model.gr00t_cfg import GR00T_N1_5_Config, GR00T_N1_Config
-from internmanip.model.backbone.eagle_backbone import EagleBackbone1_5
+from internmanip.model.backbone.eagle_backbone import EagleBackbone, EagleBackbone1_5
 from internmanip.model.data_collator_registry import DataCollatorRegistry
 from internmanip.model.basemodel.transforms.gr00t_n1 import collate_gr00t_n1, collate_gr00t_n15
 from ...action_head.flow_matching_action_head import (
@@ -33,7 +33,6 @@ from ...action_head.flow_matching_action_head import (
     FlowmatchingActionHeadConfig,
     FlowmatchingActionHeadConfig_1_5,
 )
-from ...backbone import EagleBackbone
 
 from ..base import BasePolicyModel
 
@@ -62,7 +61,6 @@ class GR00T_N1_5(BasePolicyModel):
         self,
         config: GR00T_N1_5_Config,
         local_model_path: str,
-        **kwargs
     ):
         assert isinstance(config.backbone_cfg, dict)
         assert isinstance(config.action_head_cfg, dict)
@@ -203,7 +201,7 @@ class GR00T_N1_5(BasePolicyModel):
 
         # get the current model path being downloaded
         pretrained_model = super().from_pretrained(
-            pretrained_model_name_or_path,**kwargs
+            pretrained_model_name_or_path, torch_dtype=torch.bfloat16, **kwargs
         )
 
         pretrained_model.backbone.set_trainable_parameters(
@@ -213,7 +211,6 @@ class GR00T_N1_5(BasePolicyModel):
             tune_projector=tune_projector, tune_diffusion_model=tune_diffusion_model
         )
 
-        #
         pretrained_model.backbone.eagle_model.language_model.lm_head.weight.requires_grad = False
         pretrained_model.backbone.eagle_model.vision_model.vision_model.head.mlp.fc2.bias.requires_grad=False
         pretrained_model.backbone.eagle_model.vision_model.vision_model.head.mlp.fc2.weight.requires_grad = False

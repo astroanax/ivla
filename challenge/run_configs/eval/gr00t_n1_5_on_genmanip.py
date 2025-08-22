@@ -8,10 +8,11 @@ eval_cfg = EvalCfg(
         agent_type='gr00t_n1_5_genmanip',
         base_model_path='./data/model',
         agent_settings={
-            'data_config': 'aloha_v3',
+            'data_config': 'aloha_v4',
             'embodiment_tag': 'new_embodiment',
             'pred_action_horizon': 16,
-            'adaptive_ensemble_alpha': 0.5,
+            'action_ensemble': False,
+            'adaptive_ensemble_alpha': 0,
         },
         model_kwargs={
             'HF_cache_dir': None,

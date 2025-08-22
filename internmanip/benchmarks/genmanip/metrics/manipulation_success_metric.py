@@ -72,7 +72,7 @@ class ManipulationSuccessMetric(BaseMetric):
             point_cloud_list[uid] = vertices
 
         try:
-            if self.step % 5 ==0:
+            if self.step % 10 ==0:
                 self.episode_sr = check_finished(self.task_config.target, point_cloud_list)
         except Exception:
             self.episode_sr = 0

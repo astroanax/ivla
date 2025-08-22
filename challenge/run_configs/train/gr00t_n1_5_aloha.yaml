@@ -12,12 +12,12 @@ dataset_path:
   - ./data/dataset/IROS-2025-Challenge-Manip/train/sort_waste
 num_gpus: 1
 batch_size: 8
-output_dir: Checkpoints/runs/gr00t_n1_5_aloha_v3
+output_dir: Checkpoints/runs/gr00t_n1_5_aloha_v4
 max_steps: 10000
 tune_visual: True
 tune_llm: True
-save_steps: 100
-data_config: aloha_v3
+save_steps: 1000
+data_config: aloha_v4
 video_backend: decord
 report_to: wandb
 gradient_accumulation_steps: 8

@@ -50,9 +50,9 @@ class GR00T_N1_5_Config(PretrainedConfig):
 
     def transform(self):
         transforms = GR00TTransform_15(
-                state_horizon=len(self.observation_indices),
-                action_horizon=len(list(range(self.action_horizon))),
-                max_state_dim=self.action_head_cfg['max_state_dim'],
-                max_action_dim=self.action_head_cfg['max_action_dim'],
-            )
+            state_horizon=len(self.observation_indices),
+            action_horizon=len(list(range(self.action_horizon))),
+            max_state_dim=self.action_head_cfg['max_state_dim'],
+            max_action_dim=self.action_head_cfg['max_action_dim'],
+        )
         return transforms, self.observation_indices, list(range(self.action_horizon))
