@@ -24,15 +24,17 @@ from huggingface_hub.errors import HFValidationError, RepositoryNotFoundError
 from transformers import AutoConfig, AutoModel
 from transformers.feature_extraction_utils import BatchFeature
 from internmanip.configs.model.gr00t_cfg import GR00T_N1_5_Config, GR00T_N1_Config
-from internmanip.model.backbone.eagle_backbone import EagleBackbone, EagleBackbone1_5
+from internmanip.model.backbone.eagle2_hg_model.inference_eagle_repo import EagleProcessor
+from internmanip.model.backbone.eagle_backbone import DEFAULT_EAGLE_PATH, EagleBackbone, EagleBackbone1_5
 from internmanip.model.data_collator_registry import DataCollatorRegistry
-from internmanip.model.basemodel.transforms.gr00t_n1 import collate_gr00t_n1, collate_gr00t_n15
+from internmanip.model.basemodel.transforms.gr00t_n1 import build_eagle_processor, collate_gr00t_n1, collate_gr00t_n15
 from ...action_head.flow_matching_action_head import (
     FlowmatchingActionHead,
     FlowmatchingActionHead_1_5,
     FlowmatchingActionHeadConfig,
     FlowmatchingActionHeadConfig_1_5,
 )
+from functools import partial
 
 from ..base import BasePolicyModel
 
@@ -42,9 +44,10 @@ LOSS_KEY = 'loss'
 ERROR_MSG = 'Error: unexpected input/output'
 N_COLOR_CHANNELS = 3
 
+# processor = EagleProcessor()
 
-DataCollatorRegistry.register_fn(GR00T_N1_Config.model_type, collate_gr00t_n1)
-DataCollatorRegistry.register_fn(GR00T_N1_5_Config.model_type, collate_gr00t_n15)
+DataCollatorRegistry.register_fn(GR00T_N1_Config.model_type, partial(collate_gr00t_n1, processor = EagleProcessor()))
+DataCollatorRegistry.register_fn(GR00T_N1_5_Config.model_type, partial(collate_gr00t_n15, eagle_processor = build_eagle_processor(DEFAULT_EAGLE_PATH)))
 
 # real model
 class GR00T_N1_5(BasePolicyModel):
@@ -411,6 +414,7 @@ class GR00T_N1(BasePolicyModel):
         )
         print('Total number of parameters: ', int(pretrained_model.num_parameters()/1024/1024), 'M')
         print('Total trainable number of parameters: ', int(sum(p.numel() for p in pretrained_model.parameters() if p.requires_grad)/1024/1024), 'M')
+
         return pretrained_model
 
 

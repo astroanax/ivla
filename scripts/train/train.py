@@ -39,12 +39,13 @@ from internmanip.model.data_collator_registry import DataCollatorRegistry
 from run_configs.base_cfg import TrainCfg
 
 POLICY_NAME_TO_ID = {
-    'pi0': 'lerobot/pi0',
-    'pi0fast': 'pi0fast_base',
-    'gr00t_n1': 'nvidia/GR00T-N1-2B',
-    'gr00t_n1_5': 'nvidia/GR00T-N1.5-3B',
-    'dp_clip': None,  # No model_id associated
-    'act_clip': None, # No model_id associated
+    "pi0": "lerobot/pi0",
+    "pi0fast": "pi0fast_base",
+    "gr00t_n1": "nvidia/GR00T-N1-2B",
+    "gr00t_n1_5": "nvidia/GR00T-N1.5-3B",
+    "dp_clip": None,  # No model_id associated
+    "act_clip": None, # No model_id associated
+    "openpi0": None,
 }
 
 
@@ -91,6 +92,7 @@ def main(config: TrainCfg):
 
     transforms = ComposedModalityTransform(transforms=transforms)
     # data_loader
+
     if isinstance(config.dataset_path, str):
         train_dataset = LeRobotSingleDataset(
             dataset_path=config.dataset_path,
@@ -183,6 +185,7 @@ def main(config: TrainCfg):
         ddp_find_unused_parameters=False,
         ddp_bucket_cap_mb=100,
         torch_compile_mode=None,
+        save_safetensors=True,
     )
     # Create the trainer
     trainer = BaseTrainerWrapper(

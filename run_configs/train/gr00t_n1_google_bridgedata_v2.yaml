@@ -12,3 +12,4 @@ video_backend: decord
 report_to: wandb
 gradient_accumulation_steps: 8
 base_model_path: nvidia/GR00T-N1-2B
+skip_unlabeled: True

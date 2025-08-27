@@ -1,0 +1,16 @@
+model_type: openpi0
+dataset_path: /mnt/hwfile/simpler_env/widowx_data_all_01/
+num_gpus: 1
+batch_size: 16
+output_dir: /mnt/inspurfs/ebench_t/houzhi/houzhi/Checkpoints/runs/debug-openpi0_new
+max_steps: 100000
+tune_visual: True
+tune_llm: True
+save_steps: 5000
+data_config: bridgedata_v2
+video_backend: decord
+report_to: wandb
+gradient_accumulation_steps: 2
+learning_rate: 5e-5
+weight_decay: 0
+skip_unlabeled: True

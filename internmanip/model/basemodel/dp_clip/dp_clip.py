@@ -130,9 +130,20 @@ class DiffusionModel(BasePolicyModel):
 
         # Convert input format and move tensors to model device with correct dtype
         inference_batch = {}
-        inference_batch['observation.images'] = batch['video'].to(device, dtype=dtype)
-        inference_batch['observation.state'] = batch['state'].to(device, dtype=dtype)
-        inference_batch['language'] = batch['annotation.human.action.task_description']
+        if 'observation.images' not in batch:
+            inference_batch['observation.images'] = batch['video'].to(device, dtype=dtype)
+        else:
+            inference_batch['observation.images'] = batch['observation.images'].to(device, dtype=dtype)
+        
+        if 'observation.state' not in batch:
+            inference_batch['observation.state'] = batch['state'].to(device, dtype=dtype)
+        else:
+            inference_batch['observation.state'] = batch['observation.state'].to(device, dtype=dtype)
+            
+        if 'language' not in batch:
+            inference_batch['language'] = batch['annotation.human.action.task_description']
+        else:
+            inference_batch['language'] = batch['language']
 
 
         # Generate actions using the action head

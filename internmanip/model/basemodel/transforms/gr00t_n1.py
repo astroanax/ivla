@@ -42,8 +42,7 @@ def build_eagle_processor(eagle_path: str) -> ProcessorMixin:
     eagle_processor.tokenizer.padding_side = 'left'
     return eagle_processor
 
-def collate_gr00t_n1(features: List[dict]) -> dict:
-    processor = EagleProcessor()
+def collate_gr00t_n1(features: List[dict], processor) -> dict:
     batch = {}
     keys = features[0].keys()
     assert all(
@@ -57,6 +56,10 @@ def collate_gr00t_n1(features: List[dict]) -> dict:
             # Stack to form the batch dimension.
             batch[key] = torch.from_numpy(np.stack(values))
 
+    for item in features:
+        item['embodiment_id'] = str(item['embodiment_id'])
+
+
     vlm_batch = processor.collate_fn(features)
     # merge vlm_batch with batch
     for key in vlm_batch.keys():
@@ -66,8 +69,8 @@ def collate_gr00t_n1(features: List[dict]) -> dict:
     return batch
 
 
-def collate_gr00t_n15(features: List[dict]) -> dict:
-    eagle_processor = build_eagle_processor(DEFAULT_EAGLE_PATH)
+def collate_gr00t_n15(features: List[dict], eagle_processor) -> dict:
+    
     batch = {}
     keys = features[0].keys()
 
@@ -381,7 +384,7 @@ class GR00TTransform(InvertibleModalityTransform):
 
         # Process each element.
         data_split_processed = [self.apply_single(elem) for elem in data_split]
-        return collate_gr00t_n1(data_split_processed)
+        return collate_gr00t_n1(data_split_processed, self.vlm_processor)
 
     def apply(self, data: dict) -> dict:
         is_batched, batch_size = self.check_keys_and_batch_size(data)

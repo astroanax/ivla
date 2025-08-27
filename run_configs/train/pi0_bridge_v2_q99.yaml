@@ -1,0 +1,16 @@
+model_type: pi0
+dataset_path: InternRobotics/InternData-BridgeV2
+num_gpus: 1
+batch_size: 8
+output_dir: Checkpoints/runs/debug-pi0_new1_q99
+max_steps: 25000
+tune_visual: True
+tune_llm: True
+save_steps: 5000
+data_config: bridgedata_v2_q99
+video_backend: decord
+report_to: wandb
+gradient_accumulation_steps: 8
+learning_rate: 5e-5
+weight_decay: 0
+skip_unlabeled: True

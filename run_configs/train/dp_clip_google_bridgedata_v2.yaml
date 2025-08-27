@@ -11,3 +11,4 @@ data_config: bridgedata_v2
 video_backend: decord
 report_to: wandb
 gradient_accumulation_steps: 8
+skip_unlabeled: True

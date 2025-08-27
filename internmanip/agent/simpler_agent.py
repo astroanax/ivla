@@ -39,15 +39,15 @@ class SimplerAgent(BaseAgent):
         agent_settings = config.agent_settings
         self.policy_setup = agent_settings.get('policy_setup', None)
 
-        if self.policy_setup == 'bridgedata_v2':
+        if self.policy_setup in ['bridgedata_v2', 'bridgedata_v2_q99']:
             self.action_ensemble = False
-            self.data_config = DATA_CONFIG_MAP['bridgedata_v2']
+            self.data_config = DATA_CONFIG_MAP[self.policy_setup]
             self.image_size = [256, 256]
             self.sticky_gripper_num_repeat = 1
             # EE pose in Bridge data was relative to a top-down pose, instead of robot base
             self.default_rot = np.array([[0, 0, 1.0], [0, 1.0, 0], [-1.0, 0, 0]])  # https://github.com/rail-berkeley/bridge_data_robot/blob/b841131ecd512bafb303075bd8f8b677e0bf9f1f/widowx_envs/widowx_controller/src/widowx_controller/widowx_controller.py#L203
         elif self.policy_setup == 'google_robot':
-            self.data_config = DATA_CONFIG_MAP['google_robot']
+            self.data_config = DATA_CONFIG_MAP[self.policy_setup]
             self.action_ensemble = False
             self.image_size = [320, 256]
             self.sticky_gripper_num_repeat = 10
@@ -56,7 +56,7 @@ class SimplerAgent(BaseAgent):
                 f'Policy setup {self.policy_setup} not supported. The other datasets can be found in the huggingface config.json file.'
             )
         self.observation_indices = [0]
-        self.action_indices = list(range(16))
+        self.action_indices = list(range(4))
         self._modality_config = self.data_config.modality_config(self.observation_indices, self.action_indices)
 
         # Convert string embodiment tag to EmbodimentTag enum if needed
@@ -154,7 +154,7 @@ class SimplerAgent(BaseAgent):
         self.action_scale = agent_settings.get('action_scale', 1.0)
         self.obs_horizon = 1
         self.obs_interval = 1
-        self.pred_action_horizon = 5
+        self.pred_action_horizon = 4
         self.image_history = deque(maxlen=self.obs_horizon)
         self.exec_horizon = agent_settings.get('exec_horizon', 1)
 
@@ -319,7 +319,7 @@ class SimplerAgent(BaseAgent):
         images: List[Image.Image] = self._obtain_image_history()
 
         eef_pos = kwargs.get('eef_pos', None)
-        if self.policy_setup == 'bridgedata_v2':
+        if self.policy_setup in ['bridgedata_v2', 'bridgedata_v2_q99']:
             state = self.preprocess_widowx_proprio(eef_pos)
             batch = {
                 'video.image_0': np.array(images[0][None]), # numpy (b h w c)
@@ -410,14 +410,14 @@ class SimplerAgent(BaseAgent):
 
             action['gripper'] = relative_gripper_action
 
-        elif self.policy_setup == 'bridgedata_v2':
+        elif self.policy_setup in ['bridgedata_v2', 'bridgedata_v2_q99']:
             action['gripper'] = 2.0 * (raw_action['open_gripper'] > 0.5) - 1.0
 
         action['terminate_episode'] = np.array([0.0])
         return raw_action, action
 
     def _resize_image(self, image: np.ndarray) -> np.ndarray:
-        image = cv.resize(image, tuple(self.image_size), interpolation=cv.INTER_AREA)
+        image = cv.resize(image, tuple(self.image_size), interpolation=cv.INTER_LANCZOS4)
         return image
 
     def _add_image_to_history(self, image: np.ndarray) -> None:

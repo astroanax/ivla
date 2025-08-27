@@ -121,6 +121,7 @@ class SweepDataConfig(BaseDataConfig):
         ]
         return transforms
 
+
 ###########################################################################################
 
 class BridgeDataV2DataConfig(BaseDataConfig):
@@ -169,19 +170,19 @@ class BridgeDataV2DataConfig(BaseDataConfig):
             VideoResize(apply_to=self.video_keys, height=224, width=224, interpolation='linear'),
             VideoColorJitter(
                 apply_to=self.video_keys,
-                brightness=0.3,
-                contrast=0.4,
-                saturation=0.5,
-                hue=0.08,
+                brightness=0.1,
+                contrast=0.1,
+                saturation=0.1,
+                hue=0.05,
             ),
             # state transforms
             StateActionToTensor(apply_to=self.state_keys),
             StateActionTransform(
                 apply_to=self.state_keys,
                 normalization_modes={
-                    'state.ee_pos': 'mean_std',
-                    'state.ee_rot': 'mean_std',
-                    'state.gripper': 'binary'
+                    "state.ee_pos": "mean_std",
+                    "state.ee_rot": "mean_std",
+                    "state.gripper": "binary"
                 },
             ),
             # action transforms
@@ -189,9 +190,9 @@ class BridgeDataV2DataConfig(BaseDataConfig):
             StateActionTransform(
                 apply_to=self.action_keys,
                 normalization_modes={
-                    'action.delta_ee_pos': 'mean_std',
-                    'action.delta_ee_rot': 'mean_std',
-                    'action.gripper': 'binary'
+                    "action.delta_ee_pos": "mean_std",
+                    "action.delta_ee_rot": "mean_std",
+                    "action.gripper": "binary"
                 }
             ),
             # concat transforms
@@ -202,6 +203,91 @@ class BridgeDataV2DataConfig(BaseDataConfig):
             )
         ]
         return transforms
+
+
+
+###########################################################################################
+
+class BridgeDataV2Q99DataConfig(BaseDataConfig):
+
+    video_keys = ['video.image_0']
+    state_keys = ['state.ee_pos','state.ee_rot','state.gripper']
+    action_keys = ['action.delta_ee_pos','action.delta_ee_rot','action.gripper']
+    language_keys = ['annotation.human.action.task_description']
+
+    def modality_config(self, observation_indices, action_indices) -> dict[str, ModalityConfig]:
+        self.action_indices = action_indices
+        self.observation_indices = observation_indices
+        video_modality = ModalityConfig(
+            delta_indices=self.observation_indices,
+            modality_keys=self.video_keys,
+        )
+
+        state_modality = ModalityConfig(
+            delta_indices=self.observation_indices,
+            modality_keys=self.state_keys,
+        )
+
+        action_modality = ModalityConfig(
+            delta_indices=self.action_indices,
+            modality_keys=self.action_keys,
+        )
+
+        language_modality = ModalityConfig(
+            delta_indices=self.observation_indices,
+            modality_keys=self.language_keys,
+        )
+
+        modality_configs = {
+            'video': video_modality,
+            'state': state_modality,
+            'action': action_modality,
+            'language': language_modality,
+        }
+
+        return modality_configs
+
+    def transform(self):
+        transforms = [
+            VideoToTensor(apply_to=self.video_keys),
+            # VideoCrop(apply_to=self.video_keys, scale=1.),
+            VideoResize(apply_to=self.video_keys, height=224, width=224, interpolation='linear'),
+            VideoColorJitter(
+                apply_to=self.video_keys,
+                brightness=0.1,
+                contrast=0.1,
+                saturation=0.1,
+                hue=0.05,
+            ),
+            # state transforms
+            StateActionToTensor(apply_to=self.state_keys),
+            StateActionTransform(
+                apply_to=self.state_keys,
+                normalization_modes={
+                    "state.ee_pos": "q99",
+                    "state.ee_rot": "q99",
+                    "state.gripper": "q99"
+                },
+            ),
+            # action transforms
+            StateActionToTensor(apply_to=self.action_keys),
+            StateActionTransform(
+                apply_to=self.action_keys,
+                normalization_modes={
+                    "action.delta_ee_pos": "q99",
+                    "action.delta_ee_rot": "q99",
+                    "action.gripper": "binary"
+                }
+            ),
+            # concat transforms
+            ConcatTransform(
+                video_concat_order=self.video_keys,
+                state_concat_order=self.state_keys,
+                action_concat_order=self.action_keys,
+            )
+        ]
+        return transforms
+
 
 ###########################################################################################
 
@@ -615,6 +701,7 @@ class AlohaDataConfig(BaseDataConfig):
 DATA_CONFIG_MAP = {
     'sweep': SweepDataConfig(),
     'bridgedata_v2': BridgeDataV2DataConfig(),
+    'bridgedata_v2_q99': BridgeDataV2Q99DataConfig(),
     'genmanip_v1': GenManipDataConfig(),
     'google_robot': GoogleRobotDataConfig(),
     'calvin_abc': CalvinDataConfig(),

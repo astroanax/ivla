@@ -90,13 +90,20 @@ def create_sinusoidal_pos_embedding(
     scaling_factor = 1.0 / period * 2 * math.pi
     sin_input = scaling_factor[None, :] * time[:, None]
     pos_emb = torch.cat([torch.sin(sin_input), torch.cos(sin_input)], dim=1)
+    # Only detach if we're in inference mode (no_grad context)
+    if not torch.is_grad_enabled():
+        pos_emb = pos_emb.detach()
     return pos_emb
 
 
 def sample_beta(alpha, beta, bsize, device):
     gamma1 = torch.empty((bsize,), device=device).uniform_(0, 1).pow(1 / alpha)
     gamma2 = torch.empty((bsize,), device=device).uniform_(0, 1).pow(1 / beta)
-    return gamma1 / (gamma1 + gamma2)
+    result = gamma1 / (gamma1 + gamma2)
+    # Only detach if we're in inference mode (no_grad context)
+    if not torch.is_grad_enabled():
+        result = result.detach()
+    return result
 
 
 def make_att_2d_masks(pad_masks, att_masks):
@@ -241,7 +248,7 @@ class PI0Policy(BasePolicyModel):
         pass
 
 
-    @torch.no_grad
+    @torch.no_grad()
     def select_action(self, batch: dict[str, Tensor], noise: Tensor | None = None) -> Tensor:
         """Select a single action given environment observations.
 
@@ -250,7 +257,6 @@ class PI0Policy(BasePolicyModel):
         queue is empty.
         """
         self.eval()
-
         batch['video'] = (batch['video'] - 0.5) * 2
 
 
@@ -330,7 +336,8 @@ class PI0Policy(BasePolicyModel):
         loss = losses.mean()
 
         loss_dict['l2_loss'] = loss.item()
-        loss_dict['loss'] = (losses[:, :, :batch['action'].shape[-1]] * ~batch['action_pad'][...,None]).mean()
+        # loss_dict['loss'] = (losses[:, :, :batch['action'].shape[-1]] * ~batch['action_pad'][...,None]).mean()
+        loss_dict['loss'] = losses[:, :, :batch['action'].shape[-1]].mean()
 
         return loss_dict
 
@@ -384,6 +391,12 @@ class PI0Policy(BasePolicyModel):
         policy = super().from_pretrained(
             pretrained_model_name_or_path, **kwargs
         )
+
+        # policy.config.chunk_size = 4  # initial with default chunk size
+        # policy.config.n_action_steps = 4 # initial with default chunk size
+        
+        # policy = PI0Policy(policy.config)  this strategy is able to train lerobot pi0 from scratch
+
         if tune_visual:
             for p in policy.model.paligemma_with_expert.paligemma.vision_tower.parameters():
                 p.requires_grad=True
@@ -393,6 +406,7 @@ class PI0Policy(BasePolicyModel):
         policy.config.tokenizer_max_length = tokenizer_max_length
         policy.model.paligemma_with_expert.paligemma.language_model.lm_head.weight.requires_grad = False
         policy.model.paligemma_with_expert.gemma_expert.lm_head.weight.requires_grad = False
+        policy.model.paligemma_with_expert.paligemma.language_model.model.embed_tokens.weight.requires_grad = False
 
         policy.model.paligemma_with_expert.paligemma.language_model.model.norm.weight.requires_grad = False
         policy.model.paligemma_with_expert.paligemma.language_model.model.layers[17].post_attention_layernorm.weight.requires_grad = False
@@ -471,13 +485,21 @@ class PI0FlowMatching(nn.Module):
             size=shape,
             dtype=torch.float32,
             device=device,
+            requires_grad=False
         )
+        # Only detach if we're in inference mode (no_grad context)
+        if not torch.is_grad_enabled():
+            noise = noise.detach()
         return noise
 
     def sample_time(self, bsize, device):
         time_beta = sample_beta(1.5, 1.0, bsize, device)
         time = time_beta * 0.999 + 0.001
-        return time.to(dtype=torch.float32, device=device)
+        time = time.to(dtype=torch.float32, device=device)
+        # Only detach if we're in inference mode (no_grad context)
+        if not torch.is_grad_enabled():
+            time = time.detach()
+        return time
 
     def embed_prefix(
         self, images, img_masks, lang_tokens, lang_masks
@@ -500,7 +522,11 @@ class PI0FlowMatching(nn.Module):
 
             # Normalize image embeddings
             img_emb_dim = img_emb.shape[-1]
-            img_emb = img_emb * torch.tensor(img_emb_dim**0.5, dtype=img_emb.dtype, device=img_emb.device)
+            scaling_factor = torch.tensor(img_emb_dim**0.5, dtype=img_emb.dtype, device=img_emb.device)
+            # Only detach if we're in inference mode (no_grad context)
+            if not torch.is_grad_enabled():
+                scaling_factor = scaling_factor.detach()
+            img_emb = img_emb * scaling_factor
 
             bsize, num_img_embs = img_emb.shape[:2]
             img_mask = img_mask[:, None].expand(bsize, num_img_embs)
@@ -515,7 +541,13 @@ class PI0FlowMatching(nn.Module):
 
         # Normalize language embeddings
         lang_emb_dim = lang_emb.shape[-1]
-        lang_emb = lang_emb * math.sqrt(lang_emb_dim)
+        scaling_factor = math.sqrt(lang_emb_dim)
+        # Only detach if we're in inference mode (no_grad context)
+        if not torch.is_grad_enabled():
+            scaling_factor = torch.tensor(scaling_factor, dtype=lang_emb.dtype, device=lang_emb.device).detach()
+        else:
+            scaling_factor = torch.tensor(scaling_factor, dtype=lang_emb.dtype, device=lang_emb.device)
+        lang_emb = lang_emb * scaling_factor
 
         embs.append(lang_emb)
         pad_masks.append(lang_masks)
@@ -556,6 +588,9 @@ class PI0FlowMatching(nn.Module):
             timestep, self.config.proj_width, min_period=4e-3, max_period=4.0, device=device
         )
         time_emb = time_emb.type(dtype=dtype)
+        # Only detach if we're in inference mode (no_grad context)
+        if not torch.is_grad_enabled():
+            time_emb = time_emb.detach()
 
         # Fuse timestep + action information using an MLP
         action_emb = self.action_in_proj(noisy_actions)
@@ -578,7 +613,7 @@ class PI0FlowMatching(nn.Module):
         att_masks += [1] + ([0] * (self.config.n_action_steps - 1))
 
 
-        import os
+
         embs = torch.cat(embs, dim=1)
         pad_masks = torch.cat(pad_masks, dim=1)
         att_masks = torch.tensor(att_masks, dtype=embs.dtype, device=embs.device)
@@ -659,10 +694,19 @@ class PI0FlowMatching(nn.Module):
 
         x_t = noise
         time = torch.tensor(1.0, dtype=torch.float32, device=device)
+        
+        # Store original dtypes to restore later
+        original_state_proj_dtype = self.state_proj.weight.dtype
+        original_action_in_proj_dtype = self.action_in_proj.weight.dtype
+        original_action_time_mlp_in_dtype = self.action_time_mlp_in.weight.dtype
+        original_action_time_mlp_out_dtype = self.action_time_mlp_out.weight.dtype
+        
+        # Temporarily convert to float32 for inference
         self.state_proj = self.state_proj.to(torch.float32)
         self.action_in_proj = self.action_in_proj.to(torch.float32)
         self.action_time_mlp_in = self.action_time_mlp_in.to(torch.float32)
-        self.action_time_mlp_out= self.action_time_mlp_out.to(torch.float32)
+        self.action_time_mlp_out = self.action_time_mlp_out.to(torch.float32)
+        
         with torch.autocast('cuda', dtype=torch.float32, enabled=True):
             while time >= -dt / 2:
                 expanded_time = time.expand(bsize)
@@ -677,6 +721,13 @@ class PI0FlowMatching(nn.Module):
                 # Euler step
                 x_t += dt * v_t
                 time += dt
+        
+        # Restore original dtypes
+        self.state_proj = self.state_proj.to(original_state_proj_dtype)
+        self.action_in_proj = self.action_in_proj.to(original_action_in_proj_dtype)
+        self.action_time_mlp_in = self.action_time_mlp_in.to(original_action_time_mlp_in_dtype)
+        self.action_time_mlp_out = self.action_time_mlp_out.to(original_action_time_mlp_out_dtype)
+        
         return x_t
 
     def denoise_step(
