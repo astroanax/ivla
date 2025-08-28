@@ -64,6 +64,7 @@ class GR00T_N1_5(BasePolicyModel):
         self,
         config: GR00T_N1_5_Config,
         local_model_path: str,
+        **kwargs
     ):
         assert isinstance(config.backbone_cfg, dict)
         assert isinstance(config.action_head_cfg, dict)
@@ -204,7 +205,7 @@ class GR00T_N1_5(BasePolicyModel):
 
         # get the current model path being downloaded
         pretrained_model = super().from_pretrained(
-            pretrained_model_name_or_path, torch_dtype=torch.bfloat16, **kwargs
+            pretrained_model_name_or_path, **kwargs
         )
 
         pretrained_model.backbone.set_trainable_parameters(
