@@ -238,50 +238,48 @@ class DiffusionActionHead(nn.Module):
         if self.config.use_language_conditioning and 'language' in batch:
             language_texts = batch['language']
 
-            # Handle different input formats
-            if isinstance(language_texts, list):
-                # For list format, each batch item has its own instruction
-                # We need to process each instruction separately and then stack
-                text_embeddings_list = []
+            # For list format, each batch item has its own instruction
+            # We need to process each instruction separately and then stack
+            text_embeddings_list = []
 
-                # Ensure we have exactly batch_size instructions
-                for i in range(batch_size):
-                    instruction = language_texts[i]
-                    if not isinstance(instruction, str):
-                        instruction = str(instruction)
+            # Ensure we have exactly batch_size instructions
+            for i in range(batch_size):
+                instruction = language_texts[i]
+                if not isinstance(instruction, str):
+                    instruction = str(instruction)
 
-                    # Process single instruction with CLIP
-                    inputs = self.language_processor(
-                        text=instruction,
-                        return_tensors='pt',
-                        padding=True,
-                        truncation=True,
-                        max_length=77
-                    )
-                    # Move inputs to the same device as the model
-                    try:
-                        device = next(self.parameters()).device
-                    except StopIteration:
-                        # If model has no parameters, use cuda if available, otherwise cpu
-                        device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-                    inputs = {k: v.to(device) for k, v in inputs.items()}
+                # Process single instruction with CLIP
+                inputs = self.language_processor(
+                    text=instruction,
+                    return_tensors='pt',
+                    padding=True,
+                    truncation=True,
+                    max_length=77
+                )
+                # Move inputs to the same device as the model
+                try:
+                    device = next(self.parameters()).device
+                except StopIteration:
+                    # If model has no parameters, use cuda if available, otherwise cpu
+                    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+                inputs = {k: v.to(device) for k, v in inputs.items()}
 
-                    # Get text embeddings for this instruction (language encoder is frozen)
-                    with torch.no_grad():
-                        text_emb = self.language_encoder.get_text_features(**inputs)
+                # Get text embeddings for this instruction (language encoder is frozen)
+                with torch.no_grad():
+                    text_emb = self.language_encoder.get_text_features(**inputs)
 
-                    # Project to lower dimension using trainable layer
-                    text_emb = self.language_projection(text_emb)
+                # Project to lower dimension using trainable layer
+                text_emb = self.language_projection(text_emb)
 
-                    # Apply dropout if in training mode
-                    if self.training:
-                        text_emb = self.language_dropout(text_emb)
+                # Apply dropout if in training mode
+                if self.training:
+                    text_emb = self.language_dropout(text_emb)
 
-                    text_embeddings_list.append(text_emb)
+                text_embeddings_list.append(text_emb)
 
-                # Stack all embeddings and expand to sequence dimension
-                text_embeddings = torch.stack(text_embeddings_list, dim=0)  # (B, embed_dim)
-                text_embeddings = text_embeddings.expand(-1, n_obs_steps, -1)  # (B, n_obs_steps, embed_dim)
+            # Stack all embeddings and expand to sequence dimension
+            text_embeddings = torch.stack(text_embeddings_list, dim=0)  # (B, embed_dim)
+            text_embeddings = text_embeddings.expand(-1, n_obs_steps, -1)  # (B, n_obs_steps, embed_dim)
 
             global_cond_feats.append(text_embeddings)
 

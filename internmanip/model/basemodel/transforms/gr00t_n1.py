@@ -652,7 +652,7 @@ class GR00TTransform_15(InvertibleModalityTransform):
         data_split = [tree.map_structure(lambda x: x[i], data) for i in range(batch_size)]
         # Process each element.
         data_split_processed = [self.apply_single(elem) for elem in data_split]
-        return collate_gr00t_n15(data_split_processed)
+        return collate_gr00t_n15(data_split_processed, eagle_processor = build_eagle_processor(DEFAULT_EAGLE_PATH))
 
     def apply(self, data: dict) -> dict:
         is_batched, batch_size = self.check_keys_and_batch_size(data)

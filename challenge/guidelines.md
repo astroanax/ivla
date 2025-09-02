@@ -492,3 +492,17 @@ Solved by installing the ninja module in genmanip.
 conda activate genmanip
 pip install ninja
 ```
+
+### 3. No module named 'bitsandbytes'
+If you encounter the following error message, please comment out `line 8` of the code in `/root/InternManip/internmanip/model/basemodel/__init__.py`. We will refactor this code in the future to prevent environments between different models from affecting each other.
+
+```
+No module named 'bitsandbytes'
+  File "/root/InternManip/internmanip/model/basemodel/openpi0/lora.py", line 55, in <module>
+    import bitsandbytes as bnb
+  ...
+  File "/root/InternManip/internmanip/model/basemodel/__init__.py", line 8, in <module>
+    from internmanip.model.basemodel.openpi0.pizero import PiZero
+  ...
+ModuleNotFoundError: No module named 'bitsandbytes'
+```

@@ -18,7 +18,7 @@ max_steps: 10000
 tune_visual: True
 tune_llm: True
 save_steps: 1000
-data_config: aloha_v3
+data_config: aloha_v4
 video_backend: decord
 report_to: wandb
 gradient_accumulation_steps: 8

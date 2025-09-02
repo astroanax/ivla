@@ -16,6 +16,7 @@ eval_cfg = EvalCfg(
         },
         model_kwargs={
             'HF_cache_dir': None,
+            'torch_dtype': 'float16'
         },
         server_cfg=ServerCfg(
             server_host='localhost',

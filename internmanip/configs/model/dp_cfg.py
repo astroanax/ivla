@@ -200,6 +200,10 @@ class DiffusionConfig(PretrainedConfig):
             self.robot_state_dim = 24
             self.action_dim = 7
             self.image_features = [3,3,224,224]
+        elif data_config in ['aloha_v4']:
+            self.robot_state_dim = 16
+            self.action_dim = 14
+            self.image_features = [3,3,224,224]
         elif data_config in ['google_robot']:
             self.robot_state_dim = 7
             self.action_dim = 7
