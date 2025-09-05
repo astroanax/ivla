@@ -6,9 +6,9 @@ eval_cfg = EvalCfg(
     eval_type='simpler',
     agent=AgentCfg(
         agent_type='pi0',
-        model_name_or_path='/PATH/TO/YOUR/PI0_FINETUNED_CHECKPOINT',
+        base_model_path='/PATH/TO/YOUR/PI0_FINETUNED_CHECKPOINT',
         agent_settings={
-            'policy_setup': 'bridgedata_v2',
+            'data_config': 'bridgedata_v2',
             'action_scale': 1.0,
             'exec_horizon': 1,
             'action_ensemble_temp': -0.8,

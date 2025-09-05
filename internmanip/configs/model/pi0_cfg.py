@@ -23,7 +23,6 @@ from internmanip.trainer.optim.schedulers import CosineDecayWithWarmupSchedulerC
 
 from transformers import PretrainedConfig
 
-# @PreTrainedConfig.register_subclass("pi0")
 @dataclass
 class PI0Config(PretrainedConfig):
     model_type = 'pi0'
@@ -31,6 +30,8 @@ class PI0Config(PretrainedConfig):
     n_obs_steps: int = 1
     chunk_size: int = 50
     n_action_steps: int = 50
+    pretrained_model_path: str = 'google/paligemma-3b-pt-224'
+    load_vlm_pretrained_weights: bool = True  # This indicates that we load vlm pretrained weights
 
     normalization_mapping: dict[str, NormalizationMode] = field(
         default_factory=lambda: {

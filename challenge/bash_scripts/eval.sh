@@ -94,7 +94,7 @@ conda activate ${params[server_conda_name]}
 } &
 trap "kill -TERM %1" INT TERM EXIT
 
-sleep $((10 * ${params[distributed_num_worker]}))
+sleep $((20 + 10 * ${params[distributed_num_worker]}))
 
 conda activate genmanip
 python -m scripts.eval.start_evaluator \

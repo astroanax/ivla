@@ -8,7 +8,7 @@ eval_cfg = EvalCfg(
         agent_type='gr00t_n1_5',
         base_model_path='/PATH/TO/YOUR/FINETUNED_CHECKPOINT',
         agent_settings={
-            'policy_setup': 'google_robot',
+            'data_config': 'google_robot',
             'action_scale': 1.0,
             'exec_horizon': 1,
             'action_ensemble_temp': -0.8,

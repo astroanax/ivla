@@ -39,6 +39,7 @@ class SimplerEnv(EnvWrapper):
         """
         print(f'new env settings: \n{env_settings.model_dump_json(indent=4)}')
         self.env_settings = env_settings
+        
 
         # env args: robot pose
         self.robot_init_xs = parse_range_tuple(self.env_settings.robot_init_x_range)

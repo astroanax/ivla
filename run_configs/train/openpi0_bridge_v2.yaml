@@ -1,8 +1,8 @@
 model_type: openpi0
-dataset_path: /mnt/hwfile/simpler_env/widowx_data_all_01/
+dataset_path: InternRobotics/InternData-BridgeV2
 num_gpus: 1
 batch_size: 16
-output_dir: /mnt/inspurfs/ebench_t/houzhi/houzhi/Checkpoints/runs/debug-openpi0_new
+output_dir: Checkpoints/runs/debug-openpi0
 max_steps: 100000
 tune_visual: True
 tune_llm: True

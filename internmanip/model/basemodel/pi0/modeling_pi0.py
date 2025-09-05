@@ -207,11 +207,13 @@ class PI0Policy(BasePolicyModel):
         config.validate_features()
         self.config = config
 
-        self.language_tokenizer = AutoTokenizer.from_pretrained('google/paligemma-3b-pt-224')
+        self.language_tokenizer = AutoTokenizer.from_pretrained(self.config.pretrained_model_path)
         self.model = PI0FlowMatching(config)
 
         self.reset()
         self._keys_to_ignore_on_save = None
+        if self.config.load_vlm_pretrained_weights:
+            self.model.paligemma_with_expert.load_pretrained_weights()
 
     def reset(self):
         """This should be called whenever the environment is reset."""
@@ -329,8 +331,9 @@ class PI0Policy(BasePolicyModel):
         loss_dict['losses_after_forward'] = losses.clone()
 
 
+
         # Remove padding
-        losses = losses[:, :, : self.config.max_action_dim]
+        losses = losses[:, :, : 7]
         loss_dict['losses_after_rm_padding'] = losses.clone()
 
         loss = losses.mean()
@@ -391,9 +394,12 @@ class PI0Policy(BasePolicyModel):
         policy = super().from_pretrained(
             pretrained_model_name_or_path, **kwargs
         )
+        
 
-        # policy.config.chunk_size = 4  # initial with default chunk size
-        # policy.config.n_action_steps = 4 # initial with default chunk size
+        policy.config.chunk_size = 4  # initial with default chunk size
+        policy.config.n_action_steps = 4 # initial with default chunk size
+        # policy.config.max_state_dim = 7
+        # policy.config.max_action_dim = 7
         
         # policy = PI0Policy(policy.config)  this strategy is able to train lerobot pi0 from scratch
 
@@ -417,6 +423,8 @@ class PI0Policy(BasePolicyModel):
         # policy.model.paligemma_with_expert.paligemma.language_model.model.embed_tokens.weight.requires_grad = False
         # policy.to(config.device)
         # policy.eval()
+
+        # policy.model.paligemma_with_expert.load_pretrained_weights()
         return policy
 
 
@@ -459,12 +467,16 @@ class PI0FlowMatching(nn.Module):
         paligemma_with_export_config = PaliGemmaWithExpertConfig(
             freeze_vision_encoder=self.config.freeze_vision_encoder,
             train_expert_only=self.config.train_expert_only,
+            pretrained_model_path=self.config.pretrained_model_path,
             attention_implementation=self.config.attention_implementation,
         )
         self.paligemma_with_expert = PaliGemmaWithExpertModel(paligemma_with_export_config)
 
         # Projections are float32
         self.state_proj = nn.Linear(self.config.max_state_dim, self.config.proj_width)
+
+        # self.config.max_state_dim = 7
+        # self.config.max_action_dim = 7
         self.action_in_proj = nn.Linear(self.config.max_action_dim, self.config.proj_width)
         self.action_out_proj = nn.Linear(self.config.proj_width, self.config.max_action_dim)
 
@@ -473,6 +485,16 @@ class PI0FlowMatching(nn.Module):
         self.action_time_mlp_out = nn.Linear(self.config.proj_width, self.config.proj_width)
 
         self.set_requires_grad()
+        self.flow_sampling = 'beta'
+        self.flow_sig_min = 0.001
+        if self.flow_sampling == "beta":
+            flow_alpha = 1.5
+            flow_beta = 1
+            self.flow_t_max = 1 - 0.001
+            self.flow_beta_dist = torch.distributions.Beta(flow_alpha, flow_beta)        
+
+        
+        
 
     def set_requires_grad(self):
         for params in self.state_proj.parameters():
@@ -512,6 +534,9 @@ class PI0FlowMatching(nn.Module):
         pad_masks = []
         att_masks = []
 
+        # Get batch size from first image for later use
+        bsize = images[0].shape[0] if images else lang_tokens.shape[0]
+
         # TODO: remove for loop
         for (
             img,
@@ -528,7 +553,7 @@ class PI0FlowMatching(nn.Module):
                 scaling_factor = scaling_factor.detach()
             img_emb = img_emb * scaling_factor
 
-            bsize, num_img_embs = img_emb.shape[:2]
+            _, num_img_embs = img_emb.shape[:2]
             img_mask = img_mask[:, None].expand(bsize, num_img_embs)
 
             embs.append(img_emb)
@@ -621,6 +646,27 @@ class PI0FlowMatching(nn.Module):
 
         return embs, pad_masks, att_masks
 
+    def sample_fm_time(self, bsz: int) -> torch.FloatTensor:
+        if self.flow_sampling == "uniform":  # uniform between 0 and 1
+            """https://github.com/gle-bellier/flow-matching/blob/main/Flow_Matching.ipynb"""
+            eps = 1e-5
+            t = (torch.rand(1) + torch.arange(bsz) / bsz) % (1 - eps)
+        elif self.flow_sampling == "beta":  # from pi0 paper
+            z = self.flow_beta_dist.sample((bsz,))
+            t = self.flow_t_max * (1 - z)  # flip and shift
+        return t
+
+    def psi_t(
+        self,
+        x: torch.FloatTensor,
+        x1: torch.FloatTensor,
+        t: torch.FloatTensor,
+    ) -> torch.FloatTensor:
+        """Conditional Flow"""
+        t = t[:, None, None]  # (B, 1, 1)
+        return (1 - (1 - self.flow_sig_min) * t) * x + t * x1
+    
+
     def forward(
         self, images, img_masks, lang_tokens, lang_masks, state, actions, noise=None, time=None
     ) -> Tensor:
@@ -628,22 +674,33 @@ class PI0FlowMatching(nn.Module):
         if noise is None:
             noise = self.sample_noise(actions.shape, actions.device)
 
+        # if time is None:
+            # time = self.sample_time(actions.shape[0], actions.device)
         if time is None:
-            time = self.sample_time(actions.shape[0], actions.device)
+            t = self.sample_fm_time(len(lang_tokens)).to(images[0].dtype).to(state.device)
+            time = t
+        x0 = torch.randn_like(actions, device=t.device, dtype=t.dtype)
+        x1 = actions
+        # psi_t = self.psi_t(x0, x1, t)
 
+        noise[...,7:] = 0.
+        # PiZero-style flow matching: psi_t and target d_psi
         time_expanded = time[:, None, None]
-        x_t = time_expanded * noise + (1 - time_expanded) * actions
-        u_t = noise - actions
+        # psi_t = (1 - (1 - sigma_min) * t) * x0 + t * x1
+        sigma_min = self.flow_sig_min
+        psi_t = (1 - (1 - sigma_min) * time_expanded) * noise + time_expanded * actions
+        # target velocity d_psi = x1 - (1 - sigma_min) * x0
+        d_psi = actions - (1 - sigma_min) * noise
 
         prefix_embs, prefix_pad_masks, prefix_att_masks = self.embed_prefix(images, img_masks, lang_tokens, lang_masks)
 
-        suffix_embs, suffix_pad_masks, suffix_att_masks = self.embed_suffix(state[:, 0], x_t, time)
-
+        suffix_embs, suffix_pad_masks, suffix_att_masks = self.embed_suffix(state[:, 0], psi_t, time)
         pad_masks = torch.cat([prefix_pad_masks, suffix_pad_masks], dim=1)
         att_masks = torch.cat([prefix_att_masks, suffix_att_masks], dim=1)
 
         att_2d_masks = make_att_2d_masks(pad_masks, att_masks)
         position_ids = torch.cumsum(pad_masks, dim=1) - 1
+        # position_ids = torch.cumsum(pad_masks, dim=1) # paligama start from 1000
 
         (_, suffix_out), _ = self.paligemma_with_expert.forward(
             attention_mask=att_2d_masks,
@@ -660,7 +717,7 @@ class PI0FlowMatching(nn.Module):
         suffix_out = suffix_out.to(dtype=torch.float32)
         v_t = self.action_out_proj(suffix_out)
 
-        losses = F.mse_loss( v_t, u_t, reduction='none')
+        losses = F.mse_loss(v_t, d_psi, reduction='none')
         return losses
 
     def sample_actions(self, images, img_masks, lang_tokens, lang_masks, state, noise=None) -> Tensor:
@@ -689,11 +746,12 @@ class PI0FlowMatching(nn.Module):
             fill_kv_cache=True,
         )
 
-        dt = -1.0 / self.config.num_steps
+        dt = 1.0 / self.config.num_steps
         dt = torch.tensor(dt, dtype=torch.float32, device=device)
 
+        noise[...,7:] = 0.
         x_t = noise
-        time = torch.tensor(1.0, dtype=torch.float32, device=device)
+        time = torch.tensor(0.0, dtype=torch.float32, device=device)
         
         # Store original dtypes to restore later
         original_state_proj_dtype = self.state_proj.weight.dtype
@@ -708,8 +766,10 @@ class PI0FlowMatching(nn.Module):
         self.action_time_mlp_out = self.action_time_mlp_out.to(torch.float32)
         
         with torch.autocast('cuda', dtype=torch.float32, enabled=True):
-            while time >= -dt / 2:
+            # PiZero-style forward Euler integration from t=0 to 1
+            for _ in range(self.config.num_steps):
                 expanded_time = time.expand(bsize)
+                x_t[...,7:] = 0.
                 v_t = self.denoise_step(
                     state,
                     prefix_pad_masks,
@@ -717,8 +777,6 @@ class PI0FlowMatching(nn.Module):
                     x_t,
                     expanded_time,
                 )
-
-                # Euler step
                 x_t += dt * v_t
                 time += dt
         

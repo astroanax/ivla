@@ -98,8 +98,7 @@ class PiZero(BasePolicyModel, NoSyncBase):
         self.final_action_clip_value = config.final_action_clip_value
         self.flow_sig_min = 0.001
 
-        print(config)
-        # import ipdb;ipdb.set_trace()
+
         # text input only
         self.embed_tokens = nn.Embedding(
             config.vocab_size,
@@ -541,7 +540,6 @@ class PiZero(BasePolicyModel, NoSyncBase):
         bsz, seq_len = input_ids.shape
         scaled_image_features = image_features / (self.image_text_hidden_size**0.5)
 
-        # import ipdb;ipdb.set_trace()
         # put embedding together - image, text, padding
         final_embedding = torch.full((bsz, seq_len, embed_dim), self.config.pad_token_id, dtype=scaled_image_features.dtype, device=device)
 
@@ -562,8 +560,7 @@ class PiZero(BasePolicyModel, NoSyncBase):
     def inference(
         self,
         batch,
-    ) -> torch.FloatTensor:
-        # import ipdb;ipdb.set_trace()        
+    ) -> torch.FloatTensor:      
         inputs = self.preprocess_batch(batch, split_mask=True, sample_fm_time=False)
 
 
@@ -576,7 +573,6 @@ class PiZero(BasePolicyModel, NoSyncBase):
         proprios = inputs['proprios']
         # actions = inputs['actions']
         # t = inputs['t']
-        # import ipdb;ipdb.set_trace()
         
         dtype, device = pixel_values.dtype, pixel_values.device
         bsz = pixel_values.size(0)
@@ -603,7 +599,6 @@ class PiZero(BasePolicyModel, NoSyncBase):
             kv_caches=kv_caches,
             return_caches=True,
         )
-        # import ipdb;ipdb.set_trace()
         # sample pure action noise
         action = torch.randn(
             (bsz, self.horizon_steps, self.action_dim), device=device, dtype=dtype
@@ -616,7 +611,6 @@ class PiZero(BasePolicyModel, NoSyncBase):
             # encode action and time into embedding
             time_cond = self.time_embedding(t)
             # [Batch_Size, Horizon_Steps, Embed_Dim]
-            # import ipdb;ipdb.set_trace()
             if self.action_expert_adaptive_mode:
                 action_embeds = self.action_encoder(action)
             else:
@@ -630,7 +624,6 @@ class PiZero(BasePolicyModel, NoSyncBase):
                 kv_caches=kv_caches,
                 cache_mode="append_non_active",  # use caches from other mixtures, i.e., vlm and proprio
             )["action"]
-            # print(action_embeds)
 
             # decode action: [Batch_Size, Horizon_Steps, Action_Dim]
             action_vel = self.action_decoder(action_embeds)
@@ -644,10 +637,6 @@ class PiZero(BasePolicyModel, NoSyncBase):
                 -self.final_action_clip_value,
                 self.final_action_clip_value,
             )
-        # import ipdb;ipdb.set_trace()
-        # import numpy as np
-        # from PIL import Image
-        # Image.fromarray((((pixel_values[0]+1)/2).cpu().to(torch.float32).permute(1,2,0).numpy() * 255).astype(np.uint8)).save('train.png')
         return BatchFeature(data={'action_pred': action})
 
     def infer_action_naive(

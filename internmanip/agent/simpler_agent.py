@@ -37,7 +37,7 @@ class SimplerAgent(BaseAgent):
     def __init__(self, config: AgentCfg):
         os.environ['TOKENIZERS_PARALLELISM'] = 'false'
         agent_settings = config.agent_settings
-        self.policy_setup = agent_settings.get('policy_setup', None)
+        self.policy_setup = agent_settings.get('data_config', None)
 
         if self.policy_setup in ['bridgedata_v2', 'bridgedata_v2_q99']:
             self.action_ensemble = False

@@ -8,7 +8,7 @@ eval_cfg = EvalCfg(
         agent_type='gr00t_n1_5',
         base_model_path='/PATH/TO/YOUR/FINETUNED_CHECKPOINT',
         agent_settings={
-            'data_config': 'aloha_v3',
+            'data_config': 'aloha_v4',
             'embodiment_tag': 'new_embodiment',
             'pred_action_horizon': 16,
             'adaptive_ensemble_alpha': 0.5,

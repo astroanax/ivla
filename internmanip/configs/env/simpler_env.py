@@ -4,7 +4,7 @@ from pathlib import Path
 
 
 class SimplerEnvSettings(BaseModel):
-    policy_setup: Optional[str] = Field(default='google_robot', description='Policy model setup')
+    data_config: Optional[str] = Field(default='google_robot', description='Policy model setup')
     task_name: str = Field(default='google_robot_pick_coke_can', description='Task name')
     env_name: Optional[str] = Field(default='GraspSingleOpenedCokeCanInScene-v0', description='Environment name')
     additional_env_save_tags: Optional[str] = Field(default=None, description='Additional tags to save the environment eval results')
@@ -35,9 +35,9 @@ class SimplerEnvSettings(BaseModel):
             raise ValueError(f'Invalid task name: {v}')
         return v
 
-    @field_validator('policy_setup')
+    @field_validator('data_config')
     def check_policy_setup(cls, v):
-        if v is not None and v not in ['widowx_bridge', 'google_robot']:
+        if v is not None and v not in ['bridgedata_v2', 'google_robot']:
             raise ValueError(f'Invalid policy setup type: {v}')
         return v
 

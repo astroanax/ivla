@@ -175,8 +175,8 @@ install_genmanip() {
         git submodule add --force https://github.com/InternRobotics/InternUtopia.git internmanip/benchmarks/genmanip/utils/InternUtopia
     fi
 
-    cd internmanip/benchmarks/genmanip/utils/InternUtopia
-    git checkout tags/v2.2.0
+    cd $PROJECT_ROOT/internmanip/benchmarks/genmanip/utils/InternUtopia
+    git checkout tags/v2.2.1
 
     echo "If you haven't installed Isaac Sim yet, please do so before running this setup script."
     read -p "If you have already installed it in a custom location, please type in the path containing isaac-sim.sh here >>> " ISAAC_SIM_PATH
@@ -186,18 +186,19 @@ install_genmanip() {
         echo "genmanip"
     } | ./setup_conda.sh
 
-    source ~/.bashrc
+    source $(conda info --base)/etc/profile.d/conda.sh
     conda activate genmanip
 
-    pip install lmdb==1.6.2 open3d==0.19.0 shapely==2.1.1 concave_hull==0.0.9 roboticstoolbox-python==1.1.1
+    cd $PROJECT_ROOT/internmanip/benchmarks/genmanip/utils/curobo
+    pip install -e . --no-build-isolation  
+    
+    cd $PROJECT_ROOT 
     pip install -e .
 
-    echo "y" | conda remove libxcb
+    pip install lmdb==1.6.2 open3d==0.19.0 shapely==2.1.1 concave_hull==0.0.9 roboticstoolbox-python==1.1.1
+
     conda deactivate
     echo -e "Use \033[1;33mconda activate genmanip\033[0m to activate the environment"
-
-    cd "$PROJECT_ROOT"
-
     echo -e "✅ \033[1;32mGenManip dependencies installed\033[0m"
 }
 

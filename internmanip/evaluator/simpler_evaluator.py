@@ -59,11 +59,11 @@ class SimplerEvaluator(Evaluator):
 
     @classmethod
     def _update_results(cls, result):
-        for policy_setup, eval_setup_results in result.items():
+        for data_config, eval_setup_results in result.items():
             for eval_setup, task_results in eval_setup_results.items():
                 for task_name, success_arr in task_results.items():
                     cls.results.setdefault(
-                        policy_setup, {}
+                        data_config, {}
                     ).setdefault(
                         eval_setup, {}
                     ).setdefault(
@@ -73,16 +73,16 @@ class SimplerEvaluator(Evaluator):
     @classmethod
     def _print_and_save_results(cls):
         overall_data = {
-            policy_setup: {
+            data_config: {
                 eval_setup: [[task_name, np.mean(success_arr)] for task_name, success_arr in task_results.items()]
                 for eval_setup, task_results in eval_setup_results.items()
             }
-            for policy_setup, eval_setup_results in cls.results.items()
+            for data_config, eval_setup_results in cls.results.items()
         }
 
-        for policy_setup, eval_setup_results in overall_data.items():
+        for data_config, eval_setup_results in overall_data.items():
             for eval_setup, task_results in eval_setup_results.items():
-                print(f'\n\n>>> Policy setup: {policy_setup}, Eval setup: {eval_setup} <<<')
+                print(f'\n\n>>> Policy setup: {data_config}, Eval setup: {eval_setup} <<<')
                 print(tabulate(task_results,
                                headers=['Task Name', 'Average Success Rate'],
                                tablefmt='grid'))
@@ -125,7 +125,7 @@ class SimplerEvaluator(Evaluator):
         self.env._build_env(SimplerEnvSettings(**episode_data))
         # run inference
         result = {
-            self.env.env_settings.policy_setup: {
+            self.env.env_settings.data_config: {
                 self.env.env_settings.eval_setup: {
                     self.env.env_settings.task_name: []
                 }
@@ -159,7 +159,7 @@ class SimplerEvaluator(Evaluator):
                                 episode_kwargs['obj_init_x'] = obj_init_x
                                 episode_kwargs['obj_init_y'] = obj_init_y
                                 result[
-                                    self.env.env_settings.policy_setup
+                                    self.env.env_settings.data_config
                                 ][
                                     self.env.env_settings.eval_setup
                                 ][
@@ -169,7 +169,7 @@ class SimplerEvaluator(Evaluator):
                         for obj_episode_id in range(self.env.env_settings.obj_episode_range[0], self.env.env_settings.obj_episode_range[1]):
                             episode_kwargs['obj_episode_id'] = obj_episode_id
                             result[
-                                self.env.env_settings.policy_setup
+                                self.env.env_settings.data_config
                             ][
                                 self.env.env_settings.eval_setup
                             ][

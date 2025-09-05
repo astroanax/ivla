@@ -305,6 +305,36 @@ python -m scripts.eval.start_evaluator \
 ```
 
 
+**[Optional] Use Multiple Evaluators to Speed Up**
+You can refer to the following method for parallel testing:  
+
+- **For Method 1** 
+```bash
+conda activate your_agent_env_name
+python -m scripts.eval.start_agent_server --host localhost --port [5000,5001]
+```
+
+```bash
+conda activate genmanip
+ray disable-usage-stats
+ray stop
+ray start --head
+python -m scripts.eval.start_evaluator \
+  --config challenge/run_configs/eval/custom_on_genmanip.py \
+  --server \
+  --server_port [5000,5001] \
+  --distributed \
+  --distributed_num_worker 2 
+```
+- **For Method 2** 
+```bash
+./challenge/bash_scripts/eval.sh \
+  ...
+  --distributed \
+  --distributed_num_worker 2 
+```
+
+
 ### Integrating a Custom Model for Inference in Internmanip
 
 To integrate a custom model into the **Internmanip** framework, you need to complete the following tasks:
@@ -483,26 +513,9 @@ After submitting, you can view your submissions in the corresponding phase on th
 ---  
 ## 🛠️ Troubleshooting
 
-### 1. When evaluating `make_sandwich` task, the error matrix is ​​a left-handed coordinate system.  
-Modify `line 95` of the `/root/InternManip/internmanip/benchmarks/genmanip/utils/InternUtopia/internutopia/core/task/task.py` file. And change `prim.GetAttribute('physics:rigidBodyEnabled')` to `prim.GetAttribute('physics:rigidBodyEnabled').Get()`.  
-
-### 2. When the image is run for the first time, curobo prompts that the `ninja` module is missing.
+### 1. When the image is run for the first time, curobo prompts that the `ninja` module is missing.
 Solved by installing the ninja module in genmanip.
 ```bash
 conda activate genmanip
 pip install ninja
-```
-
-### 3. No module named 'bitsandbytes'
-If you encounter the following error message, please comment out `line 8` of the code in `/root/InternManip/internmanip/model/basemodel/__init__.py`. We will refactor this code in the future to prevent environments between different models from affecting each other.
-
-```
-No module named 'bitsandbytes'
-  File "/root/InternManip/internmanip/model/basemodel/openpi0/lora.py", line 55, in <module>
-    import bitsandbytes as bnb
-  ...
-  File "/root/InternManip/internmanip/model/basemodel/__init__.py", line 8, in <module>
-    from internmanip.model.basemodel.openpi0.pizero import PiZero
-  ...
-ModuleNotFoundError: No module named 'bitsandbytes'
 ```

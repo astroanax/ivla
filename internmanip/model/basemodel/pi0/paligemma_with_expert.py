@@ -58,6 +58,7 @@ def apply_rope(x, positions, max_wavelength=10_000):
 class PaliGemmaWithExpertConfig(PretrainedConfig):
     model_type = 'PaliGemmaWithExpertModel'
     sub_configs = {'paligemma_config': AutoConfig, 'gemma_expert_config': AutoConfig}
+    
 
     def __init__(
         self,
@@ -65,12 +66,14 @@ class PaliGemmaWithExpertConfig(PretrainedConfig):
         gemma_expert_config: dict | None = None,
         freeze_vision_encoder: bool = True,
         train_expert_only: bool = True,
+        pretrained_model_path: str = 'google/paligemma-3b-pt-224',
         attention_implementation: str = 'eager',
         **kwargs,
     ):
         self.freeze_vision_encoder = freeze_vision_encoder
         self.train_expert_only = train_expert_only
         self.attention_implementation = attention_implementation
+        self.pretrained_model_path = pretrained_model_path
 
         if paligemma_config is None:
             # Default config from Pi0
@@ -180,6 +183,35 @@ class PaliGemmaWithExpertModel(PreTrainedModel):
 
         self.to_bfloat16_like_physical_intelligence()
         self.set_requires_grad()
+
+
+
+    def load_pretrained_weights(self):
+        """vision, projector, lm from paligemma"""
+        import glob, os
+        from safetensors import safe_open
+
+        if not Path(self.config.pretrained_model_path).exists():
+            snapshot_path = snapshot_download(
+                repo_id=self.config.pretrained_model_path,
+                # cache_dir=config.model_kwargs['HF_cache_dir'],
+                local_files_only=True,
+            )
+            self.config.pretrained_model_path = snapshot_path        
+        # load tensors from files
+        safetensors_files = glob.glob(
+            os.path.join(pretrained_model_path, "*.safetensors")
+        )
+        tensors = {}
+        for safetensors_file in safetensors_files:
+            with safe_open(safetensors_file, framework="pt", device="cpu") as f:
+                for key in f.keys():
+                    tensors[key] = f.get_tensor(key)
+
+        tensors['language_model.model.embed_tokens.weight'] = tensors['language_model.model.embed_tokens.weight'][:257152,:]
+        print(self.paligemma.load_state_dict(tensors, strict=False, assign=True))
+        return
+
 
     def set_requires_grad(self):
         if self.config.freeze_vision_encoder:
