@@ -5,3 +5,4 @@ ray[default]
 requests
 transformers==4.51.3
 uvicorn
+tree
