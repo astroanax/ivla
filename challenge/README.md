@@ -24,19 +24,43 @@ This repository serves as the **starter kit and evaluation toolkit**—you can u
 - Submit them via Docker for final evaluation
 
 
+
+## 🏆 Prizes
+
+| Rank       | Prize                            |
+|------------|----------------------------------|
+| 🥇 1st      | \$10,000 + \$1,500 travel + cert |
+| 🥈 2nd      | \$5,000 + \$1,500 travel + cert  |
+| 🥉 3rd      | \$3,000 + \$1,500 travel + cert  |
+| 4th–10th    | Certificate & finalist awards    |
+
+
+
+## ✅ Submission Guidelines
+
+- Teams must implement a `custom_policy()` class (see [GUIDELINES.md](./guidelines.md))
+- Docker image must include all dependencies for inference
+- Final Dockerfile and inference code must be open-sourced
+- Public datasets and pretrained models are allowed
+- **🚨 Strictly no access to test scenes or results outside official platform**
+
+
+
 ## 📚 Table of Contents
 
-- [🚀 Challenge Overview](#-challenge-overview)
-- [🛠️ Codebase & Tools](#️-codebase--tools)
-- [📌 Task Definition](#-task-definition)
-- [🔍 Evaluation Protocol](#-evaluation-protocol)
-- [🧠 Key Challenges](#-key-challenges)
-- [💻 Resource Configuration](#-resource-configuration)
-- [📆 Timeline](#-timeline)
-- [🏆 Prizes](#-prizes)
-- [✅ Submission Guidelines](#-submission-guidelines)
-- [📎 Rules & Eligibility](#-rules--eligibility)
-- [📬 Contact & Support](#-contact--support)
+- [InternManip: IROS 2025 Grand Challenge Toolkits](#internmanip-iros-2025-grand-challenge-toolkits)
+  - [🚀 Challenge Overview](#-challenge-overview)
+  - [🏆 Prizes](#-prizes)
+  - [✅ Submission Guidelines](#-submission-guidelines)
+  - [📚 Table of Contents](#-table-of-contents)
+  - [🛠️ Codebase \& Tools](#️-codebase--tools)
+  - [📌 Task Definition](#-task-definition)
+  - [🔍 Evaluation Protocol](#-evaluation-protocol)
+  - [🧠 Key Challenges](#-key-challenges)
+  - [💻 Resource Configuration](#-resource-configuration)
+  - [📆 Timeline](#-timeline)
+  - [📎 Rules \& Eligibility](#-rules--eligibility)
+  - [📬 Contact \& Support](#-contact--support)
 
 
 
@@ -101,27 +125,6 @@ Each submission runs on a dedicated evaluation machine with:
 Submission rules:
 - ⏱ **Max Submissions**: 5 per day / 50 per month / 50 total
 - 🚫 **Concurrent Submissions**: 1 at a time
-
-
-
-## 🏆 Prizes
-
-| Rank       | Prize                            |
-|------------|----------------------------------|
-| 🥇 1st      | \$10,000 + \$1,500 travel + cert |
-| 🥈 2nd      | \$5,000 + \$1,500 travel + cert  |
-| 🥉 3rd      | \$3,000 + \$1,500 travel + cert  |
-| 4th–10th    | Certificate & finalist awards    |
-
-
-
-## ✅ Submission Guidelines
-
-- Teams must implement a `custom_policy()` class (see [GUIDELINES.md](./guidelines.md))
-- Docker image must include all dependencies for inference
-- Final Dockerfile and inference code must be open-sourced
-- Public datasets and pretrained models are allowed
-- **🚨 Strictly no access to test scenes or results outside official platform**
 
 
 

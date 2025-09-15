@@ -23,6 +23,15 @@ git lfs clone https://huggingface.co/datasets/InternRobotics/IROS-2025-Challenge
 python ${dataset_save_path}/IROS-2025-Challenge-Manip/dataset_post_processing.py ${dataset_save_path}/IROS-2025-Challenge-Manip/validation
 ```
 
+> Note:
+> If you encounter a freeze while downloading data using `git lfs`, please try downloading using the `huagging face CLI` tool. Please follow the [official instructions](https://huggingface.co/docs/hub/security-tokens) to obtain the token required for login.
+> ```bash
+> pip install --upgrade huggingface_hub  
+> hf auth login  
+> hf download InternRobotics/IROS-2025-Challenge-Manip --repo-type dataset --local-dir ${dataset_save_path}/IROS-2025-Challenge-Manip  
+> ```
+
+
 ### Pull base Docker image
 ```bash
 docker pull crpi-mdum1jboc8276vb5.cn-beijing.personal.cr.aliyuncs.com/iros-challenge/internmanip:v1.0
@@ -207,7 +216,7 @@ dataset_path:
   - InternRobotics/IROS-2025-Challenge-Manip/train/purchase_gift_box
   - InternRobotics/IROS-2025-Challenge-Manip/train/put_drink_on_basket
   - InternRobotics/IROS-2025-Challenge-Manip/train/sort_waste
-data_config: aloha_v3                     # pre-registered data config preset
+data_config: aloha_v4                     # pre-registered data config preset
 base_model_path: nvidia/GR00T-N1.5-3B     # optional pretrained checkpoint path
 hf_cache_dir: /your/custom/cache/path     # optional cache directory
 ```
