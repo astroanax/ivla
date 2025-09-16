@@ -11,7 +11,7 @@ git clone --depth 1 --recurse-submodules https://github.com/InternRobotics/Inter
 
 ### Prepare train & validation dataset
 ```bash
-dataset_save_path=/custom/dataset/save/path # Please replace it with your local path. Note that at least 50G of storage space is required.
+dataset_save_path=/custom/dataset/save/path # Please replace it with your local path. Note that at least 400G of storage space is required.
 mkdir InternManip/data
 ln -s ${dataset_save_path} InternManip/data/dataset
 
@@ -30,6 +30,31 @@ python ${dataset_save_path}/IROS-2025-Challenge-Manip/dataset_post_processing.py
 > hf auth login  
 > hf download InternRobotics/IROS-2025-Challenge-Manip --repo-type dataset --local-dir ${dataset_save_path}/IROS-2025-Challenge-Manip  
 > ```
+
+
+### Pre-trained Baseline Checkpoints (opt)
+
+We provide a set of [pre-trained weights](https://huggingface.co/InternRobotics/Gr00t-n1-5_Genmanip_IROS) for the **gr00t n1.5** model. You can download them using the following command:
+
+```bash
+mkdir InternManip/data/model
+git lfs clone https://huggingface.co/InternRobotics/Gr00t-n1-5_Genmanip_IROS InternManip/data/model # or use huagging face CLI
+```
+
+The performance of the model is summarized below:
+
+**Table1. Val\_Seen**
+
+| average\_sr | collect\_three\_glues | collect\_two\_alarm\_clocks | collect\_two\_shoes | gather\_three\_teaboxes | make\_sandwich | oil\_painting\_recognition | organize\_colorful\_cups | purchase\_gift\_box | put\_drink\_on\_basket | sort\_waste |
+| ----------- | --------------------- | --------------------------- | ------------------- | ----------------------- | -------------- | -------------------------- | ------------------------ | ------------------- | ---------------------- | ----------- |
+| 0.33        | 0.23                  | 0.30                        | 0.45                | 0.30                    | 0.00           | 0.30                       | 0.50                     | 1.00                | 0.00                   | 0.23        |
+
+**Table2. Val\_Unseen**
+
+| average\_sr | collect\_three\_glues | collect\_two\_alarm\_clocks | collect\_two\_shoes | gather\_three\_teaboxes | make\_sandwich | oil\_painting\_recognition | organize\_colorful\_cups | purchase\_gift\_box | put\_drink\_on\_basket | sort\_waste |
+| ----------- | --------------------- | --------------------------- | ------------------- | ----------------------- | -------------- | -------------------------- | ------------------------ | ------------------- | ---------------------- | ----------- |
+| 0.35        | 0.20                  | 0.35                        | 0.25                | 0.20                    | 0.00           | 0.20                       | 0.45                     | 1.00                | 0.40                   | 0.40        |
+
 
 
 ### Pull base Docker image
