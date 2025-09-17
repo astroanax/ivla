@@ -34,7 +34,7 @@ python ${dataset_save_path}/IROS-2025-Challenge-Manip/dataset_post_processing.py
 
 ### Pre-trained Baseline Checkpoints (opt)
 
-We provide a set of [pre-trained weights](https://huggingface.co/InternRobotics/Gr00t-n1-5_Genmanip_IROS) for the **gr00t n1.5** model. You can download them using the following command:
+We provide a [checkpoint](https://huggingface.co/InternRobotics/Gr00t-n1-5_Genmanip_IROS) of **gr00t-n1.5** finetuned on the training dataset of this challenge. You can download them using the following command:
 
 ```bash
 mkdir InternManip/data/model
