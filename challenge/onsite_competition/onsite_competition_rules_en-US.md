@@ -1,0 +1,97 @@
+# Manip Track Onsite Competition Rules
+English Version | [中文版](./onsite_competition_rules_zh-CN.md)
+
+## 1. Task Description
+This track aims to develop a multimodal robotic operating system with language understanding and execution capabilities. Participants are required to design an end-to-end control policy model that completes the full pipeline from visual perception and natural language instruction understanding to action control prediction. Robots will operate in an open tabletop environment, controlling robotic arms to complete various manipulation tasks under complex natural language instructions.  
+
+Main challenges include:
+- Integrating language and visual information to drive a unified perception–decision–control pipeline
+- Handling long-horizon tasks that challenge model stability and self-correction capabilities in decision-making and control
+- Coping with diverse scene layouts, object types, and task instructions, which challenge model generalization
+
+## 2. Competition Environment and Equipment
+To ensure fairness and reproducibility, the organizing committee will provide standardized hardware and venue setups, including but not limited to:  
+
+**Competition venue**:  
+A standardized tabletop workspace (recommended size approximately 1.5 m × 1.0 m). The final size and boundary calibration will follow the official layout drawings published by the organizers.
+
+**Objects**:  
+Common household, educational, and daily-use items. All items will be uniformly labeled and managed, ensuring identical models, sizes, materials, and colors for all teams.  
+
+**Standardization and fairness**:
+- All teams will face the exact same set of tasks (about 5 groups, each with more than 5 test cases), and each case will come with a natural language task instruction.
+- The initial tabletop state (including layout, object positions, orientations, poses, etc.) for each case will be pre-arranged and calibrated by referees to ensure environment consistency.
+- To avoid potential interference from residual effects on the site, the execution order of task groups may be randomized via a drawing mechanism.  
+
+**Robot platform**:  
+The unified robot platform provided by the organizers and its paired robotic arm.   
+
+**Sensor system**:  
+A standardized RGB-D camera with provided extrinsic/intrinsic calibration parameters. The mounting position, viewing angle, and frame rate of the sensor will also be standardized and published in an official notice prior to the competition.
+
+## 3. Task Setup
+**Task format**:  
+All task instructions will be given in natural language text, covering typical manipulation modes such as pick, place, stack, and insert. The test set will be sourced from unseen data to evaluate model generalization to novel environments.
+
+**Key sub-goals**:  
+To facilitate objective quantitative evaluation, each complex task will be decomposed into multiple Key Sub-goals, with executable evaluation criteria defined for each.  
+
+For example, the task “Put the red block into the bowl” can be decomposed into:  
+1. Successfully grasp the red block (stable grip without dropping)
+2. Move the block to directly above the bowl (object projection lies within the bowl’s opening area)
+3. Place the block into the bowl and keep it stably stationary (after release, stays inside the bowl without slipping out)  
+
+**Evaluation rules**:  
+ The success criteria and detection logic for each sub-goal will be standardized by the referee team and published as a technical manual before the competition. This ensures all teams are evaluated under the same rules, improving repeatability, fairness, and transparency.
+
+## 4. Competition Procedure
+### 4.1 Pre-competition Preparation
+- Teams must package the competition image in advance according to the GitHub documentation.
+- A standardized debugging time and environment will be provided onsite. Teams may use model weights different from the online stage and make environment-specific configuration adjustments, but modifications to the core algorithm logic are strictly prohibited.
+
+### 4.2 Task Execution
+- Each team will execute all pre-set tasks in sequence. Before each task starts, the scene will be reset to the official standard initial state by the referees.
+- Execution flow: team confirms system startup → referee inputs natural language instruction  → raise hand to signal → referee starts timing → system executes automatically.
+- No human intervention related to the algorithm is allowed during execution. In the event of system freeze/crash, a one-time restart may be allowed with referee approval.
+
+### 4.3 Time Limits
+- Each task has a maximum allowed duration 10 minutes (to be announced by the organizers based on pre-competition tests).
+- Each team’s total competition time (including switching, preparation, and execution) must not exceed 55 minutes.
+
+### 4.4 Retry and Abandonment
+- If dropping, freezing, or abnormal poses occur during execution, teams may choose to:
+  - Retry the current task (maximum 2 times; time is counted continuously), or
+  - Abandon the current task (score = 0, proceed to next task)
+- If time exceeds the maximum limit, referees may forcibly stop the current task and record the result.
+
+### 4.5 Fairness and Compliance
+- Collecting additional data on site is prohibited. Using private datasets for offline or collaborative pre-training before the competition is allowed, but using on-site images to update the model is forbidden.  
+- Except for fixing system freeze/crash, modifying core algorithm code during the competition is strictly forbidden.
+- Any unauthorized human intervention (including but not limited to manually moving objects, adjusting robot arm poses, modifying task judgment logic, etc.) is prohibited. Violations will result in point deductions or disqualification.
+- Teams engaging in cheating or disorderly behavior may be disqualified by the organizing committee.
+
+## 5. Scoring Rules
+### 5.1 Scoring Formula (Onsite Competition)
+- Score per task = (Number of completed sub-goals / Total sub-goals) × Full score for that task (10 points)
+- Team total score = Avg of all task scores
+
+### 5.2 Ranking Rules (Onsite Competition)
+1. Primary ranking: average score of all tasks (out of 10)
+2. Tie-breaker 1: if average scores are equal, rank by total completion time (shorter is better)
+3. Tie-breaker 2: if total time is equal, rank by number of fully completed tasks
+4. Tie-breaker 3: if fully completed tasks are equal, rank by the variance of task scores (lower is better, indicating stability)
+
+### 5.3 Final Results
+Final results combine online phase and onsite phase scores using a rank-based point system:
+- Points per Rank:
+Points = 100 – 5 × (Rank – 1)
+- Final Score Calculation:
+Final Score = (Online Points × 40%) + (Onsite Points × 60%)  
+
+If the final score the same, onsite points break the tie.
+
+## 6. Supplementary Provisions
+- Referee assignment: At least 2 referees per match, responsible for timing, scoring, recording execution, and judging behaviors. Referees must remain neutral and may not assist any team.
+- Fair competition: Teams must follow academic integrity and competition ethics. Plagiarism, cheating, and tampering with system logs are strictly prohibited.
+- Information disclosure: The committee will publish the evaluation protocols, scoring logic, device list, initial layout drawings, and interface documentation in advance to ensure all teams compete on the same information baseline.
+- Right to revise rules: In case of force majeure or emergencies (e.g., equipment failure, site unavailability, safety risks), the organizing committee reserves the right to make minor adjustments to the rules and will notify all teams in advance through official channels.
