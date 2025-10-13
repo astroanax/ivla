@@ -74,13 +74,7 @@ For example, the task of "Putting the colored blocks on the table into the corre
 - Score per task = (Number of completed sub-goals / Total sub-goals) × 100%
 - Team total score = Avg of all task scores
 
-### 5.2 Ranking Rules (Onsite Competition)
-1. Primary ranking: average score of all tasks (out of 10)
-2. Tie-breaker 1: if average scores are equal, rank by total completion time (shorter is better)
-3. Tie-breaker 2: if total time is equal, rank by number of fully completed tasks
-4. Tie-breaker 3: if fully completed tasks are equal, rank by the variance of task scores (lower is better, indicating stability)
-
-### 5.3 Final Results
+### 5.2 Final Results
 The final result is calculated by weighting the scores of the online and offline stages:  
 - **Final Score Calculation**:  
 Final Score = (Online Points × 40%) + (Onsite Points × 60%)  
