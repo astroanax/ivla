@@ -14,6 +14,8 @@ class AgentRegistry(Enum):
     """
     SIMPLER = 'SimplerAgent'
     GENMANIP = 'GenmanipAgent'
+    REALARX = 'RealArxAgent'
+    REPLAY = 'ReplayAgent'
 
     @property
     def value(self):
@@ -23,6 +25,12 @@ class AgentRegistry(Enum):
         elif self.name == 'GENMANIP':
             from internmanip.agent.genmanip_agent import GenmanipAgent
             return GenmanipAgent
+        elif self.name == 'REALARX':
+            from internmanip.agent.realarx_agent import RealArxAgent
+            return RealArxAgent
+        elif self.name == 'REPLAY':
+            from internmanip.agent.replay_agent import ReplayAgent
+            return ReplayAgent
         else:
             raise ValueError(f'Invalid agent type: {self.name}. Only {[agent_type.name for agent_type in AgentRegistry]} are registered.')
 
