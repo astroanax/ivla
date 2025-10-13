@@ -34,12 +34,11 @@ A standardized RGB-D camera with provided extrinsic/intrinsic calibration parame
 All task instructions will be given in natural language text, covering typical manipulation modes such as pick, place, stack, and insert. The test set will be sourced from unseen data to evaluate model generalization to novel environments.
 
 **Key sub-goals**:  
-To facilitate objective quantitative evaluation, each complex task will be decomposed into multiple Key Sub-goals, with executable evaluation criteria defined for each.  
+Some complex tasks are broken down into multiple key sub-goals.
 
-For example, the task “Put the red block into the bowl” can be decomposed into:  
-1. Successfully grasp the red block (stable grip without dropping)
-2. Move the block to directly above the bowl (object projection lies within the bowl’s opening area)
-3. Place the block into the bowl and keep it stably stationary (after release, stays inside the bowl without slipping out)  
+For example, the task of "Putting the colored blocks on the table into the corresponding colored bowls" can be broken down into:
+1. Place the red blocks in the red bowl;
+2. Place the yellow blocks in the yellow bowl; 
 
 **Evaluation rules**:  
  The success criteria and detection logic for each sub-goal will be standardized by the referee team and published as a technical manual before the competition. This ensures all teams are evaluated under the same rules, improving repeatability, fairness, and transparency.
@@ -72,7 +71,7 @@ For example, the task “Put the red block into the bowl” can be decomposed in
 
 ## 5. Scoring Rules
 ### 5.1 Scoring Formula (Onsite Competition)
-- Score per task = (Number of completed sub-goals / Total sub-goals) × Full score for that task (10 points)
+- Score per task = (Number of completed sub-goals / Total sub-goals) × 100%
 - Team total score = Avg of all task scores
 
 ### 5.2 Ranking Rules (Onsite Competition)
@@ -82,13 +81,9 @@ For example, the task “Put the red block into the bowl” can be decomposed in
 4. Tie-breaker 3: if fully completed tasks are equal, rank by the variance of task scores (lower is better, indicating stability)
 
 ### 5.3 Final Results
-Final results combine online phase and onsite phase scores using a rank-based point system:
-- Points per Rank:
-Points = 100 – 5 × (Rank – 1)
-- Final Score Calculation:
+The final result is calculated by weighting the scores of the online and offline stages:  
+- **Final Score Calculation**:  
 Final Score = (Online Points × 40%) + (Onsite Points × 60%)  
-
-If the final score the same, onsite points break the tie.
 
 ## 6. Supplementary Provisions
 - Referee assignment: At least 2 referees per match, responsible for timing, scoring, recording execution, and judging behaviors. Referees must remain neutral and may not assist any team.
