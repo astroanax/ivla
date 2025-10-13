@@ -7,7 +7,7 @@ eval_cfg = EvalCfg(
     agent=AgentCfg(
         agent_type='gr00t_n1_5_on_realarx',
         eval_type='realarx',
-        base_model_path='/data/Checkpoints/runs/gr00t_n1_5_arx_iros_20251009/checkpoint-5000',
+        base_model_path='./data/model',
         agent_settings={
             'data_config': 'arx',
             'embodiment_tag': 'new_embodiment',

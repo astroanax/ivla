@@ -27,7 +27,7 @@ dataset_path:
    - ./data/dataset/IROS-2025-Challenge-Manip/train_real/Place_the_banana_on_the_painting_of_giant_panda
 num_gpus: 1
 batch_size: 4
-output_dir: /data/Checkpoints/runs/gr00t_n1_5_arx_iros_20251009_tmp
+output_dir: Checkpoints/runs/gr00t_n1_5_arx_iros_20251009_tmp
 max_steps: 10000
 tune_visual: True
 tune_llm: True
@@ -37,4 +37,3 @@ video_backend: decord
 report_to: wandb
 gradient_accumulation_steps: 8
 base_model_path: nvidia/GR00T-N1.5-3B
-HF_cache_dir: /mnt/workspace/.cache/huggingface
