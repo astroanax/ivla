@@ -19,9 +19,8 @@ A standardized tabletop workspace (recommended size approximately 1.5 m × 1.0 m
 Common household, educational, and daily-use items. All items will be uniformly labeled and managed, ensuring identical models, sizes, materials, and colors for all teams.  
 
 **Standardization and fairness**:
-- All teams will face the exact same set of tasks (about 5 groups, each with more than 5 test cases), and each case will come with a natural language task instruction.
+- All teams will face the exact same set of tasks (around five groups, each containing two test cases), and all cases will include natural language task instructions to be executed in the same order.
 - The initial tabletop state (including layout, object positions, orientations, poses, etc.) for each case will be pre-arranged and calibrated by referees to ensure environment consistency.
-- To avoid potential interference from residual effects on the site, the execution order of task groups may be randomized via a drawing mechanism.  
 
 **Robot platform**:  
 The unified robot platform provided by the organizers and its paired robotic arm.   
@@ -54,7 +53,7 @@ For example, the task of "Putting the colored blocks on the table into the corre
 - No human intervention related to the algorithm is allowed during execution. In the event of system freeze/crash, a one-time restart may be allowed with referee approval.
 
 ### 4.3 Time Limits
-- Each task has a maximum allowed duration 10 minutes (to be announced by the organizers based on pre-competition tests).
+- Each task has a maximum allowed duration 5 minutes (to be announced by the organizers based on pre-competition tests).
 - Each team’s total competition time (including switching, preparation, and execution) must not exceed 55 minutes.
 
 ### 4.4 Retry and Abandonment
