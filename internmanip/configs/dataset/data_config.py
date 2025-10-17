@@ -615,9 +615,11 @@ class So100DataConfig(BaseDataConfig):
 ###########################################################################################
 
 class AlohaDataConfig(BaseDataConfig):
-    video_keys = ['video.left_view', 'video.right_view', 'video.top_view']
-    state_keys = ['state.left_arm_qpos', 'state.left_gripper_qpos_state', 'state.right_arm_qpos', 'state.right_gripper_qpos_state']
-    action_keys = ['action.left_arm_delta_qpos', 'action.right_arm_delta_qpos', 'action.left_gripper_close', 'action.right_gripper_close']
+    # Align video keys with common dataset modality.json (hand_left, hand_right, head)
+    video_keys = ['video.hand_left', 'video.hand_right', 'video.head']
+    # Use keys matching the Challenge dataset's modality.json
+    state_keys = ['state.left_joint', 'state.left_gripper', 'state.right_joint', 'state.right_gripper']
+    action_keys = ['action.left_joint_delta', 'action.left_gripper', 'action.right_joint_delta', 'action.right_gripper']
     language_keys = ['annotation.human.action.task_description']
 
     def modality_config(self, observation_indices, action_indices) -> dict[str, ModalityConfig]:
@@ -670,10 +672,10 @@ class AlohaDataConfig(BaseDataConfig):
             StateActionTransform(
                 apply_to=self.state_keys,
                 normalization_modes={
-                    'state.left_arm_qpos': 'min_max',
-                    'state.left_gripper_qpos_state': 'min_max',
-                    'state.right_arm_qpos': 'min_max',
-                    'state.right_gripper_qpos_state': 'min_max'
+                    'state.left_joint': 'min_max',
+                    'state.left_gripper': 'min_max',
+                    'state.right_joint': 'min_max',
+                    'state.right_gripper': 'min_max'
                 },
             ),
             # action transforms
@@ -681,10 +683,10 @@ class AlohaDataConfig(BaseDataConfig):
             StateActionTransform(
                 apply_to=self.action_keys,
                 normalization_modes={
-                    'action.left_arm_delta_qpos': 'min_max',
-                    'action.right_arm_delta_qpos': 'min_max',
-                    'action.left_gripper_close': 'binary',
-                    'action.right_gripper_close': 'binary'
+                    'action.left_joint_delta': 'min_max',
+                    'action.right_joint_delta': 'min_max',
+                    'action.left_gripper': 'binary',
+                    'action.right_gripper': 'binary'
                 }
             ),
             # concat transforms

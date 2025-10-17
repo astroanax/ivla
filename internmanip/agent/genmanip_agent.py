@@ -120,14 +120,17 @@ class GenmanipAgent(BaseAgent):
             # self._debug_print_data(left_gripper_qpos_state, title='Left Gripper Qpos State')
             # self._debug_print_data(right_arm_qpos, title='Right Arm Qpos')
             # self._debug_print_data(right_gripper_qpos_state, title='Right Gripper Qpos State')
+            # match dataset video keys (hand_left/hand_right/head)
+            # We use available sensor names as source (left_camera/right_camera/top_camera)
             converted_data = {
-                'video.left_view': np.array([input['robot']['sensors']['left_camera']['rgb']]),
-                'video.right_view': np.array([input['robot']['sensors']['right_camera']['rgb']]),
-                'video.top_view': np.array([input['robot']['sensors']['top_camera']['rgb']]),
-                'state.left_arm_qpos': np.array([left_arm_qpos]),
-                'state.left_gripper_qpos_state': np.array([left_gripper_qpos_state]),
-                'state.right_arm_qpos': np.array([right_arm_qpos]),
-                'state.right_gripper_qpos_state': np.array([right_gripper_qpos_state]),
+                'video.hand_left': np.array([input['robot']['sensors'].get('left_camera', input['robot']['sensors'].get('hand_left'))['rgb']]),
+                'video.hand_right': np.array([input['robot']['sensors'].get('right_camera', input['robot']['sensors'].get('hand_right'))['rgb']]),
+                'video.head': np.array([input['robot']['sensors'].get('top_camera', input['robot']['sensors'].get('head'))['rgb']]),
+                # match dataset modality keys
+                'state.left_joint': np.array([left_arm_qpos]),
+                'state.left_gripper': np.array([left_gripper_qpos_state]),
+                'state.right_joint': np.array([right_arm_qpos]),
+                'state.right_gripper': np.array([right_gripper_qpos_state]),
                 'annotation.human.action.task_description': [input['robot']['instruction']],
             }
         else:
@@ -150,8 +153,9 @@ class GenmanipAgent(BaseAgent):
         elif self.data_config == 'aloha_v4':
             left_arm_action = (output['action.left_arm_delta_qpos'] + input['state.left_arm_qpos'][0]).tolist()
             right_arm_action = (output['action.right_arm_delta_qpos'] + input['state.right_arm_qpos'][0]).tolist()
-            left_gripper_action = output['action.left_gripper_close']*2-1
-            right_gripper_action = output['action.right_gripper_close']*2-1
+            # dataset/action naming uses 'action.left_gripper' and 'action.right_gripper'
+            left_gripper_action = output.get('action.left_gripper', output.get('action.left_gripper_close'))*2-1
+            right_gripper_action = output.get('action.right_gripper', output.get('action.right_gripper_close'))*2-1
             converted_data = {
                 'left_arm_action': left_arm_action,
                 'right_arm_action': right_arm_action,
